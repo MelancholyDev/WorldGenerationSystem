@@ -20,15 +20,17 @@ public:
 	float VoxelSize = 100;
 	int NoiseScale = 10;
 	UPROPERTY(EditAnywhere)
-	int ChunkSize = 5;
+	int ChunkSize = 10;
 	UPROPERTY(EditAnywhere)
-	int Depth = 2;
+	int Depth = 15;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent * Root;
 	float NoiseDensity3D = 0.001f;
 	float Threshold3D = 0;
 	UPROPERTY(VisibleAnywhere)
-	UInstancedStaticMeshComponent* Instance;
+	UInstancedStaticMeshComponent* InstanceTopGrass;
+	UInstancedStaticMeshComponent* InstanceDirt;
+	UInstancedStaticMeshComponent* InstanceStone;
 	AVoxelChank();
 private:
 	void ActorLocationVoxelWorld(const int XIndex,const int YIndex,const int ZIndex,float& X,float& Y,int& Z);
