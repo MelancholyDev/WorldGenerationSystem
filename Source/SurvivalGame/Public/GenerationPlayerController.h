@@ -23,20 +23,29 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 
 	UPROPERTY(EditAnywhere)
 	int Depth;
-
+	
+	public:
+	UPROPERTY(BlueprintReadWrite)
 	FIntVector OldCoordinates;
-public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;
 	TArray<FVoxelLine>* Map;
+	UFUNCTION(BlueprintCallable)
 	FIntVector GetPlayerChunkCoordinates();
-	AVoxelChank* SpawnChunk(float X, float Y, float Z) const;
-	void DeleteColumn(int Index);
+	UFUNCTION(BlueprintCallable)
+	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	void DeleteLine(int Index);
-	void AddLine(int Index);
-	void AddColumn(int Index);
+	void AddLine(bool IsForward);
+	void AddColumn(bool isLeft);
+	void AppendColumn(int Index,bool isLeft);
+	void DeleteColumn(int Index);
+	UFUNCTION(BlueprintCallable)
+	void GetFullSize();
+	UFUNCTION(BlueprintCallable)
 	void XShift(int X);
+	UFUNCTION(BlueprintCallable)
 	void YShift(int Y);
+	UFUNCTION(BlueprintCallable)
 	void Diagonal(int X, int Y);
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

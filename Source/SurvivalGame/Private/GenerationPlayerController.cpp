@@ -11,8 +11,9 @@ FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 	return FIntVector(round(location.X), round(location.Y), 0);
 }
 
-AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z) const
+AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 {
+	FString str = FString::Printf(TEXT("%f , %f , %f"), X, Y, Z);
 	const FVector Location = {X, Y, Z};
 	const FRotator Rotation = FRotator(0, 0, 0);
 	AActor* NewActor = GetWorld()->SpawnActor(ToSpawn, &Location, &Rotation);
@@ -20,59 +21,198 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z) 
 	return Chunk;
 }
 
-void AGenerationPlayerController::DeleteColumn(int Index)
-{
-}
 
 void AGenerationPlayerController::DeleteLine(int Index)
 {
 	TArray<AVoxelChank*> Line = (*Map)[Index].Voxels;
 	while (Line.Num() > 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("1!"));
+		int a = Line[0]->Children.Num();
+		std::string s = std::to_string(a);
 		AVoxelChank* DeleteChunk = Line[0];
 		Line.RemoveAt(0);
 		DeleteChunk->Destroy();
 	}
+	(*Map).RemoveAt(Index);
 }
 
-void AGenerationPlayerController::AddLine(int Index)
+void AGenerationPlayerController::AddLine(bool IsForward)
 {
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
+	int Shift = IsForward ? RenderRange : -RenderRange;
 	FVoxelLine Line = FVoxelLine();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
 	{
-		AVoxelChank* CreatedChunk = SpawnChunk(CurrentCoordinates.X * ChunkSize, CurrentCoordinates.Y * ChunkSize, 0);
+		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + Shift) * ChunkSize,
+		                                       (CurrentCoordinates.Y + i) * ChunkSize, 0);
 		Line.Voxels.Add(CreatedChunk);
+	}
+	if (IsForward)
+	{
+		Map->Insert(Line, RenderRange * 2);
+	}
+	else
+	{
+		Map->Insert(Line, 0);
 	}
 }
 
-void AGenerationPlayerController::AddColumn(int Index)
+void AGenerationPlayerController::AddColumn(bool isLeft)
 {
+	auto CurrentCoordinates = GetPlayerChunkCoordinates();
+	int Shift = isLeft ? -RenderRange : RenderRange;
+	for (int i = 0; i <= RenderRange * 2; i++)
+	{
+		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + i - RenderRange) * ChunkSize,
+		                                       (CurrentCoordinates.Y + Shift) * ChunkSize, 0);
+		FVoxelLine* Line = &(*Map)[i];
+		if (isLeft)
+		{
+			Line->Voxels.Insert(CreatedChunk, 0);
+		}
+		else
+		{
+			Line->Voxels.Insert(CreatedChunk, RenderRange * 2);
+		}
+	}
+}
+
+void AGenerationPlayerController::AppendColumn(int Index, bool isLeft)
+{
+	int Start;
+	int Last;
+	int Increment;
+	int XShift;
+	if (Index == 0)
+	{
+		Start = 1;
+		Last = RenderRange * 2;
+		Increment = 1;
+		XShift = 0;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Z"));
+		Start = RenderRange * 2 - 1;
+		Last = 0;
+		Increment = -1;
+		XShift = 0;
+	}
+	auto CurrentCoordinates = GetPlayerChunkCoordinates();
+	int Shift = isLeft ? -RenderRange : RenderRange;
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("B"));
+	for (int i = Start; Index>0?i >= Last:i <= Last; i += Increment)
+	{
+		FString a = FString::Printf(TEXT("TREXT:%d"),i - RenderRange + XShift);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("AAA")+a);
+		FVoxelLine* Line = &(*Map)[i];
+		AVoxelChank* chunk = SpawnChunk((CurrentCoordinates.X + i - RenderRange + XShift) * ChunkSize,
+		                                (CurrentCoordinates.Y + Shift) * ChunkSize, 0);
+		a = FString::Printf(TEXT("%f %f %f"),chunk->GetActorLocation().X,chunk->GetActorLocation().Y,chunk->GetActorLocation().Z);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, a);
+		if (isLeft)
+		{
+			Line->Voxels.Insert(chunk, 0);
+		}
+		else
+		{
+			Line->Voxels.Add(chunk);
+		}
+	}
+}
+
+void AGenerationPlayerController::DeleteColumn(int Index)
+{
+	for (int i = 0; i < (*Map).Num(); i++)
+	{
+		FVoxelLine* Line = &(*Map)[i];
+		AVoxelChank* DeleteChunk = Line->Voxels[Index];
+		Line->Voxels.RemoveAt(Index);
+		DeleteChunk->Destroy();
+	}
+}
+
+void AGenerationPlayerController::GetFullSize()
+{
+	for(int i=0;i<=RenderRange*2;i++)
+	{
+		FVoxelLine* Line = &(*Map)[i];
+		FString a= FString::Printf(TEXT("%d %d"), Line->Voxels.Num(),i);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, a);
+		for(int j=0;j<Line->Voxels.Num();j++)
+		{
+			AVoxelChank* ch=Line->Voxels[j];
+			a= FString::Printf(TEXT("%f %f %f"),ch->GetActorLocation().X,ch->GetActorLocation().Y,ch->GetActorLocation().Z);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, a);
+		}
+	
+	}
 }
 
 void AGenerationPlayerController::XShift(int X)
 {
 	if (X > 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("1!"));
 		DeleteLine(0);
-		AddLine(RenderRange * 2);
+		AddLine(true);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("2!"));
 		DeleteLine(RenderRange * 2);
-		AddLine(0);
+		AddLine(false);
 	}
 }
 
 void AGenerationPlayerController::YShift(int Y)
 {
+	if (Y < 0)
+	{
+		DeleteColumn(RenderRange * 2);
+		AddColumn(true);
+	}
+	else
+	{
+		DeleteColumn(0);
+		AddColumn(false);
+	}
 }
 
 void AGenerationPlayerController::Diagonal(int X, int Y)
 {
+	FString a = FString::Printf(TEXT("%d %d"),X,Y);
+	if (X > 0)
+	{
+		if(Y>0)
+		{
+			DeleteLine(0);
+			DeleteColumn(0);
+			AddLine(true);
+			AppendColumn(RenderRange*2, false);
+		}else
+		{
+			DeleteLine(0);
+			DeleteColumn(RenderRange*2);
+			AddLine(true);
+			AppendColumn(RenderRange*2, true);
+		}
+	}
+	else
+	{
+		if (Y > 0)
+		{
+			DeleteLine(RenderRange*2);
+			DeleteColumn(0);
+			AddLine(false);
+			AppendColumn(0, false);
+		}
+		else
+		{
+			DeleteLine(RenderRange*2);
+			DeleteColumn(RenderRange*2);
+			AddLine(false);
+			AppendColumn(0, true);
+		}
+	}
 }
 
 void AGenerationPlayerController::BeginPlay()
@@ -118,22 +258,4 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 	{
 		Map->Add(FVoxelLine());
 	}
-}
-
-FAsyncSpawnChunkTask::FAsyncSpawnChunkTask(float x, float y, float z)
-{
-	this->x = x;
-	this->y = y;
-	this->z = z;
-
-}
-
-
-void FAsyncSpawnChunkTask::DoWork()
-{
-	// const FVector Location = {x, y, z};
-	// const FRotator Rotation = FRotator(0, 0, 0);
-	//
-	// AActor* NewActor = GetWorld()->SpawnActor(ToSpawn, &Location, &Rotation);
-	// AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 }
