@@ -20,9 +20,9 @@ public:
 	float VoxelSize = 100;
 	int NoiseScale = 10;
 	UPROPERTY(EditAnywhere)
-	int ChunkSize = 1;
+	int ChunkSize = 5;
 	UPROPERTY(EditAnywhere)
-	int Depth = 1;
+	int Depth = 10;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent * Root;
 	float NoiseDensity3D = 0.001f;
@@ -33,9 +33,8 @@ public:
 	UInstancedStaticMeshComponent* InstanceStone;
 	AVoxelChank();
 private:
-	void ActorLocationVoxelWorld(const int XIndex,const int YIndex,const int ZIndex,float& X,float& Y,int& Z);
-protected:
-	virtual void BeginPlay() override;
+	void ActorLocationVoxelWorldXY(const int XIndex,const int YIndex,float& X,float& Y) const;
+	void ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const;
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnConstruction(const FTransform& Transform) override;

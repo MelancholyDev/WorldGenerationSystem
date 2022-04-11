@@ -22,53 +22,6 @@ AVoxelChank::AVoxelChank()
 	InstanceDirt->SetStaticMesh(Dirt.Object);
 }
 
-void AVoxelChank::BeginPlay()
-{
-	Super::BeginPlay();
-	InstanceTopGrass->ClearInstances();
-	FVector InstanceLocation = InstanceTopGrass->GetComponentLocation();
-	int LoopX;
-	int LoopY;
-	int LoopZ;
-	int PostNoiseZ;
-	for (int i = ChunkSize * -1; i <= ChunkSize; i++)
-	{
-		LoopX = i;
-		for (int j = ChunkSize * -1; j <= ChunkSize; j++)
-		{
-			LoopY = j;
-			for (int k = Depth * -1; k <= 0; k++)
-			{
-				LoopZ = k;
-				float A;
-				float B;
-				int C;
-				ActorLocationVoxelWorld(LoopX, LoopY, LoopZ, A, B, C);
-				float Noise2D = USimplexNoiseBPLibrary::SimplexNoise2D(A, B, NoiseDensity);
-				PostNoiseZ = floor(Noise2D * NoiseScale) - LoopZ;
-				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, PostNoiseZ * VoxelSize * -1);
-				if (LoopZ < -3)
-				{
-					FVector NoiseLocation = FVector(position.X, position.Y, position.Z);
-					NoiseLocation = NoiseLocation + InstanceLocation;
-					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
-						NoiseLocation.X, NoiseLocation.Y, NoiseLocation.Z, NoiseDensity3D);
-					if (!(Noise3D < Threshold3D))
-					{
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						InstanceTopGrass->AddInstance(transform);
-					}
-				}
-				else
-				{
-					FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-					InstanceTopGrass->AddInstance(transform);
-				}
-			}
-		}
-	}
-}
-
 void AVoxelChank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -78,25 +31,21 @@ void AVoxelChank::Tick(float DeltaTime)
 void AVoxelChank::OnConstruction(const FTransform& Transform)
 {
 	InstanceTopGrass->ClearInstances();
-	int LoopX;
-	int LoopY;
-	int LoopZ;
-	int PostNoiseZ;
 	for (int i = ChunkSize * -1; i <= ChunkSize; i++)
 	{
-		LoopX = i;
+		int LoopX = i;
 		for (int j = ChunkSize * -1; j <= ChunkSize; j++)
 		{
-			LoopY = j;
+			int LoopY = j;
+			float A;
+			float B;
+			ActorLocationVoxelWorldXY(LoopX,LoopY,A,B);
+			float Noise2D = USimplexNoiseBPLibrary::SimplexNoise2D(A, B, NoiseDensity);
+			float NoiseShift = floor(Noise2D * NoiseScale);
 			for (int k = Depth * -1; k <= 0; k++)
 			{
-				LoopZ = k;
-				float A;
-				float B;
-				int C;
-				ActorLocationVoxelWorld(LoopX, LoopY, LoopZ, A, B, C);
-				float Noise2D = USimplexNoiseBPLibrary::SimplexNoise2D(A, B, NoiseDensity);
-				PostNoiseZ = floor(Noise2D * NoiseScale) - LoopZ;
+				int LoopZ = k;
+				int PostNoiseZ = NoiseShift - LoopZ;
 				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, PostNoiseZ * VoxelSize * -1);
 				if (LoopZ < -3)
 				{
@@ -118,16 +67,20 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AVoxelChank::ActorLocationVoxelWorld(const int XIndex, const int YIndex, const int ZIndex, float& X, float& Y,
-                                          int& Z)
+void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex,  float& X, float& Y) const
 {
-	FVector loc = InstanceTopGrass->GetComponentLocation();
-	// X = (XIndex + floor(loc.X)) * VoxelSize;
-	// Y = (YIndex + floor(loc.X)) * VoxelSize;
-	X = loc.X+XIndex * VoxelSize;
-	Y = loc.Y+YIndex * VoxelSize;
-	Z = loc.Z+ZIndex * VoxelSize;
+	const FVector Location = InstanceTopGrass->GetComponentLocation();
+	X = Location.X+XIndex * VoxelSize;
+	Y = Location.Y+YIndex * VoxelSize;
+	//Z = Location.Z+ZIndex * VoxelSize;
 }
+
+void AVoxelChank::ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const
+{
+	FVector Location = InstanceTopGrass->GetComponentLocation();
+	Z = Location.Z+ZIndex * VoxelSize;
+}
+
 
 void AVoxelChank::InitializeParameters(float NoiseDensityParam, float VoxelSizeParam, int NoiseScaleParam,
                                        int ChunkSizeParam, int DepthParam, float NoiseDensity3DParam,
