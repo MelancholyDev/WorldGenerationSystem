@@ -16,13 +16,13 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 	
 public:
 	UPROPERTY(EditAnywhere)
-	float NoiseDesity = 0.0001f;
+	float NoiseDensity = 0.0001f;
 	float VoxelSize = 100;
 	int NoiseScale = 10;
 	UPROPERTY(EditAnywhere)
-	int ChunkSize = 10;
+	int ChunkSize = 1;
 	UPROPERTY(EditAnywhere)
-	int Depth = 15;
+	int Depth = 1;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent * Root;
 	float NoiseDensity3D = 0.001f;
@@ -36,10 +36,9 @@ private:
 	void ActorLocationVoxelWorld(const int XIndex,const int YIndex,const int ZIndex,float& X,float& Y,int& Z);
 protected:
 	virtual void BeginPlay() override;
-
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
-
+	void InitializeParameters(float NoiseDensityParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,
+		float NoiseDensity3DParam,float Threshold3DParam);
 };

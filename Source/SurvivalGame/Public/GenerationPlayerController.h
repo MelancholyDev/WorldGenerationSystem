@@ -17,13 +17,21 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
 	float ChunkSize;
-
+	float ChunkLength;
 	UPROPERTY(EditAnywhere)
 	int RenderRange;
-
 	UPROPERTY(EditAnywhere)
 	int Depth;
-	
+	UPROPERTY(EditAnywhere)
+	float NoiseDensity;
+	UPROPERTY(EditAnywhere)
+	float NoiseScale;
+	UPROPERTY(EditAnywhere)
+	float VoxelSize;
+	UPROPERTY(EditAnywhere)
+	float NoiseDensity3D;
+	UPROPERTY(EditAnywhere)
+	float Threshold3D;
 	public:
 	UPROPERTY(BlueprintReadWrite)
 	FIntVector OldCoordinates;
@@ -47,22 +55,9 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	void YShift(int Y);
 	UFUNCTION(BlueprintCallable)
 	void Diagonal(int X, int Y);
+	FActorSpawnParameters* ChunkSpawnParameters;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 };
 
-class FAsyncSpawnChunkTask : public FNonAbandonableTask
-{
-private:
-	float x;
-	float y;
-	float z;
-public:
-	FAsyncSpawnChunkTask(float x, float y, float z);
-	void DoWork();
-	FORCEINLINE TStatId GetStatId() const
-	{
-		RETURN_QUICK_DECLARE_CYCLE_STAT(FAsyncSpawnChunkTask, STATGROUP_ThreadPoolAsyncTasks);
-	}
-};
