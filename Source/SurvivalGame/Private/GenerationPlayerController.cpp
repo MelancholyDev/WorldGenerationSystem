@@ -20,7 +20,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	Chunk->InitializeParameters(NoiseDensity, VoxelSize, NoiseScale, ChunkSize, Depth,
-	                            NoiseDensity3D, Threshold3D);
+	                            NoiseDensity3D, Threshold3D,WaterLevel);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }

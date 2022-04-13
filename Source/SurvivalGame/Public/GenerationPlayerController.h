@@ -34,6 +34,9 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	float NoiseDensity3D;
 	UPROPERTY(EditAnywhere)
 	float Threshold3D;
+	UPROPERTY(EditAnywhere)
+	int WaterLevel;
+	
 	public:
 	UPROPERTY(BlueprintReadWrite)
 	FIntVector OldCoordinates;

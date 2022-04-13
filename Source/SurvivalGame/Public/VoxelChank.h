@@ -23,14 +23,22 @@ public:
 	int ChunkSize = 5;
 	UPROPERTY(EditAnywhere)
 	int Depth = 10;
+	UPROPERTY(EditAnywhere)
+	int WaterLevel;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent * Root;
 	float NoiseDensity3D = 0.001f;
 	float Threshold3D = 0;
 	UPROPERTY(VisibleAnywhere)
 	UInstancedStaticMeshComponent* InstanceTopGrass;
+	UPROPERTY(VisibleAnywhere)
 	UInstancedStaticMeshComponent* InstanceDirt;
+	UPROPERTY(VisibleAnywhere)
 	UInstancedStaticMeshComponent* InstanceStone;
+	UPROPERTY(VisibleAnywhere)
+	UInstancedStaticMeshComponent* InstanceSand;
+	UPROPERTY(VisibleAnywhere)
+	UInstancedStaticMeshComponent* InstanceSnow;
 	AVoxelChank();
 private:
 	void ActorLocationVoxelWorldXY(const int XIndex,const int YIndex,float& X,float& Y) const;
@@ -39,5 +47,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	void InitializeParameters(float NoiseDensityParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,
-		float NoiseDensity3DParam,float Threshold3DParam);
+		float NoiseDensity3DParam,float Threshold3DParam,int WaterLevel);
 };
