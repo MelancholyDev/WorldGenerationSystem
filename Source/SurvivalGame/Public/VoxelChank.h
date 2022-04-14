@@ -19,6 +19,7 @@ public:
 	float NoiseDensity = 0.0001f;
 	float VoxelSize = 100;
 	int NoiseScale = 10;
+	float NoiseDensityTemperature;
 	UPROPERTY(EditAnywhere)
 	int ChunkSize = 5;
 	UPROPERTY(EditAnywhere)
@@ -47,5 +48,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	void InitializeParameters(float NoiseDensityParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,
-		float NoiseDensity3DParam,float Threshold3DParam,int WaterLevel);
+		float NoiseDensity3DParam,float Threshold3DParam,int WaterLevel,float NoiseDensityTemperature);
 };
