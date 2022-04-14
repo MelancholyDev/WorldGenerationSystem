@@ -4,6 +4,23 @@
 #include "math.h"
 #include "vector"
 
+float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, float A,float X)
+{
+	auto t = linspace(0,1,256);
+	std::vector<float> vecX{};
+	std::vector<float> vecY{};
+	for(int i=0;i<t.size();i++)
+	{
+		Point a = Bezier(X1,Y1,X2,Y2,A,t.at(4));
+		vecX.push_back(a.X);
+		vecY.push_back(a.Y);
+	}
+	std::vector<float> result;
+	std::vector<float> buffer{X};
+	result = interp1(vecX,vecY,buffer);
+	return result.at(0);
+}
+
 Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A, float T)
 {
 	Point P1 = Point(0, 0);
@@ -11,28 +28,23 @@ Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A
 	Point P3 = Point(X2, Y2);
 	Point P4 = Point(1, A);
 	Point Result = pow(1 - T, 3)*P1 +  3 * pow((1 - T), 2) * T * P2 + 3 * (1 - T) * pow(T,2) * P3 +pow(T,3) * P4;
-	return Point(0,0);
+	return Result;
 }
 
 float BezierComputations::FilterMap(float HeightMap, float SmoothMap, float X1, float Y1, float X2, float Y2, float A,
 	float B)
 {
-	// float X = B*HeightMap+(1-B)*SmoothMap;
-	// float Y = Bezier(X1,Y1,X2,Y2,A);
-	return  1;
+	float X = B*HeightMap+(1-B)*SmoothMap;
+	FString num = FString::Printf(TEXT("%f"),X);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
+	float Y = BezierLut(X1, Y1, X2, Y2, A, X);
+	std::cout<<"FinishBezier!";
+	return  Y;
 }
-
-#include <iostream>
-#include <vector>
-#include <limits>
-#include <cmath>
-
-
-template<typename Real>
-int nearestNeighbourIndex(std::vector<Real> &x, Real &value)
+int nearestNeighbourIndex(std::vector<float> &x, float &value)
 {
-	Real dist = std::numeric_limits<Real>::max();
-	Real newDist = dist;
+	float dist = std::numeric_limits<float>::max();
+	float newDist = dist;
 	size_t idx = 0;
 
 	for (size_t i = 0; i < x.size(); ++i) {
@@ -46,11 +58,10 @@ int nearestNeighbourIndex(std::vector<Real> &x, Real &value)
 	return idx;
 }
 
-template<typename Real>
-std::vector<Real> interp1(std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &x_new)
+std::vector<float> interp1(std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new)
 {
-	std::vector<Real> y_new;
-	Real dx, dy, m, b;
+	std::vector<float> y_new;
+	float dx, dy, m, b;
 	size_t x_max_idx = x.size() - 1;
 	size_t x_new_size = x_new.size();
 
@@ -80,10 +91,28 @@ std::vector<Real> interp1(std::vector<Real> &x, std::vector<Real> &y, std::vecto
 	return y_new;
 }
 
-int main() {
+std::vector<float> linspace(float start_in, float end_in, int num_in)
+{
 
-	// auto res = interp1(x, y, newx);
-	// for (auto i: res)
-	// 	cout << i << " ";
-	// cout << endl;
+	std::vector<float> linspaced;
+
+	double start = start_in;
+	double end = end_in;
+	double num = num_in;
+
+	if (num == 0) { return linspaced; }
+	if (num == 1) 
+	{
+		linspaced.push_back(start);
+		return linspaced;
+	}
+
+	double delta = (end - start) / (num - 1);
+
+	for(int i=0; i < num-1; ++i)
+	{
+		linspaced.push_back(start + delta * i);
+	}
+	linspaced.push_back(end);
+	return linspaced;
 }

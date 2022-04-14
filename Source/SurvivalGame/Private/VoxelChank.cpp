@@ -1,5 +1,5 @@
 #include "VoxelChank.h"
-
+#include "BezierComputations.h"
 AVoxelChank::AVoxelChank()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,59 +60,61 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			float A;
 			float B;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-			float Noise2D = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2.3f,0.6f,1,NoiseDensity);
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"),Noise2D));
-			float NoiseShift = floor(Noise2D * NoiseScale);
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%f"),NoiseShift));
-			int BottomLevel = Depth * -1 + NoiseShift;
-			for (int k = BottomLevel; k <= 0; k++)
-			{
-				USimplexNoiseBPLibrary::setNoiseSeed(16);
-				int LoopZ = k;
-				int C;
-				ActorLocationVoxelWorldZ(LoopZ, C);
-				int PostNoiseZ = NoiseShift - LoopZ;
-				FString f = FString::Printf(TEXT("%d"), PostNoiseZ);
-				int TileShift = PostNoiseZ * VoxelSize;
-				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, TileShift * -1);
-				if ((LoopZ < -3) && (LoopZ != BottomLevel))
-				{
-					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
-						A, B, C, NoiseDensity3D);
-					if (!(Noise3D < Threshold3D))
-					{
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						InstanceDirt->AddInstance(transform);
-					}
-				}
-				else
-				{
-					if (LoopZ == 0)
-					{
-						USimplexNoiseBPLibrary::setNoiseSeed(21);
-						float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
-							A, B, NoiseDensityTemperature);
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						if (Temperature < 0.33)
-						{
-							InstanceSnow->AddInstance(transform);
-						}
-						else if ((Temperature >= 0.33) & (Temperature < 0.66))
-						{
-							InstanceTopGrass->AddInstance(transform);
-						}else
-						{
-							InstanceSand->AddInstance(transform);
-						}
-					}
-					else
-					{
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						InstanceDirt->AddInstance(transform);
-					}
-				}
-			}
-		}
+			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,6);
+			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,1,NoiseDensity);
+			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp,Noise2DSmooth,0.75, 0.2, 0.95, 0.2, 0.2, 0.5);
+			// FString num = FString::Printf(TEXT("%f"),FinalNoise);
+			// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
+		// 	float NoiseShift = floor(FinalNoise * NoiseScale);
+		// 	int BottomLevel = Depth * -1 + NoiseShift;
+		// 	for (int k = BottomLevel; k <= 0; k++)
+		// 	{
+		// 		USimplexNoiseBPLibrary::setNoiseSeed(16);
+		// 		int LoopZ = k;
+		// 		int C;
+		// 		ActorLocationVoxelWorldZ(LoopZ, C);
+		// 		int PostNoiseZ = NoiseShift - LoopZ;
+		// 		FString f = FString::Printf(TEXT("%d"), PostNoiseZ);
+		// 		int TileShift = PostNoiseZ * VoxelSize;
+		// 		FVector position(LoopX * VoxelSize, LoopY * VoxelSize, TileShift * -1);
+		// 		if ((LoopZ < -3) && (LoopZ != BottomLevel))
+		// 		{
+		// 			float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
+		// 				A, B, C, NoiseDensity3D);
+		// 			if (!(Noise3D < Threshold3D))
+		// 			{
+		// 				FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+		// 				InstanceDirt->AddInstance(transform);
+		// 			}
+		// 		}
+		// 		else
+		// 		{
+		// 			if (LoopZ == 0)
+		// 			{
+		// 				USimplexNoiseBPLibrary::setNoiseSeed(21);
+		// 				float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
+		// 					A, B, NoiseDensityTemperature);
+		// 				FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+		// 				if (Temperature < 0.33)
+		// 				{
+		// 					InstanceSnow->AddInstance(transform);
+		// 				}
+		// 				else if ((Temperature >= 0.33) & (Temperature < 0.66))
+		// 				{
+		// 					InstanceTopGrass->AddInstance(transform);
+		// 				}else
+		// 				{
+		// 					InstanceSand->AddInstance(transform);
+		// 				}
+		// 			}
+		// 			else
+		// 			{
+		// 				FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+		// 				InstanceDirt->AddInstance(transform);
+		// 			}
+		// 		}
+		// 	}
+		 }
 	}
 }
 
