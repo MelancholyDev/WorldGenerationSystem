@@ -35,9 +35,9 @@ float BezierComputations::FilterMap(float HeightMap, float SmoothMap, float X1, 
 	float B)
 {
 	float X = B*HeightMap+(1-B)*SmoothMap;
-	FString num = FString::Printf(TEXT("%f"),X);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	float Y = BezierLut(X1, Y1, X2, Y2, A, X);
+	// FString num = FString::Printf(TEXT("%f %f : %f %f"),HeightMap,SmoothMap,X,Y);
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	return Y;
 }
 int nearestNeighbourIndex(std::vector<float> &x, float &value)
@@ -60,7 +60,6 @@ int nearestNeighbourIndex(std::vector<float> &x, float &value)
 std::vector<float> interp1(std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new)
 {
 	FString num = FString::Printf(TEXT("%f"),x_new.at(0));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	std::vector<float> y_new;
 	float dx, dy, m, b;
 	size_t x_max_idx = x.size() - 1;
@@ -89,8 +88,6 @@ std::vector<float> interp1(std::vector<float> &x, std::vector<float> &y, std::ve
 		y_new.push_back(x_new[i] * m + b);
 	}
 
-	// FString num = FString::Printf(TEXT("%f"),y_new.at(0));
- //    			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	return y_new;
 }
 

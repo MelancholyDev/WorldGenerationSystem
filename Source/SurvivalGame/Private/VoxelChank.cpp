@@ -51,29 +51,32 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 {
 	InstanceTopGrass->ClearInstances();
 	InstanceDirt->ClearInstances();
+	USimplexNoiseBPLibrary::setNoiseSeed(16);
 	for (int LoopX = ChunkSize * -1; LoopX <= ChunkSize; LoopX++)
 	{
 		for (int LoopY = ChunkSize * -1; LoopY <= ChunkSize; LoopY++)
 		{
-			USimplexNoiseBPLibrary::setNoiseSeed(16);
 			float A;
 			float B;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-
+			FString num = FString::Printf(TEXT("%f %f :"),A,B);
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, num);
 			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 6, NoiseDensity,true);
 			Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
 			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 1, NoiseDensity,true);
 			Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
 			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.5, 1, 0.25, 1, 1, 1);
+			//float FinalNoise = Noise2DSmooth;
 			float NoiseShift = FinalNoise * NoiseScale;
 			NoiseShift = floor(NoiseShift);
 			int VoxelShift = VoxelSize;
-			int CurrentLocation =NoiseShift*VoxelShift;
+			int CurrentLocation = NoiseShift*VoxelShift;
 			for (int LoopZ = NoiseShift; LoopZ >= Depth; LoopZ--)
 			{
-				USimplexNoiseBPLibrary::setNoiseSeed(16);
+		
 				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, CurrentLocation);
-				if ((LoopZ < NoiseShift-3) && (LoopZ != Depth))
+				//if ((LoopZ < NoiseShift-3) && (LoopZ != Depth))
+				if(false)
 				{
 					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
 						A, B, CurrentLocation, NoiseDensity3D);
@@ -85,9 +88,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 				}
 				else
 				{
-					if (LoopZ == 0)
+					if (LoopZ == NoiseShift)
 					{
-						USimplexNoiseBPLibrary::setNoiseSeed(21);
 						float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
 							A, B, NoiseDensityTemperature);
 						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
@@ -148,7 +150,9 @@ void AVoxelChank::InitializeParameters(float NoiseDensityParam, float VoxelSizeP
 float Clamp(float x, float left, float right)
 {
 	if (x < left)
+	{
 		return left;
+	}
 	if (x > right)
 		return right;
 	return x;

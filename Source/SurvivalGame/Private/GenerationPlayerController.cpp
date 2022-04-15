@@ -96,7 +96,6 @@ void AGenerationPlayerController::AppendColumn(int Index, bool isLeft)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Z"));
 		Start = RenderRange * 2 - 1;
 		Last = 0;
 		Increment = -1;
@@ -104,17 +103,11 @@ void AGenerationPlayerController::AppendColumn(int Index, bool isLeft)
 	}
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
 	int Shift = isLeft ? -RenderRange : RenderRange;
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("B"));
 	for (int i = Start; Index > 0 ? i >= Last : i <= Last; i += Increment)
 	{
-		FString a = FString::Printf(TEXT("TREXT:%d"), i - RenderRange + XShift);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("AAA") + a);
 		FVoxelLine* Line = &(*Map)[i];
 		AVoxelChank* chunk = SpawnChunk((CurrentCoordinates.X + i - RenderRange + XShift) * ChunkLength,
 		                                (CurrentCoordinates.Y + Shift) * ChunkLength, 0);
-		a = FString::Printf(TEXT("%f %f %f"), chunk->GetActorLocation().X, chunk->GetActorLocation().Y,
-		                    chunk->GetActorLocation().Z);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, a);
 		if (isLeft)
 		{
 			Line->Voxels.Insert(chunk, 0);
