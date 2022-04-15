@@ -17,8 +17,6 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
 	float ChunkSize;
-	UPROPERTY(EditAnywhere)
-	int LastDepthIndex;
 	float ChunkLength;
 	UPROPERTY(EditAnywhere)
 	int RenderRange;

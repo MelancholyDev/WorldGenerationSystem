@@ -50,3 +50,5 @@ public:
 	void InitializeParameters(float NoiseDensityParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,
 		float NoiseDensity3DParam,float Threshold3DParam,int WaterLevel,float NoiseDensityTemperature);
 };
+
+float Clamp(float x,float left,float right);

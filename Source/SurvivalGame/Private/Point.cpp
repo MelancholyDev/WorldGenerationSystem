@@ -1,5 +1,5 @@
 ﻿#include "Point.h"
-Point::Point(int XParam,int YParam)
+Point::Point(float XParam,float YParam)
 {
 	X = XParam;
 	Y = YParam;
