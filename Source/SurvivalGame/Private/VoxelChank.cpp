@@ -51,43 +51,32 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 {
 	InstanceTopGrass->ClearInstances();
 	InstanceDirt->ClearInstances();
-	for (int i = ChunkSize * -1; i <= ChunkSize; i++)
+	for (int LoopX = ChunkSize * -1; LoopX <= ChunkSize; LoopX++)
 	{
-		int LoopX = i;
-		for (int j = ChunkSize * -1; j <= ChunkSize; j++)
+		for (int LoopY = ChunkSize * -1; LoopY <= ChunkSize; LoopY++)
 		{
 			USimplexNoiseBPLibrary::setNoiseSeed(16);
-			int LoopY = j;
 			float A;
 			float B;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
 
-			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 6, NoiseDensity);
+			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 6, NoiseDensity,true);
 			Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
-			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 1, NoiseDensity);
+			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 1, NoiseDensity,true);
 			Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
-			Noise2DSharp =0.1;
-			Noise2DSmooth = 0.1;
-
 			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.5, 1, 0.25, 1, 1, 1);
 			float NoiseShift = FinalNoise * NoiseScale;
 			NoiseShift = floor(NoiseShift);
-			int VoxelShift = VoxelSize*2;
-			int StartLocation =NoiseShift*VoxelShift;
-			for (int k = NoiseShift; k >= Depth; k--)
+			int VoxelShift = VoxelSize;
+			int CurrentLocation =NoiseShift*VoxelShift;
+			for (int LoopZ = NoiseShift; LoopZ >= Depth; LoopZ--)
 			{
 				USimplexNoiseBPLibrary::setNoiseSeed(16);
-				int LoopZ = k;
-				int C;
-				ActorLocationVoxelWorldZ(LoopZ, C);
-				int PostNoiseZ = NoiseShift - LoopZ;
-				FString f = FString::Printf(TEXT("%d"), PostNoiseZ);
-				int TileShift = PostNoiseZ * VoxelSize;
-				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, TileShift * -1);
-				if ((LoopZ < -3) && (LoopZ != BottomLevel))
+				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, CurrentLocation);
+				if ((LoopZ < NoiseShift-3) && (LoopZ != Depth))
 				{
 					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
-						A, B, C, NoiseDensity3D);
+						A, B, CurrentLocation, NoiseDensity3D);
 					if (!(Noise3D < Threshold3D))
 					{
 						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
@@ -121,6 +110,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 						InstanceDirt->AddInstance(transform);
 					}
 				}
+				CurrentLocation-=VoxelShift;
 			}
 		}
 	}
