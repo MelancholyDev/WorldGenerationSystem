@@ -63,6 +63,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			//float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,6);
 			//float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,1,NoiseDensity);
 			//float FinalNoise = BezierComputations::FilterMap(Noise2DSharp,Noise2DSmooth,0.75, 0.2, 0.95, 0.2, 0.2, 0.5);
+			float FinalNoise = USimplexNoiseBPLibrary::SimplexNoise2D(A,B,NoiseDensity);
 			FString num = FString::Printf(TEXT("%f"),FinalNoise);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 			float NoiseShift = floor(FinalNoise * NoiseScale);
