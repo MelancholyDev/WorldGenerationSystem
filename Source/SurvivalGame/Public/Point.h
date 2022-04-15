@@ -3,9 +3,9 @@
 class Point
 {
 public:
-	int X;
-	int Y;
-	Point(int X,int Y);
+	float X;
+	float Y;
+	Point(float X,float Y);
 };
 
 inline Point operator + (Point X,Point Y)

@@ -11,7 +11,9 @@ float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, floa
 	std::vector<float> vecY{};
 	for(int i=0;i<t.size();i++)
 	{
-		Point a = Bezier(X1,Y1,X2,Y2,A,t.at(4));
+		Point a = Bezier(X1,Y1,X2,Y2,A,t.at(i));
+		// FString num = FString::Printf(TEXT("%f %f"),a.X,a.Y);
+		// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 		vecX.push_back(a.X);
 		vecY.push_back(a.Y);
 	}
@@ -35,8 +37,8 @@ float BezierComputations::FilterMap(float HeightMap, float SmoothMap, float X1, 
 	float B)
 {
 	float X = B*HeightMap+(1-B)*SmoothMap;
-	FString num = FString::Printf(TEXT("%f"),X);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
+	// FString num = FString::Printf(TEXT("%f"),X);
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	float Y = BezierLut(X1, Y1, X2, Y2, A, X);
 	std::cout<<"FinishBezier!";
 	return  Y;
