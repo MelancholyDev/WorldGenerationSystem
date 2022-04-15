@@ -1,5 +1,6 @@
 #include "VoxelChank.h"
 #include "BezierComputations.h"
+
 AVoxelChank::AVoxelChank()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,15 +61,33 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			float A;
 			float B;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,6,NoiseDensity);
-			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,1,NoiseDensity);
-			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp,Noise2DSmooth,0.75, 0.2, 0.95, 0.2, 0.2, 0.5);
+			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.5, 6, NoiseDensity);
+			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.5, 1, NoiseDensity);
+			//float FinalNoise = BezierComputations::FilterMap(Noise2DSharp,Noise2DSmooth,0.75, 0.2, 0.95, 0.2, 0.2, 0.5);
+			float FinalNoise;
 			//float FinalNoise = USimplexNoiseBPLibrary::SimplexNoise2D(A,B,NoiseDensity);
-			
+
 			//float FinalNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,6,NoiseDensity);
 			//float FinalNoise  = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B,2,0.5,1,NoiseDensity);
-			
-			FString num = FString::Printf(TEXT("%f"),FinalNoise);
+			USimplexNoiseBPLibrary::setNoiseSeed(21);
+			float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
+				A, B, NoiseDensityTemperature);
+			USimplexNoiseBPLibrary::setNoiseSeed(16);
+			if (Temperature < 0.33)
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.33, 0.33, 0.95, 0.1, 0.1,
+				                                           0.75);
+			}
+			else if ((Temperature >= 0.33) & (Temperature < 0.66))
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.2, 0.95, 0.2, 0.2, 0.5);
+			}
+			else
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.33, 0.33, 0.95, 0.1, 0.1,
+				                                           0.75);
+			}
+			FString num = FString::Printf(TEXT("%f"), FinalNoise);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 			float NoiseShift = floor(FinalNoise * NoiseScale);
 			int BottomLevel = Depth * -1 + NoiseShift;
@@ -83,43 +102,45 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 				int TileShift = PostNoiseZ * VoxelSize;
 				FVector position(LoopX * VoxelSize, LoopY * VoxelSize, TileShift * -1);
 				if ((LoopZ < -3) && (LoopZ != BottomLevel))
-				{
-					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
-						A, B, C, NoiseDensity3D);
-					if (!(Noise3D < Threshold3D))
+					if (true)
 					{
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						InstanceDirt->AddInstance(transform);
-					}
-				}
-				else
-				{
-					if (LoopZ == 0)
-					{
-						USimplexNoiseBPLibrary::setNoiseSeed(21);
-						float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
-							A, B, NoiseDensityTemperature);
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						if (Temperature < 0.33)
+						float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
+							A, B, C, NoiseDensity3D);
+						if (!(Noise3D < Threshold3D))
 						{
-							InstanceSnow->AddInstance(transform);
-						}
-						else if ((Temperature >= 0.33) & (Temperature < 0.66))
-						{
-							InstanceTopGrass->AddInstance(transform);
-						}else
-						{
-							InstanceSand->AddInstance(transform);
+							FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+							InstanceDirt->AddInstance(transform);
 						}
 					}
 					else
 					{
-						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-						InstanceDirt->AddInstance(transform);
+						if (LoopZ == 0)
+						{
+							//USimplexNoiseBPLibrary::setNoiseSeed(21);
+							// float Temperatures = USimplexNoiseBPLibrary::SimplexNoise2D(
+							// 	A, B, NoiseDensityTemperature);
+							FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+							if (Temperature < 0.33)
+							{
+								InstanceSnow->AddInstance(transform);
+							}
+							else if ((Temperature >= 0.33) & (Temperature < 0.66))
+							{
+								InstanceTopGrass->AddInstance(transform);
+							}
+							else
+							{
+								InstanceSand->AddInstance(transform);
+							}
+						}
+						else
+						{
+							FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+							InstanceDirt->AddInstance(transform);
+						}
 					}
-				}
 			}
-		 }
+		}
 	}
 }
 
@@ -139,7 +160,7 @@ void AVoxelChank::ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const
 
 void AVoxelChank::InitializeParameters(float NoiseDensityParam, float VoxelSizeParam, int NoiseScaleParam,
                                        int ChunkSizeParam, int DepthParam, float NoiseDensity3DParam,
-                                       float Threshold3DParam, int WaterLevelParam,float NoiseDensityTemperatureParam)
+                                       float Threshold3DParam, int WaterLevelParam, float NoiseDensityTemperatureParam)
 {
 	WaterLevel = WaterLevelParam;
 	NoiseDensity = NoiseDensityParam;
