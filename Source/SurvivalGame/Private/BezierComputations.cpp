@@ -36,8 +36,6 @@ float BezierComputations::FilterMap(float HeightMap, float SmoothMap, float X1, 
 {
 	float X = B*HeightMap+(1-B)*SmoothMap;
 	float Y = BezierLut(X1, Y1, X2, Y2, A, X);
-	// FString num = FString::Printf(TEXT("%f %f : %f %f"),HeightMap,SmoothMap,X,Y);
-	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, num);
 	return Y;
 }
 int nearestNeighbourIndex(std::vector<float> &x, float &value)

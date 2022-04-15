@@ -61,14 +61,14 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
 			FString num = FString::Printf(TEXT("%f %f :"),A,B);
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, num);
-			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 6, NoiseDensity,true);
+			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.3, 6, NoiseDensity);
 			Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
-			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2.3, 0.6, 1, NoiseDensity,true);
+			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.3, 2, NoiseDensity);
 			Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
-			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.5, 1, 0.25, 1, 1, 1);
+			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
 			//float FinalNoise = Noise2DSmooth;
-			float NoiseShift = FinalNoise * NoiseScale;
-			NoiseShift = floor(NoiseShift);
+			float NoiseShift2 = FinalNoise * NoiseScale;
+			int NoiseShift = NoiseShift2;
 			int VoxelShift = VoxelSize;
 			int CurrentLocation = NoiseShift*VoxelShift;
 			for (int LoopZ = NoiseShift; LoopZ >= Depth; LoopZ--)
@@ -151,7 +151,7 @@ float Clamp(float x, float left, float right)
 {
 	if (x < left)
 	{
-		return left;
+		return -x;
 	}
 	if (x > right)
 		return right;
