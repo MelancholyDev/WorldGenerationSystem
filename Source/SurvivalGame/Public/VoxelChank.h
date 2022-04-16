@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include <vector>
+
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "SimplexNoise/Public/SimplexNoiseBPLibrary.h"
@@ -30,6 +32,7 @@ public:
 	USceneComponent * Root;
 	float NoiseDensity3D = 0.001f;
 	float Threshold3D = 0;
+	std::vector<float> Map;
 	UPROPERTY(VisibleAnywhere)
 	UInstancedStaticMeshComponent* InstanceTopGrass;
 	UPROPERTY(VisibleAnywhere)

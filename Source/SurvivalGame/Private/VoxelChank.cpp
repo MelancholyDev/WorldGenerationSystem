@@ -65,8 +65,22 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
 			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.3, 2, NoiseDensity);
 			Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
-			float FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
+			float FinalNoise;
 			//float FinalNoise = Noise2DSmooth;
+			float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
+							A, B, NoiseDensityTemperature);
+			if (Temperature < 0.33)
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.5, 1, 0.25, 1, 1, 1);
+			}
+			else if ((Temperature >= 0.33) & (Temperature < 0.66))
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
+			}
+			else
+			{
+				FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
+			}
 			float NoiseShift2 = FinalNoise * NoiseScale;
 			int NoiseShift = NoiseShift2;
 			int VoxelShift = VoxelSize;
@@ -90,7 +104,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 				{
 					if (LoopZ == NoiseShift)
 					{
-						float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
+						Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
 							A, B, NoiseDensityTemperature);
 						FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 						if (Temperature < 0.33)

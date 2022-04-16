@@ -16,6 +16,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
+	int MapSize;
+	UPROPERTY(EditAnywhere)
 	float ChunkSize;
 	float ChunkLength;
 	UPROPERTY(EditAnywhere)
@@ -36,6 +38,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	int WaterLevel;
 	UPROPERTY(EditAnywhere)
 	float NoiseDensityTemperature;
+	float** MapNoise;
 	
 	public:
 	UPROPERTY(BlueprintReadWrite)
@@ -64,5 +67,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	private:
+	void GenerateHeightMap();
 };
 

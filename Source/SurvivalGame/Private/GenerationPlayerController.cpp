@@ -260,3 +260,7 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 		Map->Add(FVoxelLine());
 	}
 }
+
+void AGenerationPlayerController::GenerateHeightMap()
+{
+}
