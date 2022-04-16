@@ -1,12 +1,11 @@
 ﻿#include "BezierComputations.h"
 
 #include "Point.h"
-#include "math.h"
 #include "vector"
 
 float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, float A,float X)
 {
-	auto t = linspace(0,1,256);
+	auto t = Linspace(0,1,256);
 	std::vector<float> vecX{};
 	std::vector<float> vecY{};
 	for(int i=0;i<t.size();i++)
@@ -17,7 +16,7 @@ float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, floa
 	}
 	std::vector<float> result;
 	std::vector<float> buffer{X};
-	result = interp1(vecX,vecY,buffer);
+	result = Interpolation1(vecX,vecY,buffer);
 	return result.at(0);
 }
 
@@ -31,17 +30,73 @@ Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A
 	return Result;
 }
 
-float BezierComputations::FilterMap(float HeightMap, float SmoothMap, float X1, float Y1, float X2, float Y2, float A,
-	float B)
+float BezierComputations::FilterMap(float HeightMap, float SmoothMap, BiomType Biom)
 {
-	float X = B*HeightMap+(1-B)*SmoothMap;
-	float Y = BezierLut(X1, Y1, X2, Y2, A, X);
+	float Y = 0;
+	switch (Biom)
+	{
+		case DESERT:
+			{
+				float B=0.5;
+				float X = B*HeightMap+(1-B)*SmoothMap;
+				Y = BezierLut(0.75, 0.2, 0.95, 0.2, 0.2, X);
+			}break;
+	case SAVANNA:
+		{
+			float B=0.2;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.5, 0.1, 0.95, 0.1, 0.1, X);
+		}break;
+	case TROPICAL_WOODLAND:
+		{
+			float B=0.75;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.33, 0.33, 0.95, 0.1, 0.1, X);
+		} break;
+	case TUNDRA:
+		{
+			float B=1;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.5, 1, 0.25, 1, 1, X);
+		} break;
+	case SEASONAL_FOREST:
+		{
+			float B=0.2;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.5, 0.25, 0.66, 1, 1, X);
+		} break;
+	case RAIN_FOREST:
+		{
+			float B=0.5;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
+		} break;
+	case TEMPERATE_FOREST:
+		{
+			float B=0.33;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
+		} break;
+	case TEMPERATE_RAINFOREST:
+		{
+			float B=0.33;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
+		} break;
+	case BOREAL:
+		{
+			float B=0.1;
+			float X = B*HeightMap+(1-B)*SmoothMap;
+			Y = BezierLut(0.8, 0.1, 0.9, 0.05, 0.05, X);
+		} break;
+	default: ;
+	}
 	return Y;
 }
 int nearestNeighbourIndex(std::vector<float> &x, float &value)
 {
 	float dist = std::numeric_limits<float>::max();
-	float newDist = dist;
+	float newDist;
 	size_t idx = 0;
 
 	for (size_t i = 0; i < x.size(); ++i) {
@@ -55,7 +110,7 @@ int nearestNeighbourIndex(std::vector<float> &x, float &value)
 	return idx;
 }
 
-std::vector<float> interp1(std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new)
+std::vector<float> Interpolation1(std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new)
 {
 	FString num = FString::Printf(TEXT("%f"),x_new.at(0));
 	std::vector<float> y_new;
@@ -89,7 +144,7 @@ std::vector<float> interp1(std::vector<float> &x, std::vector<float> &y, std::ve
 	return y_new;
 }
 
-std::vector<float> linspace(float start_in, float end_in, int num_in)
+std::vector<float> Linspace(float start_in, float end_in, int num_in)
 {
 
 	std::vector<float> linspaced;

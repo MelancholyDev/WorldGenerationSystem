@@ -2,8 +2,10 @@
 
 #include <string>
 
+#include "BezierComputations.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/IntVector.h"
+#include "Enums.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -14,13 +16,11 @@ FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 
 AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 {
-	FString str = FString::Printf(TEXT("%f , %f , %f"), X, Y, Z);
 	const FVector Location = {X, Y, Z};
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	Chunk->InitializeParameters(NoiseDensity, VoxelSize, NoiseScale, ChunkSize, Depth,
-	                            NoiseDensity3D, Threshold3D,WaterLevel,NoiseDensityTemperature);
+	Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize,MapNoise);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -217,7 +217,7 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 void AGenerationPlayerController::BeginPlay()
 {
 	GenerateHeightMap();
-	ChunkLength = ChunkSize*VoxelSize*2+VoxelSize;
+	ChunkLength = ChunkSize * VoxelSize * 2 + VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
 	{
@@ -265,13 +265,33 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 void AGenerationPlayerController::GenerateHeightMap()
 {
 	MapNoise = new float*[MapSize];
-	for(int i=0;i<MapSize;i++)
+	const int LeftBorder = -(MapSize - 1) / 2;
+	const int RightBorder = -LeftBorder;
+	for (int i = LeftBorder; i <= RightBorder; i++)
 	{
-		MapNoise[i] = new float[MapSize];
+		MapNoise[i + RightBorder] = new float[MapSize];
 	}
-	for(int i=0;i<MapSize;i++)
-		for(int j=0;j<MapSize;i++)
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			MapNoise[i][j] = 2;
+			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,Lacunarity,Persistance,6,NoiseDensity);
+			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,Lacunarity,Persistance,1,NoiseDensity);
+			SmoothNoise = Clamp(SmoothNoise, 0,1);
+			SharpNoise = Clamp(SharpNoise, 0,1);
+			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, Biom);
+			const int XIndex = i + RightBorder;
+			const int YIndex = j + RightBorder;
+			MapNoise[XIndex][YIndex] = FinalNoise;
 		}
+}
+
+float AGenerationPlayerController::Clamp(float x, float left, float right)
+{
+	if (x < left)
+	{
+		return -x;
+	}
+	if (x > right)
+		return right;
+	return x;
 }

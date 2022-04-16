@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 
+#include "Enums.h"
 #include "VoxelChank.h"
 #include "GameFramework/PlayerController.h"
 #include "Structures.h"
-#include "Async/AsyncWork.h"
+#include "Enums.h"
 #include "GenerationPlayerController.generated.h"
 
 
@@ -15,6 +16,10 @@ UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere)
+	float Lacunarity;
+	UPROPERTY(EditAnywhere)
+	float Persistance;
 	UPROPERTY(EditAnywhere)
 	int MapSize;
 	UPROPERTY(EditAnywhere)
@@ -29,6 +34,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	float NoiseScale;
 	UPROPERTY(EditAnywhere)
+	TEnumAsByte<BiomType> Biom;;
+	UPROPERTY(EditAnywhere)
 	float VoxelSize;
 	UPROPERTY(EditAnywhere)
 	float NoiseDensity3D;
@@ -39,8 +46,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	float NoiseDensityTemperature;
 	float** MapNoise;
-	
-	public:
+
+public:
 	UPROPERTY(BlueprintReadWrite)
 	FIntVector OldCoordinates;
 	UPROPERTY(EditAnywhere)
@@ -53,7 +60,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	void DeleteLine(int Index);
 	void AddLine(bool IsForward);
 	void AddColumn(bool isLeft);
-	void AppendColumn(int Index,bool isLeft);
+	void AppendColumn(int Index, bool isLeft);
 	void DeleteColumn(int Index);
 	UFUNCTION(BlueprintCallable)
 	void GetFullSize();
@@ -67,8 +74,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
+	float Clamp(float x, float left, float right);
 
-	private:
+private:
 	void GenerateHeightMap();
 };
-
