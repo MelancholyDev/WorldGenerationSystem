@@ -216,6 +216,7 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 
 void AGenerationPlayerController::BeginPlay()
 {
+	GenerateHeightMap();
 	ChunkLength = ChunkSize*VoxelSize*2+VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
@@ -263,4 +264,14 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 
 void AGenerationPlayerController::GenerateHeightMap()
 {
+	MapNoise = new float*[MapSize];
+	for(int i=0;i<MapSize;i++)
+	{
+		MapNoise[i] = new float[MapSize];
+	}
+	for(int i=0;i<MapSize;i++)
+		for(int j=0;j<MapSize;i++)
+		{
+			MapNoise[i][j] = 2;
+		}
 }

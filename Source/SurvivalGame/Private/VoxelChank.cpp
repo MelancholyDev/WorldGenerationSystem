@@ -61,9 +61,9 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
 			FString num = FString::Printf(TEXT("%f %f :"),A,B);
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, num);
-			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.3, 6, NoiseDensity);
+			float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 4, 0.3, 5, NoiseDensity);
 			Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
-			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 2, 0.3, 2, NoiseDensity);
+			float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 4, 0.3, 2, NoiseDensity);
 			Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
 			float FinalNoise;
 			//float FinalNoise = Noise2DSmooth;
