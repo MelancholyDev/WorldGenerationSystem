@@ -55,17 +55,18 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int B;
 			int IndexShift = MapSize / 2;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-			if((Transform.GetLocation().X==0) && (Transform.GetLocation().Y==1100))
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d %d"),A,B));
+			//if((Transform.GetLocation().X==0) && (Transform.GetLocation().Y==1100))
+				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d %d"),A,B));
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
 			float Shift;
+			GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d %d %d"),XIndex,YIndex,MapSize));
 			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
 			{
 				Shift = Map[XIndex][YIndex];
 			}else
 			{
-				Shift=0;
+				Shift=0.1;
 			}
 			
 			Shift = Shift*NoiseScale;

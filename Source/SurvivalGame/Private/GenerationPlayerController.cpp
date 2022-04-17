@@ -20,7 +20,9 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
+	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
+	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"),MapSize));
+	Chunk->InitializeParameters(VoxelSize,NoiseScale,ChunkSize,Depth,MapSize,MapNoise);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -258,7 +260,7 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 {
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
-	MapSize = ChunkSize * Multiplier;
+	MapSize = (ChunkSize*2+1) * Multiplier;
 	ChunkSpawnParameters = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
