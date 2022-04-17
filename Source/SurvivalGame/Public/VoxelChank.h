@@ -21,7 +21,8 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 	int ChunkSize;
 	int Depth;
 	int MapSize;
-	float** Map;
+	float** HeightMap;
+	float** HeatMap;
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
@@ -43,5 +44,5 @@ public:
 	AVoxelChank();
 	virtual void OnConstruction(const FTransform& Transform) override;
 	void InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,
-	                          int MapSizeParam,float** MapParam);
+	                          int MapSizeParam,float** MapParam,float** HeatParam);
 };

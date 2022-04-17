@@ -22,7 +22,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
 	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"),MapSize));
-	Chunk->InitializeParameters(VoxelSize,NoiseScale,ChunkSize,Depth,MapSize,MapNoise);
+	Chunk->InitializeParameters(VoxelSize,NoiseScale,ChunkSize,Depth,MapSize,HeightMap,HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -218,7 +218,7 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 
 void AGenerationPlayerController::BeginPlay()
 {
-	GenerateHeightMap();
+	GenerateMaps();
 	ChunkLength = ChunkSize * VoxelSize * 2 + VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
@@ -269,14 +269,21 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AGenerationPlayerController::GenerateHeightMap()
+void AGenerationPlayerController::GenerateMaps()
 {
-	MapNoise = new float*[MapSize];
+	HeightMap = new float*[MapSize];
+	HeatMap = new float*[MapSize];
+	WaterMap = new float*[MapSize];
+	MoistureMap = new float*[MapSize];
 	const int LeftBorder = -(MapSize - 1) / 2;
 	const int RightBorder = -LeftBorder;
 	for (int i = LeftBorder; i <= RightBorder; i++)
 	{
-		MapNoise[i + RightBorder] = new float[MapSize];
+		int Index=i+ RightBorder;
+		HeatMap[Index]=new float[MapSize];
+		HeightMap[Index] = new float[MapSize];
+		WaterMap[Index] = new float[MapSize];
+		MoistureMap[Index] = new float[MapSize];
 	}
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
@@ -285,12 +292,15 @@ void AGenerationPlayerController::GenerateHeightMap()
 				i, -j, Lacunarity, Persistance, OctaveSharp, NoiseDensity,ZeroToOne);
 			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, Lacunarity, Persistance, OctaveSmooth, NoiseDensity,ZeroToOne);
+			float HeatNoise = USimplexNoiseBPLibrary::SimplexNoise2D(i,-j,NoiseDensityTemperature);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
+			HeatNoise = Clamp(HeatNoise,0,1);
 			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, Biom);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
-			MapNoise[XIndex][YIndex] = FinalNoise;
+			HeatMap[XIndex][YIndex] = HeatNoise;
+			HeightMap[XIndex][YIndex] = FinalNoise;
 		}
 }
 

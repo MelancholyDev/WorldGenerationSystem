@@ -59,21 +59,33 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d %d"),A,B));
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
-			float Shift;
+			float HeightNoise;
+			float HeatNoise;
 			GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d %d %d"),XIndex,YIndex,MapSize));
 			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
 			{
-				Shift = Map[XIndex][YIndex];
+				HeightNoise = HeightMap[XIndex][YIndex];
+				HeatNoise = HeatMap[XIndex][YIndex];
 			}else
 			{
-				Shift=0.1;
+				HeightNoise=0.1;
+				HeatNoise=0.1;
 			}
 			
-			Shift = Shift*NoiseScale;
-			int ShiftClamped = floor(Shift)*VoxelSize;
+			HeightNoise = HeightNoise*NoiseScale;
+			int ShiftClamped = floor(HeightNoise)*VoxelSize;
 			FVector position(LoopX*VoxelSize, LoopY*VoxelSize, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			InstanceTopGrass->AddInstance(transform);
+			if(HeatNoise<0.33)
+			{
+				InstanceSnow->AddInstance(transform);
+			}else if((HeatNoise>=0.33) & (HeatNoise<0.66))
+			{
+				InstanceTopGrass->AddInstance(transform);
+			}else
+			{
+				InstanceSand->AddInstance(transform);
+			}
 			//float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
 			//	A, B, NoiseDensityTemperature);
 			// if (Temperature < 0.33)
@@ -143,14 +155,15 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 }
 
 void AVoxelChank::InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,
-                                       int MapSizeParam, float** MapParam)
+                                       int MapSizeParam, float** MapParam,float** HeatParam)
 {
 	VoxelSize = VoxelSizeParam;
 	NoiseScale = NoiseScaleParam;
 	ChunkSize = ChunkSizeParam;
 	Depth = DepthParam;
 	MapSize = MapSizeParam;
-	Map = MapParam;
+	HeightMap = MapParam;
+	HeatMap = HeatParam; 
 }
 
 void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const

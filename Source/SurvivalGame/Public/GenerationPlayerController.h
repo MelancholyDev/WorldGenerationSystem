@@ -53,7 +53,10 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	int WaterLevel;
 	UPROPERTY(EditAnywhere)
 	float NoiseDensityTemperature;
-	float** MapNoise;
+	float** HeightMap;
+	float** HeatMap;
+	float** MoistureMap;
+	float** WaterMap;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
@@ -83,7 +86,6 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	float Clamp(float x, float left, float right);
-
 private:
-	void GenerateHeightMap();
+	void GenerateMaps();
 };
