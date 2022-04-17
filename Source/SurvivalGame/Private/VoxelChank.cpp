@@ -55,12 +55,17 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
-			float Shift = Map[XIndex][YIndex];
-			
-			//float Shift = 0;
+			float Shift;
+			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
+			{
+				Shift = Map[XIndex][YIndex];
+			}else
+			{
+				Shift=0;
+			}
 			Shift = Shift*NoiseScale;
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
-			int ShiftClamped = floor(Shift)*VoxelSize;
+			int ShiftClamped; 
+			ShiftClamped = floor(Shift)*VoxelSize;
 			FVector position(A, B, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 			InstanceTopGrass->AddInstance(transform);
@@ -160,4 +165,11 @@ void AVoxelChank::ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const
 {
 	const FVector Location = InstanceTopGrass->GetComponentLocation();
 	Z = Location.Z + ZIndex * VoxelSize;
+}
+
+bool AVoxelChank::CheckInBound(int Index,int Size)
+{
+	if((Index<Size) & (Index>=0))
+		return true;
+	return false;
 }
