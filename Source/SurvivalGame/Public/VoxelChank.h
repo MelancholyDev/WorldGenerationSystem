@@ -37,7 +37,7 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 	UInstancedStaticMeshComponent* InstanceSnow;
 	void ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const;
 	void ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const;
-	static float Clamp(float x, float left, float right);
+	bool CheckInBound(int Index,int Size);
 
 public:
 	AVoxelChank();

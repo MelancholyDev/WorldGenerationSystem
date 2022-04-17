@@ -1,6 +1,8 @@
 #include "VoxelChank.h"
 #include "BezierComputations.h"
 
+//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
+
 AVoxelChank::AVoxelChank()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -55,21 +57,20 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
-			float Shift = Map[XIndex][YIndex];
+			float Shift;
+			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
+			{
+				Shift = Map[XIndex][YIndex];
+			}else
+			{
+				Shift=0;
+			}
 			
-			//float Shift = 0;
 			Shift = Shift*NoiseScale;
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
 			int ShiftClamped = floor(Shift)*VoxelSize;
 			FVector position(A, B, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 			InstanceTopGrass->AddInstance(transform);
-			//float Noise2DSharp = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 4, 0.3, 5, NoiseDensity);
-			//Noise2DSharp = Clamp(Noise2DSharp, 0, 1);
-			//float Noise2DSmooth = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(A, B, 4, 0.3, 2, NoiseDensity);
-			//Noise2DSmooth = Clamp(Noise2DSmooth, 0, 1);
-			//float FinalNoise;
-			//float FinalNoise = Noise2DSmooth;
 			//float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
 			//	A, B, NoiseDensityTemperature);
 			// if (Temperature < 0.33)
@@ -160,4 +161,11 @@ void AVoxelChank::ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const
 {
 	const FVector Location = InstanceTopGrass->GetComponentLocation();
 	Z = Location.Z + ZIndex * VoxelSize;
+}
+
+bool AVoxelChank::CheckInBound(int Index,int Size)
+{
+	if((Index<Size) & (Index>=0))
+		return true;
+	return false;
 }
