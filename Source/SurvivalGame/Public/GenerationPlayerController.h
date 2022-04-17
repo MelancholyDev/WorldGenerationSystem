@@ -16,6 +16,13 @@ UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	int OctaveSharp;
+	UPROPERTY(EditAnywhere)
+	int OctaveSmooth;
+	UPROPERTY(EditAnywhere)
+	bool ZeroToOne;
 	UPROPERTY(EditAnywhere)
 	float Lacunarity;
 	UPROPERTY(EditAnywhere)

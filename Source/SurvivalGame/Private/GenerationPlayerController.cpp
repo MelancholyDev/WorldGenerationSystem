@@ -282,9 +282,9 @@ void AGenerationPlayerController::GenerateHeightMap()
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, Lacunarity, Persistance, 6, NoiseDensity);
+				i, -j, Lacunarity, Persistance, OctaveSharp, NoiseDensity,ZeroToOne);
 			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, Lacunarity, Persistance, 1, NoiseDensity);
+				i, -j, Lacunarity, Persistance, OctaveSmooth, NoiseDensity,ZeroToOne);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
 			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, Biom);
@@ -296,7 +296,7 @@ void AGenerationPlayerController::GenerateHeightMap()
 
 float AGenerationPlayerController::Clamp(float x, float left, float right)
 {
-	if (x < left)
+	if (x <left)
 	{
 		return -x;
 	}
