@@ -20,7 +20,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize,MapNoise);
+	Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -224,7 +224,9 @@ void AGenerationPlayerController::BeginPlay()
 		for (int j = RenderRange * -1; j <= RenderRange; j++)
 		{
 			FIntVector Vector = GetPlayerChunkCoordinates();
-			AVoxelChank* chunk = SpawnChunk((Vector.X + i) * ChunkLength, (Vector.Y + j) * ChunkLength, 0);
+			int XCoord=(Vector.X + i) * ChunkLength;
+			int YCoord=(Vector.Y + j) * ChunkLength;
+			AVoxelChank* chunk = SpawnChunk(XCoord, YCoord, 0);
 			(*Map)[i + RenderRange].Voxels.Add(chunk);
 		}
 	}
@@ -254,6 +256,9 @@ void AGenerationPlayerController::Tick(float DeltaSeconds)
 
 void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 {
+	if (Multiplier % 2 == 0)
+		Multiplier += 1;
+	MapSize = ChunkSize * Multiplier;
 	ChunkSpawnParameters = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
@@ -274,10 +279,12 @@ void AGenerationPlayerController::GenerateHeightMap()
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,Lacunarity,Persistance,6,NoiseDensity);
-			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,Lacunarity,Persistance,1,NoiseDensity);
-			SmoothNoise = Clamp(SmoothNoise, 0,1);
-			SharpNoise = Clamp(SharpNoise, 0,1);
+			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+				i, -j, Lacunarity, Persistance, 6, NoiseDensity);
+			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+				i, -j, Lacunarity, Persistance, 1, NoiseDensity);
+			SmoothNoise = Clamp(SmoothNoise, 0, 1);
+			SharpNoise = Clamp(SharpNoise, 0, 1);
 			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, Biom);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;

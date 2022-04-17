@@ -21,6 +21,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	float Persistance;
 	UPROPERTY(EditAnywhere)
+	int Multiplier;
 	int MapSize;
 	UPROPERTY(EditAnywhere)
 	float ChunkSize;

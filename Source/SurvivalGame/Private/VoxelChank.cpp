@@ -55,6 +55,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int B;
 			int IndexShift = MapSize / 2;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
+			if((Transform.GetLocation().X==0) && (Transform.GetLocation().Y==1100))
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d %d"),A,B));
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
 			float Shift;
@@ -68,7 +70,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			
 			Shift = Shift*NoiseScale;
 			int ShiftClamped = floor(Shift)*VoxelSize;
-			FVector position(A, B, ShiftClamped);
+			FVector position(LoopX*VoxelSize, LoopY*VoxelSize, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 			InstanceTopGrass->AddInstance(transform);
 			//float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
