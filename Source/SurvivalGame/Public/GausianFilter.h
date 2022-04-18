@@ -3,6 +3,5 @@
 class GausianFilter
 {
 public:
-	void CreateKernel(float**,int Size,float Sigma);
-	
+	void CreateKernel(float** Kernel,int Size,float Sigma);
 };

@@ -22,7 +22,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
 	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"),MapSize));
-	Chunk->InitializeParameters(VoxelSize,NoiseScale,ChunkSize,Depth,MapSize,HeightMap,HeatMap);
+	Chunk->InitializeParameters(VoxelSize,HeightNoiseScale,ChunkSize,Depth,MapSize,HeightMap,HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -130,6 +130,29 @@ void AGenerationPlayerController::DeleteColumn(int Index)
 		Line->Voxels.RemoveAt(Index);
 		DeleteChunk->Destroy();
 	}
+}
+
+void AGenerationPlayerController::InitializeParameters()
+{
+	OctaveSharp=HeightParameters.OctaveSharp;
+	OctaveSmooth=HeightParameters.OctaveSmooth;
+	HeightZeroToOne=HeightParameters.ZeroToOne;
+	HeightLacunarity=HeightParameters.Lacunarity;
+	HeightPersistance=HeightParameters.Persistance;
+	Multiplier=HeightParameters.Multiplier;
+	ChunkSize=HeightParameters.ChunkSize;
+	RenderRange=HeightParameters.RenderRange;
+	Depth=HeightParameters.Depth;
+	HeightNoiseDensity=HeightParameters.NoiseDensity;
+	HeightNoiseScale=HeightParameters.NoiseScale;
+	Biom=HeightParameters.Biom;
+	VoxelSize=HeightParameters.VoxelSize;
+	NoiseDensity3D=HeightParameters.NoiseDensity3D;
+	Threshold3D=HeightParameters.Threshold3D;
+	NoiseDensityTemperature=TemperatureParameters.NoiseDensity;
+	TemperatureZeroToOne=TemperatureParameters.ZeroToOne;
+	TemperatureLacunarity = TemperatureParameters.Lacunarity;
+	PersistenceTemperature = TemperatureParameters.Persistence;
 }
 
 void AGenerationPlayerController::GetFullSize()
@@ -261,7 +284,7 @@ void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
 	MapSize = (ChunkSize*2+1) * Multiplier;
-	ChunkSpawnParameters = new FActorSpawnParameters();
+	ChunkRenderLines = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
 	for (int i = RenderRange * -1; i <= RenderRange; i++)
 	{
@@ -289,9 +312,9 @@ void AGenerationPlayerController::GenerateMaps()
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, Lacunarity, Persistance, OctaveSharp, NoiseDensity,ZeroToOne);
+				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity,HeightZeroToOne);
 			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, Lacunarity, Persistance, OctaveSmooth, NoiseDensity,ZeroToOne);
+				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity,HeightZeroToOne);
 			float HeatNoise = USimplexNoiseBPLibrary::SimplexNoise2D(i,-j,NoiseDensityTemperature);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
