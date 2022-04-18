@@ -21,8 +21,8 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
-	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"),MapSize));
-	Chunk->InitializeParameters(VoxelSize,HeightNoiseScale,ChunkSize,Depth,MapSize,HeightMap,HeatMap);
+	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"), MapSize));
+	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth, MapSize, HeightMap, HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -134,25 +134,34 @@ void AGenerationPlayerController::DeleteColumn(int Index)
 
 void AGenerationPlayerController::InitializeParameters()
 {
-	OctaveSharp=HeightParameters.OctaveSharp;
-	OctaveSmooth=HeightParameters.OctaveSmooth;
-	HeightZeroToOne=HeightParameters.ZeroToOne;
-	HeightLacunarity=HeightParameters.Lacunarity;
-	HeightPersistance=HeightParameters.Persistance;
-	Multiplier=HeightParameters.Multiplier;
-	ChunkSize=HeightParameters.ChunkSize;
-	RenderRange=HeightParameters.RenderRange;
-	Depth=HeightParameters.Depth;
-	HeightNoiseDensity=HeightParameters.NoiseDensity;
-	HeightNoiseScale=HeightParameters.NoiseScale;
-	Biom=HeightParameters.Biom;
-	VoxelSize=HeightParameters.VoxelSize;
-	NoiseDensity3D=HeightParameters.NoiseDensity3D;
-	Threshold3D=HeightParameters.Threshold3D;
-	NoiseDensityTemperature=TemperatureParameters.NoiseDensity;
-	TemperatureZeroToOne=TemperatureParameters.ZeroToOne;
+	OctaveSharp = HeightParameters.OctaveSharp;
+	OctaveSmooth = HeightParameters.OctaveSmooth;
+	HeightZeroToOne = HeightParameters.ZeroToOne;
+	HeightLacunarity = HeightParameters.Lacunarity;
+	HeightPersistance = HeightParameters.Persistance;
+	Multiplier = HeightParameters.Multiplier;
+	ChunkSize = HeightParameters.ChunkSize;
+	RenderRange = HeightParameters.RenderRange;
+	Depth = HeightParameters.Depth;
+	HeightNoiseDensity = HeightParameters.NoiseDensity;
+	HeightNoiseScale = HeightParameters.NoiseScale;
+	Biom = HeightParameters.Biom;
+	VoxelSize = HeightParameters.VoxelSize;
+	NoiseDensity3D = HeightParameters.NoiseDensity3D;
+	Threshold3D = HeightParameters.Threshold3D;
+	NoiseDensityTemperature = TemperatureParameters.NoiseDensity;
+	TemperatureZeroToOne = TemperatureParameters.ZeroToOne;
 	TemperatureLacunarity = TemperatureParameters.Lacunarity;
 	PersistenceTemperature = TemperatureParameters.Persistence;
+	if (Multiplier % 2 == 0)
+		Multiplier += 1;
+	MapSize = (ChunkSize * 2 + 1) * Multiplier;
+	ChunkRenderLines = new FActorSpawnParameters();
+	Map = new TArray<FVoxelLine>();
+	for (int i = RenderRange * -1; i <= RenderRange; i++)
+	{
+		Map->Add(FVoxelLine());
+	}
 }
 
 void AGenerationPlayerController::GetFullSize()
@@ -241,6 +250,7 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 
 void AGenerationPlayerController::BeginPlay()
 {
+	InitializeParameters();
 	GenerateMaps();
 	ChunkLength = ChunkSize * VoxelSize * 2 + VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
@@ -249,8 +259,8 @@ void AGenerationPlayerController::BeginPlay()
 		for (int j = RenderRange * -1; j <= RenderRange; j++)
 		{
 			FIntVector Vector = GetPlayerChunkCoordinates();
-			int XCoord=(Vector.X + i) * ChunkLength;
-			int YCoord=(Vector.Y + j) * ChunkLength;
+			int XCoord = (Vector.X + i) * ChunkLength;
+			int YCoord = (Vector.Y + j) * ChunkLength;
 			AVoxelChank* chunk = SpawnChunk(XCoord, YCoord, 0);
 			(*Map)[i + RenderRange].Voxels.Add(chunk);
 		}
@@ -279,18 +289,6 @@ void AGenerationPlayerController::Tick(float DeltaSeconds)
 	OldCoordinates = CurrentCoordinates;
 }
 
-void AGenerationPlayerController::OnConstruction(const FTransform& Transform)
-{
-	if (Multiplier % 2 == 0)
-		Multiplier += 1;
-	MapSize = (ChunkSize*2+1) * Multiplier;
-	ChunkRenderLines = new FActorSpawnParameters();
-	Map = new TArray<FVoxelLine>();
-	for (int i = RenderRange * -1; i <= RenderRange; i++)
-	{
-		Map->Add(FVoxelLine());
-	}
-}
 
 void AGenerationPlayerController::GenerateMaps()
 {
@@ -302,38 +300,75 @@ void AGenerationPlayerController::GenerateMaps()
 	const int RightBorder = -LeftBorder;
 	for (int i = LeftBorder; i <= RightBorder; i++)
 	{
-		int Index=i+ RightBorder;
-		HeatMap[Index]=new float[MapSize];
+		int Index = i + RightBorder;
+		HeatMap[Index] = new float[MapSize];
 		HeightMap[Index] = new float[MapSize];
 		WaterMap[Index] = new float[MapSize];
 		MoistureMap[Index] = new float[MapSize];
 	}
+	GenerateHeatMap(LeftBorder, RightBorder);
+	GenerateHeightMap(LeftBorder, RightBorder);
+}
+
+void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
+{
+	USimplexNoiseBPLibrary::setNoiseSeed(16);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
+			const int XIndex = i + RightBorder;
+			const int YIndex = j + RightBorder;
 			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity,HeightZeroToOne);
+				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity, HeightZeroToOne);
 			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity,HeightZeroToOne);
-			float HeatNoise = USimplexNoiseBPLibrary::SimplexNoise2D(i,-j,NoiseDensityTemperature);
+				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity, HeightZeroToOne);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
-			HeatNoise = Clamp(HeatNoise,0,1);
-			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, Biom);
+			TEnumAsByte<EBiomType> CurrentBiom = (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
+			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
+			HeightMap[XIndex][YIndex] = FinalNoise;
+		}
+}
+
+void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorder)
+{
+	USimplexNoiseBPLibrary::setNoiseSeed(21);
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
+		{
+			float HeatNoise = USimplexNoiseBPLibrary::SimplexNoise2D(i, -j, NoiseDensityTemperature);
+			HeatNoise = Clamp(HeatNoise, 0, 1);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
 			HeatMap[XIndex][YIndex] = HeatNoise;
-			HeightMap[XIndex][YIndex] = FinalNoise;
 		}
 }
 
 float AGenerationPlayerController::Clamp(float x, float left, float right)
 {
-	if (x <left)
+	if (x < left)
 	{
 		return -x;
 	}
 	if (x > right)
 		return right;
 	return x;
+}
+
+uint8 AGenerationPlayerController::GetBiom(float Noise)
+{
+	uint8 bytes;
+	if (Noise < 0.33)
+	{
+		bytes = (uint8)TUNDRA;
+	}
+	else if ((Noise >= 0.33) & (Noise < 0.66))
+	{
+		bytes = (uint8)TROPICAL_WOODLAND;
+	}
+	else
+	{
+		bytes = (uint8)DESERT;
+	}
+	return bytes;
 }

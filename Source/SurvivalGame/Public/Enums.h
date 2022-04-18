@@ -2,7 +2,7 @@
 
 
 UENUM()
-enum BiomType
+enum EBiomType
 {
 	DESERT   UMETA(DisplayName = "Desert"),
 	SAVANNA      UMETA(DisplayName = "Savanna"),

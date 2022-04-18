@@ -30,7 +30,7 @@ Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A
 	return Result;
 }
 
-float BezierComputations::FilterMap(float HeightMap, float SmoothMap, BiomType Biom)
+float BezierComputations::FilterMap(float HeightMap, float SmoothMap, EBiomType Biom)
 {
 	float Y = 0;
 	switch (Biom)

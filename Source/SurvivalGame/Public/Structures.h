@@ -56,7 +56,7 @@ struct FHeightParameters{
 	UPROPERTY(EditAnywhere)
 	int NoiseScale;
 	UPROPERTY(EditAnywhere)
-	TEnumAsByte<BiomType> Biom;
+	TEnumAsByte<EBiomType> Biom;
 	UPROPERTY(EditAnywhere)
 	int VoxelSize;
 	UPROPERTY(EditAnywhere)

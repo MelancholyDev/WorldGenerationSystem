@@ -9,7 +9,7 @@ class BezierComputations
 public:
 	static float BezierLut(float X1,float Y1,float X2,float Y2,float A,float X);
 	static Point Bezier(float X1, float Y1, float X2, float Y2, float A, float T);
-	static float FilterMap(float HeightMap,float SmoothMap,BiomType Biom);
+	static float FilterMap(float HeightMap,float SmoothMap,EBiomType Biom);
 };
 
 

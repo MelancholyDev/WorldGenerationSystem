@@ -30,7 +30,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	int Depth;
 	float HeightNoiseDensity;
 	float HeightNoiseScale;
-	TEnumAsByte<BiomType> Biom;;
+	TEnumAsByte<EBiomType> Biom;;
 	float VoxelSize;
 	float NoiseDensity3D;
 	float Threshold3D;
@@ -42,7 +42,6 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	bool TemperatureZeroToOne;
 	
 	FIntVector OldCoordinates;
-	TSubclassOf<AVoxelChank> ToSpawn;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
 	float** HeightMap;
@@ -54,11 +53,13 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FHeightParameters HeightParameters;
 	UPROPERTY(EditAnywhere)
 	FTemperatureParameters TemperatureParameters;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AVoxelChank> ToSpawn;
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void OnConstruction(const FTransform& Transform) override;
 private:
+	uint8 GetBiom(float Noise);
 	float Clamp(float x, float left, float right);
 	void GetFullSize();
 	void XShift(int X);
@@ -71,6 +72,8 @@ private:
 	void DeleteColumn(int Index);
 	void InitializeParameters();
 	void GenerateMaps();
+	void GenerateHeightMap(int LeftBorder, int RightBorder);
+	void GenerateHeatMap(int LeftBorder, int RightBorder);
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
 };
