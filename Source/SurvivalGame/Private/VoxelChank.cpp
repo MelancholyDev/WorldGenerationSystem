@@ -1,5 +1,6 @@
 #include "VoxelChank.h"
 #include "BezierComputations.h"
+#include "SimplexNoise/SimplexNoiseBPLibrary.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
 
@@ -41,12 +42,21 @@ AVoxelChank::AVoxelChank()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Sand(
 		TEXT("StaticMesh'/Game/SurvivalGeneration/Models/Meshes/Sand.Sand'"));
 	InstanceSand->SetStaticMesh(Sand.Object);
+
+	InstanceStone = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstanceStone"));
+	InstanceStone->SetMobility(EComponentMobility::Static);
+	InstanceStone->SetupAttachment(Root);
+	InstanceStone->SetRelativeLocation(FVector(0, 0, 0));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>Stone(
+		TEXT("StaticMesh'/Game/SurvivalGeneration/Models/Meshes/Stone.Stone'"));
+	InstanceStone->SetStaticMesh(Stone.Object);
 }
 
 void AVoxelChank::OnConstruction(const FTransform& Transform)
 {
 	InstanceTopGrass->ClearInstances();
 	InstanceDirt->ClearInstances();
+	InstanceStone->ClearInstances();
 	for (int LoopX = ChunkSize * -1; LoopX <= ChunkSize; LoopX++)
 	{
 		for (int LoopY = ChunkSize * -1; LoopY <= ChunkSize; LoopY++)
@@ -55,8 +65,6 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int B;
 			int IndexShift = MapSize / 2;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-			//if((Transform.GetLocation().X==0) && (Transform.GetLocation().Y==1100))
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d %d"),A,B));
 			int XIndex = A / VoxelSize + IndexShift;
 			int YIndex = B / VoxelSize + IndexShift;
 			float HeightNoise;
@@ -73,7 +81,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			}
 			
 			HeightNoise = HeightNoise*NoiseScale;
-			int ShiftClamped = floor(HeightNoise)*VoxelSize;
+			int FloorNoise=floor(HeightNoise);
+			int ShiftClamped = FloorNoise*VoxelSize;
 			FVector position(LoopX*VoxelSize, LoopY*VoxelSize, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 			if(HeatNoise<0.33)
@@ -86,6 +95,22 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			{
 				InstanceSand->AddInstance(transform);
 			}
+			// int DepthCount=-(FloorNoise-Depth);
+			// for(int i=-1;i>DepthCount;i--)
+			// {
+			// 	position.Z=ShiftClamped+(i*VoxelSize);
+			// 	//position.Z=ShiftClamped-200;
+			// 	int A1,B1,C1;
+			// 	ActorLocationVoxelWorldXY(LoopX,LoopY,A1,B1);
+			// 	ActorLocationVoxelWorldZ(i,C1);
+			// 	float Noise3D=USimplexNoiseBPLibrary::SimplexNoise3D(A1,B1,C1,0.0006);
+			// 	if((Noise3D>Threshold3D) || (i>-3) || ((i-1)==DepthCount))
+			// 	{
+			// 		transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+			// 		InstanceDirt->AddInstance(transform);
+			// 	}
+			//
+			// }
 			//float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
 			//	A, B, NoiseDensityTemperature);
 			// if (Temperature < 0.33)
@@ -154,7 +179,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AVoxelChank::InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,
+void AVoxelChank::InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,float Threshold3DParam,
                                        int MapSizeParam, float** MapParam,float** HeatParam)
 {
 	VoxelSize = VoxelSizeParam;
@@ -163,7 +188,9 @@ void AVoxelChank::InitializeParameters(float VoxelSizeParam, int NoiseScaleParam
 	Depth = DepthParam;
 	MapSize = MapSizeParam;
 	HeightMap = MapParam;
-	HeatMap = HeatParam; 
+	HeatMap = HeatParam;
+	Threshold3D=Threshold3DParam;
+	
 }
 
 void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const

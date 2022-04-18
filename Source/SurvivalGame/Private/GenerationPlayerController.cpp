@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Math/IntVector.h"
 #include "Enums.h"
+#include "GausianFilter.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -22,7 +23,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
 	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"), MapSize));
-	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth, MapSize, HeightMap, HeatMap);
+	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth,Threshold3D, MapSize, HeightMap, HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -296,6 +297,7 @@ void AGenerationPlayerController::GenerateMaps()
 	HeatMap = new float*[MapSize];
 	WaterMap = new float*[MapSize];
 	MoistureMap = new float*[MapSize];
+	GausianKernel = new float*[MapSize];
 	const int LeftBorder = -(MapSize - 1) / 2;
 	const int RightBorder = -LeftBorder;
 	for (int i = LeftBorder; i <= RightBorder; i++)
@@ -305,6 +307,7 @@ void AGenerationPlayerController::GenerateMaps()
 		HeightMap[Index] = new float[MapSize];
 		WaterMap[Index] = new float[MapSize];
 		MoistureMap[Index] = new float[MapSize];
+		GausianKernel[Index] = new float[MapSize];
 	}
 	GenerateHeatMap(LeftBorder, RightBorder);
 	GenerateHeightMap(LeftBorder, RightBorder);
@@ -324,7 +327,15 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity, HeightZeroToOne);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
-			TEnumAsByte<EBiomType> CurrentBiom = (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
+			TEnumAsByte<EBiomType> CurrentBiom;
+			if(isTest)
+			{
+				CurrentBiom= (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
+			}else
+			{
+				CurrentBiom=Biom;
+			}
+			
 			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
 			HeightMap[XIndex][YIndex] = FinalNoise;
 		}
@@ -342,6 +353,11 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 			const int YIndex = j + RightBorder;
 			HeatMap[XIndex][YIndex] = HeatNoise;
 		}
+}
+
+void AGenerationPlayerController::GenerateGausianKernel()
+{
+	GausianFilter::CreateKernel(GausianKernel,MapSize,16);
 }
 
 float AGenerationPlayerController::Clamp(float x, float left, float right)

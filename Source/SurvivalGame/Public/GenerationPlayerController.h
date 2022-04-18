@@ -44,10 +44,12 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
+	
 	float** HeightMap;
 	float** HeatMap;
 	float** MoistureMap;
 	float** WaterMap;
+	float** GausianKernel;
 	
 	UPROPERTY(EditAnywhere)
 	FHeightParameters HeightParameters;
@@ -55,6 +57,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FTemperatureParameters TemperatureParameters;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;
+	UPROPERTY(EditAnywhere)
+	bool isTest;
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -71,9 +75,12 @@ private:
 	void AppendColumn(int Index, bool isLeft);
 	void DeleteColumn(int Index);
 	void InitializeParameters();
+	
 	void GenerateMaps();
 	void GenerateHeightMap(int LeftBorder, int RightBorder);
 	void GenerateHeatMap(int LeftBorder, int RightBorder);
+	void GenerateGausianKernel();
+	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
 };
