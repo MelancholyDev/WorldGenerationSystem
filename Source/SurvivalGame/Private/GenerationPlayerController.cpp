@@ -336,7 +336,8 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 				CurrentBiom=Biom;
 			}
 			
-			const float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
+			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
+			//FinalNoise = 1-FinalNoise;
 			HeightMap[XIndex][YIndex] = FinalNoise;
 		}
 }

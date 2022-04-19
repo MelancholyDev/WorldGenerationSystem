@@ -11,6 +11,8 @@ public class SurvivalGame : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {"SimplexNoise"});
+		
+		PrivateDependencyModuleNames.AddRange(new string[] {"NoiseBlueprintLibrary"});
 
 		//PublicIncludePaths.AddRange(new string[] {"SimplexNoise/Public"});
 

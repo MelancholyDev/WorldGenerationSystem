@@ -1,6 +1,5 @@
 #include "VoxelChank.h"
 #include "BezierComputations.h"
-#include "SimplexNoise/SimplexNoiseBPLibrary.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
 
