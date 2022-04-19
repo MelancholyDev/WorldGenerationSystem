@@ -21,22 +21,38 @@ void GausianFilter::CreateKernel(float** Kernel, int Size, float Sigma)
 			Kernel[i][j] /= Sum;
 }
 
-void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float** Kernel)
+void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float** Kernel,int KernelSize)
 {
-	for (int i = 1; i < MapSize - 1; i++)
-		for (int j = 1; j < MapSize - 1; j++)
+	float** PixelMap = new float*[KernelSize];
+	for(int i=0;i<KernelSize;i++)
+	{
+		PixelMap[i] = new float[KernelSize];
+	}
+	const int Border = (KernelSize-1)/2;
+	for (int i = Border; i < MapSize - Border; i++)
+		for (int j = Border; j < MapSize - Border; j++)
 		{
-			float LeftTop = Map[i - 1][j - 1] * Kernel[0][0];
-			float LeftCenter = Map[i][j - 1] * Kernel[1][0];
-			float LeftBottom = Map[i + 1][j - 1] * Kernel[2][0];
-			float CenterTop = Map[i - 1][j] * Kernel[0][1];
-			float Center = Map[i][j] * Kernel[1][1];
-			float CenterBottom = Map[i + 1][j] * Kernel[2][1];
-			float RightTop = Map[i - 1][j + 1] * Kernel[0][2];
-			float RightCenter = Map[i][j + 1] * Kernel[1][2];
-			float RightBottom = Map[i + 1][j + 1] * Kernel[2][2];
-			FinalMap[i][j] = (LeftTop + LeftCenter + LeftBottom + CenterBottom + CenterTop + CenterBottom + RightTop +
-				RightCenter + Center + RightBottom) / 9;
+			for(int k = 0;k<KernelSize;k++)
+			{
+				for(int l = 0;l<KernelSize;l++)
+				{
+					PixelMap[k][l] = Map[i+k-Border][j+l-Border]*Kernel[0][1];
+				}
+			}
+			float Sum = 0;
+			for(int k=0;k<KernelSize;k++)
+				for(int l=0;l<KernelSize;l++)
+					Sum+=PixelMap[k][l];
+			// Sum+=PixelMap[0][0];
+			// Sum+=PixelMap[0][1];
+			// Sum+=PixelMap[0][2];
+			// Sum+=PixelMap[1][0];
+			// Sum+=PixelMap[1][1];
+			// Sum+=PixelMap[1][2];
+			// 		Sum+=PixelMap[2][0];
+			// 		Sum+=PixelMap[2][1];
+			// 		Sum+=PixelMap[2][2];
+			FinalMap[i][j] = Sum / (KernelSize*KernelSize);
 		}
 }
 

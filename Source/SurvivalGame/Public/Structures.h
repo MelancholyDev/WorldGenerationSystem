@@ -64,4 +64,12 @@ struct FHeightParameters{
 	UPROPERTY(EditAnywhere)
 	float Threshold3D;
 };
+USTRUCT()
+struct FGausianParameters{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere)
+	int KernelSize;
+	UPROPERTY(EditAnywhere)
+	int Sigma;
+};
 

@@ -150,10 +150,14 @@ void AGenerationPlayerController::InitializeParameters()
 	VoxelSize = HeightParameters.VoxelSize;
 	NoiseDensity3D = HeightParameters.NoiseDensity3D;
 	Threshold3D = HeightParameters.Threshold3D;
+	
 	NoiseDensityTemperature = TemperatureParameters.NoiseDensity;
 	TemperatureZeroToOne = TemperatureParameters.ZeroToOne;
 	TemperatureLacunarity = TemperatureParameters.Lacunarity;
 	PersistenceTemperature = TemperatureParameters.Persistence;
+	OctaveTemperature = TemperatureParameters.Octaves;
+	KernelSize = GausianParameters.KernelSize;
+	Sigma = GausianParameters.Sigma;
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
 	MapSize = (ChunkSize * 2 + 1) * Multiplier;
@@ -316,10 +320,10 @@ void AGenerationPlayerController::GenerateMaps()
 void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
 {
 	USimplexNoiseBPLibrary::setNoiseSeed(16);
-	GausianKernel = new float*[3];
-	for (int i = 0; i < 3; i++)
+	GausianKernel = new float*[KernelSize];
+	for (int i = 0; i <KernelSize; i++)
 	{
-		GausianKernel[i] = new float[3];
+		GausianKernel[i] = new float[KernelSize];
 	}
 
 	float** TempHeightMap = new float*[MapSize];
@@ -328,7 +332,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 		TempHeightMap[i] = new float[MapSize];
 	}
 
-	GausianFilter::CreateKernel(GausianKernel, 3, 1);
+	GausianFilter::CreateKernel(GausianKernel, KernelSize, Sigma);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -373,7 +377,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			HeightMap[i][MapSize-1]=TempHeightMap[i][MapSize-1];
 		}
 	}
-	GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel);
+	GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel,KernelSize);
 }
 
 void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorder)
@@ -382,7 +386,8 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			float HeatNoise = USimplexNoiseBPLibrary::SimplexNoise2D(i, -j, NoiseDensityTemperature);
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),TemperatureLacunarity));
+			float HeatNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,TemperatureLacunarity,PersistenceTemperature,OctaveTemperature, NoiseDensityTemperature,TemperatureZeroToOne);
 			HeatNoise = Clamp(HeatNoise, 0, 1);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
@@ -390,10 +395,6 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 		}
 }
 
-void AGenerationPlayerController::GenerateGausianKernel()
-{
-	GausianFilter::CreateKernel(GausianKernel, MapSize, 16);
-}
 
 float AGenerationPlayerController::Clamp(float x, float left, float right)
 {

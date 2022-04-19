@@ -35,10 +35,14 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	float NoiseDensity3D;
 	float Threshold3D;
 	int WaterLevel;
+
+	int KernelSize;
+	int Sigma;
 	
 	float NoiseDensityTemperature;
 	float TemperatureLacunarity;
 	float PersistenceTemperature;
+	int OctaveTemperature;
 	bool TemperatureZeroToOne;
 	
 	FIntVector OldCoordinates;
@@ -50,7 +54,9 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	float** MoistureMap;
 	float** WaterMap;
 	float** GausianKernel;
-	
+
+	UPROPERTY(EditAnywhere)
+	FGausianParameters GausianParameters;
 	UPROPERTY(EditAnywhere)
 	FHeightParameters HeightParameters;
 	UPROPERTY(EditAnywhere)
@@ -80,7 +86,6 @@ private:
 	void GenerateMaps();
 	void GenerateHeightMap(int LeftBorder, int RightBorder);
 	void GenerateHeatMap(int LeftBorder, int RightBorder);
-	void GenerateGausianKernel();
 	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
