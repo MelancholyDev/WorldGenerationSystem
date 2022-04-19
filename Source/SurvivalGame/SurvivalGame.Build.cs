@@ -12,7 +12,6 @@ public class SurvivalGame : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {"SimplexNoise"});
 		
-		PrivateDependencyModuleNames.AddRange(new string[] {"NoiseBlueprintLibrary"});
 
 		//PublicIncludePaths.AddRange(new string[] {"SimplexNoise/Public"});
 

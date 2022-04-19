@@ -68,7 +68,6 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int YIndex = B / VoxelSize + IndexShift;
 			float HeightNoise;
 			float HeatNoise;
-			GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d %d %d"),XIndex,YIndex,MapSize));
 			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
 			{
 				HeightNoise = HeightMap[XIndex][YIndex];

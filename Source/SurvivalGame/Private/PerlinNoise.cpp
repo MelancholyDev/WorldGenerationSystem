@@ -1,4 +1,4 @@
-#include "PerlinNoise/PerlinNoiseBPLibrary.h"
+﻿#include "PerlinNoise.h"
 
 namespace
 {
@@ -170,7 +170,7 @@ namespace
 }   // namespace
 
 
-void UPerlinNoiseBPLibrary::OctavePerlinNoise1D(float& Out, float X,
+void PerlinNoise::OctavePerlinNoise1D(float& Out, float X,
                                                 int Octaves, float Persistence)
 {
     float ScaledX = ScaleToHashTblSize(X);
@@ -178,16 +178,16 @@ void UPerlinNoiseBPLibrary::OctavePerlinNoise1D(float& Out, float X,
     Out = Perlin(ScaledX, 0.0f, 0.0f, Octaves, Persistence);
 }
 
-float UPerlinNoiseBPLibrary::OctavePerlinNoise2D(float X, float Y,
+float PerlinNoise::OctavePerlinNoise2D(float X, float Y,
                                                 int Octaves, float Persistence)
 {
     float ScaledX = ScaleToHashTblSize(X);
     float ScaledY = ScaleToHashTblSize(Y);
-
+    float X1 =  Perlin(ScaledX, ScaledY, 0.0f, Octaves, Persistence);
     return  Perlin(ScaledX, ScaledY, 0.0f, Octaves, Persistence);
 }
 
-void UPerlinNoiseBPLibrary::OctavePerlinNoise3D(float& Out, float X, float Y, float Z,
+void PerlinNoise::OctavePerlinNoise3D(float& Out, float X, float Y, float Z,
                                                 int Octaves, float Persistence)
 {
     float ScaledX = ScaleToHashTblSize(X);
@@ -197,7 +197,7 @@ void UPerlinNoiseBPLibrary::OctavePerlinNoise3D(float& Out, float X, float Y, fl
     Out = Perlin(ScaledX, ScaledY, ScaledZ, Octaves, Persistence);
 }
 
-void UPerlinNoiseBPLibrary::PerlinNoise1D(float& Out, float X,
+void PerlinNoise::PerlinNoise1D(float& Out, float X,
                                           float Frequency, float Amplitude)
 {
     float ScaledX = ScaleToHashTblSize(X);
@@ -205,7 +205,7 @@ void UPerlinNoiseBPLibrary::PerlinNoise1D(float& Out, float X,
     Out = Perlin(ScaledX * Frequency, 0.0f, 0.0f) * Amplitude;
 }
 
-void UPerlinNoiseBPLibrary::PerlinNoise2D(float& Out, float X, float Y,
+void PerlinNoise::PerlinNoise2D(float& Out, float X, float Y,
                                           float Frequency, float Amplitude)
 {
     float ScaledX = ScaleToHashTblSize(X);
@@ -214,7 +214,7 @@ void UPerlinNoiseBPLibrary::PerlinNoise2D(float& Out, float X, float Y,
     Out = Perlin(ScaledX * Frequency, ScaledY * Frequency, 0.0f) * Amplitude;
 }
 
-void UPerlinNoiseBPLibrary::PerlinNoise3D(float& Out, float X, float Y, float Z,
+void PerlinNoise::PerlinNoise3D(float& Out, float X, float Y, float Z,
                                           float Frequency, float Amplitude)
 {
     float ScaledX = ScaleToHashTblSize(X);
@@ -224,7 +224,7 @@ void UPerlinNoiseBPLibrary::PerlinNoise3D(float& Out, float X, float Y, float Z,
     Out = Perlin(ScaledX * Frequency, ScaledY * Frequency, ScaledZ * Frequency) * Amplitude;
 }
 
-void UPerlinNoiseBPLibrary::AccumulatedPerlinNoise1D(float& Out,
+void PerlinNoise::AccumulatedPerlinNoise1D(float& Out,
                                                      const TArray<float>& Frequencies,
                                                      const TArray<float>& Amplitudes,
                                                      float X)
@@ -247,7 +247,7 @@ void UPerlinNoiseBPLibrary::AccumulatedPerlinNoise1D(float& Out,
     }
 }
 
-void UPerlinNoiseBPLibrary::AccumulatedPerlinNoise2D(float& Out,
+void PerlinNoise::AccumulatedPerlinNoise2D(float& Out,
                                                      const TArray<float>& Frequencies,
                                                      const TArray<float>& Amplitudes,
                                                      float X, float Y)
@@ -271,7 +271,7 @@ void UPerlinNoiseBPLibrary::AccumulatedPerlinNoise2D(float& Out,
     }
 }
 
-void UPerlinNoiseBPLibrary::AccumulatedPerlinNoise3D(float& Out,
+void PerlinNoise::AccumulatedPerlinNoise3D(float& Out,
                                                      const TArray<float>& Frequencies,
                                                      const TArray<float>& Amplitudes,
                                                      float X, float Y, float Z)

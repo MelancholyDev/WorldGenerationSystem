@@ -7,6 +7,7 @@
 #include "Math/IntVector.h"
 #include "Enums.h"
 #include "GausianFilter.h"
+#include "PerlinNoise.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -21,9 +22,8 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	//Chunk->InitializeParameters(VoxelSize, NoiseScale, ChunkSize, Depth, MapSize, MapNoise);
-	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("%d"), MapSize));
-	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth,Threshold3D, MapSize, HeightMap, HeatMap);
+	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth, Threshold3D, MapSize, HeightMap,
+	                            HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -316,30 +316,64 @@ void AGenerationPlayerController::GenerateMaps()
 void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
 {
 	USimplexNoiseBPLibrary::setNoiseSeed(16);
+	GausianKernel = new float*[3];
+	for (int i = 0; i < 3; i++)
+	{
+		GausianKernel[i] = new float[3];
+	}
+
+	float** TempHeightMap = new float*[MapSize];
+	for (int i = 0; i < MapSize; i++)
+	{
+		TempHeightMap[i] = new float[MapSize];
+	}
+
+	GausianFilter::CreateKernel(GausianKernel, 3, 1);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
-			float SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			float SharpNoise;
+			float SmoothNoise;
+			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity, HeightZeroToOne);
-			float SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity, HeightZeroToOne);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
 			TEnumAsByte<EBiomType> CurrentBiom;
-			if(isTest)
+			if (isTest)
 			{
-				CurrentBiom= (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
-			}else
-			{
-				CurrentBiom=Biom;
+				CurrentBiom = (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
 			}
-			
+			else
+			{
+				CurrentBiom = Biom;
+			}
+
 			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
-			//FinalNoise = 1-FinalNoise;
-			HeightMap[XIndex][YIndex] = FinalNoise;
+			if (CurrentBiom == TUNDRA)
+			{
+				FinalNoise = 1 - FinalNoise;
+			}
+
+			TempHeightMap[XIndex][YIndex] = FinalNoise;
 		}
+	for (int i = 0; i < MapSize; i++)
+	{
+		if ((i == 0) | (i + 1 == MapSize))
+			for (int j = 0; j < MapSize; j++)
+			{
+				HeightMap[i][j]=TempHeightMap[i][j];
+			}
+		else
+		{
+			HeightMap[i][0]=TempHeightMap[i][0];
+			HeightMap[i][MapSize-1]=TempHeightMap[i][MapSize-1];
+		}
+	}
+	GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel);
 }
 
 void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorder)
@@ -358,7 +392,7 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 
 void AGenerationPlayerController::GenerateGausianKernel()
 {
-	GausianFilter::CreateKernel(GausianKernel,MapSize,16);
+	GausianFilter::CreateKernel(GausianKernel, MapSize, 16);
 }
 
 float AGenerationPlayerController::Clamp(float x, float left, float right)
