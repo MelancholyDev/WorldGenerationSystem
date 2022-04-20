@@ -340,6 +340,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			const int YIndex = j + RightBorder;
 			float SharpNoise;
 			float SmoothNoise;
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),HeightPersistance));
 			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity, HeightZeroToOne);
 			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
@@ -357,12 +358,13 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			}
 
 			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
-			if (CurrentBiom == TUNDRA)
+			if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
+			if(true)
 			{
 				FinalNoise = 1 - FinalNoise;
 			}
 
-			TempHeightMap[XIndex][YIndex] = FinalNoise;
+			TempHeightMap[XIndex][YIndex] = Clamp(FinalNoise,0,1);
 		}
 	for (int i = 0; i < MapSize; i++)
 	{
@@ -377,7 +379,14 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			HeightMap[i][MapSize-1]=TempHeightMap[i][MapSize-1];
 		}
 	}
-	GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel,KernelSize);
+	if(GausianParameters.IsApplyGausianFilter)
+	{
+		GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel,KernelSize);
+	}else
+	{
+		HeightMap=TempHeightMap;
+	}
+	
 }
 
 void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorder)
@@ -401,6 +410,7 @@ float AGenerationPlayerController::Clamp(float x, float left, float right)
 	if (x < left)
 	{
 		return -x;
+		//return left;
 	}
 	if (x > right)
 		return right;

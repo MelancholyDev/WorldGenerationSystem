@@ -64,8 +64,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;
 	UPROPERTY(EditAnywhere)
-	
 	bool isTest;
+	
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

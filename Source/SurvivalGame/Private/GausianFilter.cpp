@@ -18,7 +18,18 @@ void GausianFilter::CreateKernel(float** Kernel, int Size, float Sigma)
 		}
 	for (int i = 0; i < Size; i++)
 		for (int j = 0; j < Size; j++)
+		{
 			Kernel[i][j] /= Sum;
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Kernel[i][j]));
+		}
+	
+}
+
+
+float GausianFilter::Gausian(float X, float Mu, float Sigma)
+{
+	const float A = (X - Mu) / Sigma;
+	return std::exp(-0.5 * A * A);
 }
 
 void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float** Kernel,int KernelSize)
@@ -43,22 +54,7 @@ void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float*
 			for(int k=0;k<KernelSize;k++)
 				for(int l=0;l<KernelSize;l++)
 					Sum+=PixelMap[k][l];
-			// Sum+=PixelMap[0][0];
-			// Sum+=PixelMap[0][1];
-			// Sum+=PixelMap[0][2];
-			// Sum+=PixelMap[1][0];
-			// Sum+=PixelMap[1][1];
-			// Sum+=PixelMap[1][2];
-			// 		Sum+=PixelMap[2][0];
-			// 		Sum+=PixelMap[2][1];
-			// 		Sum+=PixelMap[2][2];
 			FinalMap[i][j] = Sum / (KernelSize*KernelSize);
 		}
 }
 
-
-float GausianFilter::Gausian(float X, float Mu, float Sigma)
-{
-	const float A = (X - Mu) / Sigma;
-	return std::exp(-0.5 * A * A);
-}
