@@ -2,6 +2,7 @@
 #include "Point.h"
 #include "vector"
 #include "Enums.h"
+#include"Structures.h"
 
 using namespace std;
 class BezierComputations
@@ -9,7 +10,7 @@ class BezierComputations
 public:
 	static float BezierLut(float X1,float Y1,float X2,float Y2,float A,float X);
 	static Point Bezier(float X1, float Y1, float X2, float Y2, float A, float T);
-	static float FilterMap(float HeightMap,float SmoothMap,EBiomType Biom);
+	static float FilterMap(float HeightMap,float SmoothMap,FBiomData Biom);
 };
 
 

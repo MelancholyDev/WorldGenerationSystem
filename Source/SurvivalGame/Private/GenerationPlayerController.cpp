@@ -7,7 +7,6 @@
 #include "Math/IntVector.h"
 #include "Enums.h"
 #include "GausianFilter.h"
-#include "PerlinNoise.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -169,6 +168,19 @@ void AGenerationPlayerController::InitializeParameters()
 	}
 }
 
+void AGenerationPlayerController::InitializeBiomData()
+{
+	static ConstructorHelpers::FObjectFinder<UDataTable> BiomDatatable(TEXT("DataTable'/Game/SurvivalGeneration/Datasets/DT_Biome.DT_Biome'"));
+	DataTableBiome=BiomDatatable.Object;
+	TArray<FName> RowNames = DataTableBiome->GetRowNames();
+	FString EmptyString;
+	for ( auto& Name : RowNames )
+	{
+		FBiomData* Data= DataTableBiome->FindRow<FBiomData>(Name,EmptyString);
+		BiomDataSet.Add(Data->Type,Data);
+	}
+}
+
 void AGenerationPlayerController::GetFullSize()
 {
 	for (int i = 0; i <= RenderRange * 2; i++)
@@ -256,6 +268,7 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 void AGenerationPlayerController::BeginPlay()
 {
 	InitializeParameters();
+	InitializeBiomData();
 	GenerateMaps();
 	ChunkLength = ChunkSize * VoxelSize * 2 + VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
@@ -347,6 +360,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity, HeightZeroToOne);
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
+			
 			TEnumAsByte<EBiomType> CurrentBiom;
 			if (isTest)
 			{
@@ -357,7 +371,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 				CurrentBiom = Biom;
 			}
 
-			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
+			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, FBiomData());
 			if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
 			if(true)
 			{

@@ -83,57 +83,38 @@ struct FGausianParameters
 	int Sigma;
 };
 
-// USTRUCT()
-// struct FBiomData:public FTableRowBase
-// {
-// 	GENERATED_USTRUCT_BODY()
-// 	UPROPERTY(EditAnywhere)
-// 	int Max = 0;
-// 	UPROPERTY(EditAnywhere)
-// 	int Min = 1;
-// 	UPROPERTY(EditAnywhere)
-// 	float B;
-// 	UPROPERTY(EditAnywhere)
-// 	float A;
-// 	UPROPERTY(EditAnywhere)
-// 	float X1;
-// 	UPROPERTY(EditAnywhere)
-// 	float Y1;
-// 	UPROPERTY(EditAnywhere)
-// 	float X2;
-// 	UPROPERTY(EditAnywhere)
-// 	float Y2;
-// 	void CheckValue(int Number)
-// 	{
-// 		if (Number < Min)
-// 		{
-// 			Min = Number;
-// 		}
-// 		if (Number > Max)
-// 		{
-// 			Max = Number;
-// 		}
-// 	}
-// };
-
-USTRUCT()
-struct FBiomDataSet
+USTRUCT(BlueprintType)
+struct FBiomData : public FTableRowBase
 {
-	
-	GENERATED_BODY()
-//	TMap<EBiomType,FBiomData>;
-	// FBiomData()
-	// {
-	// 	Savannah=FHeightRange();
-	// 	TropicalWoodland=FHeightRange();
-	// 	Desert=FHeightRange();
-	// 	Tundra=FHeightRange();
-	// 	SeasonalForest=FHeightRange();
-	// 	RainForest=FHeightRange();
-	// 	TemperatureForest=FHeightRange();
-	// 	TemperatureRainForest=FHeightRange();
-	// 	Boreal=FHeightRange();
-	// }
-	
-	
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EBiomType> Type;
+	UPROPERTY(EditAnywhere)
+	int Max = 0;
+	UPROPERTY(EditAnywhere)
+	int Min = 1;
+	UPROPERTY(EditAnywhere)
+	float B;
+	UPROPERTY(EditAnywhere)
+	float A;
+	UPROPERTY(EditAnywhere)
+	float X1;
+	UPROPERTY(EditAnywhere)
+	float Y1;
+	UPROPERTY(EditAnywhere)
+	float X2;
+	UPROPERTY(EditAnywhere)
+	float Y2;
+
+	void CheckValue(int Number)
+	{
+		if (Number < Min)
+		{
+			Min = Number;
+		}
+		if (Number > Max)
+		{
+			Max = Number;
+		}
+	}
 };

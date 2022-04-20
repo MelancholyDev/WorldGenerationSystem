@@ -30,67 +30,11 @@ Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A
 	return Result;
 }
 
-float BezierComputations::FilterMap(float HeightMap, float SmoothMap, EBiomType Biom)
+float BezierComputations::FilterMap(float HeightMap, float SmoothMap,FBiomData Biom)
 {
-	float Y = 0;
-	switch (Biom)
-	{
-		case DESERT:
-			{
-				float B=0.5;
-				float X = B*HeightMap+(1-B)*SmoothMap;
-				Y = BezierLut(0.75, 0.2, 0.95, 0.2, 0.2, X);
-			}break;
-	case SAVANNA:
-		{
-			float B=0.2;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.5, 0.1, 0.95, 0.1, 0.1, X);
-		}break;
-	case TROPICAL_WOODLAND:
-		{
-			float B=0.75;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.33, 0.33, 0.95, 0.1, 0.1, X);
-		} break;
-	case TUNDRA:
-		{
-			float B=1;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.5, 1, 0.25, 1, 1, X);
-		} break;
-	case SEASONAL_FOREST:
-		{
-			float B=0.2;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.5, 0.25, 0.66, 1, 1, X);
-		} break;
-	case RAIN_FOREST:
-		{
-			float B=0.5;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
-		} break;
-	case TEMPERATE_FOREST:
-		{
-			float B=0.33;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
-		} break;
-	case TEMPERATE_RAINFOREST:
-		{
-			float B=0.33;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.75, 0.5, 0.4, 0.4, 0.33, X);
-		} break;
-	case BOREAL:
-		{
-			float B=0.1;
-			float X = B*HeightMap+(1-B)*SmoothMap;
-			Y = BezierLut(0.8, 0.1, 0.9, 0.05, 0.05, X);
-		} break;
-	default: ;
-	}
+	float B=Biom.B;
+	float X = B*HeightMap+(1-B)*SmoothMap;
+	float Y = BezierLut(Biom.X1, Biom.Y1, Biom.X2, Biom.Y2, Biom.A, X);
 	return Y;
 }
 int nearestNeighbourIndex(std::vector<float> &x, float &value)

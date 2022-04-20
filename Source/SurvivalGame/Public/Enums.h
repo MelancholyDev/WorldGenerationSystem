@@ -4,13 +4,13 @@
 UENUM()
 enum EBiomType
 {
-	DESERT   UMETA(DisplayName = "Desert"),
-	SAVANNA      UMETA(DisplayName = "Savanna"),
-	TROPICAL_WOODLAND   UMETA(DisplayName = "TropicalWoodland"),
-	TUNDRA   UMETA(DisplayName = "Tundra"),
-	SEASONAL_FOREST   UMETA(DisplayName = "SeasonalForest"),
-	RAIN_FOREST   UMETA(DisplayName = "RainForest"),
-	TEMPERATE_FOREST   UMETA(DisplayName = "TemperateForest"),
-	TEMPERATE_RAINFOREST   UMETA(DisplayName = "TemperateRainforest"),
-	BOREAL   UMETA(DisplayName = "Boreal"),
+	DESERT=0   UMETA(DisplayName = "Desert"),
+	SAVANNA=1      UMETA(DisplayName = "Savanna"),
+	TROPICAL_WOODLAND=2   UMETA(DisplayName = "TropicalWoodland"),
+	TUNDRA=3   UMETA(DisplayName = "Tundra"),
+	SEASONAL_FOREST=4   UMETA(DisplayName = "SeasonalForest"),
+	RAIN_FOREST=5   UMETA(DisplayName = "RainForest"),
+	TEMPERATE_FOREST=6   UMETA(DisplayName = "TemperateForest"),
+	TEMPERATE_RAINFOREST=7   UMETA(DisplayName = "TemperateRainforest"),
+	BOREAL=8   UMETA(DisplayName = "Boreal"),
 };

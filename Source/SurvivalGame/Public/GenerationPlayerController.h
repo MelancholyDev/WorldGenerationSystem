@@ -65,6 +65,10 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	TSubclassOf<AVoxelChank> ToSpawn;
 	UPROPERTY(EditAnywhere)
 	bool isTest;
+
+	TMap<EBiomType,FBiomData*> BiomDataSet;
+	UPROPERTY(EditAnywhere)
+	UDataTable* DataTableBiome;
 	
 public:
 	virtual void BeginPlay() override;
@@ -82,7 +86,7 @@ private:
 	void AppendColumn(int Index, bool isLeft);
 	void DeleteColumn(int Index);
 	void InitializeParameters();
-	
+	void InitializeBiomData();
 	void GenerateMaps();
 	void GenerateHeightMap(int LeftBorder, int RightBorder);
 	void GenerateHeatMap(int LeftBorder, int RightBorder);
