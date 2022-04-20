@@ -34,10 +34,4 @@ struct FHeightParameters
 	bool IsTest;
 	UPROPERTY(EditAnywhere)
 	int VoxelSize;
-	UPROPERTY(EditAnywhere)
-	bool IsAddDepth;
-	UPROPERTY(EditAnywhere)
-	float NoiseDensity3D;
-	UPROPERTY(EditAnywhere)
-	float Threshold3D;
 };

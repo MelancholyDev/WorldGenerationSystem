@@ -20,9 +20,9 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	FVoxelGenerationData Data;
-	Data.Initialize(HeightParameters.IsAddDepth,HeightParameters.VoxelSize, HeightParameters.NoiseScale,
-								HeightParameters.ChunkSize, HeightParameters.Depth,HeightParameters.NoiseDensity3D,
-								HeightParameters.Threshold3D, MapSize, HeightMap, HeatMap);
+	Data.Initialize(VoxelGenerationData.IsAddDepth,HeightParameters.VoxelSize, HeightParameters.NoiseScale,
+								HeightParameters.ChunkSize, HeightParameters.Depth,VoxelGenerationData.NoiseDensity3D,
+								VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap);
 	Chunk->InitializeParameters(Data);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
