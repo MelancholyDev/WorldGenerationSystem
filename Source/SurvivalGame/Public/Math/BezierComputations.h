@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "Point.h"
 #include "vector"
-#include "Enums.h"
-#include"Structures.h"
+#include"Structures/FBiomData.h"
 
 using namespace std;
 class BezierComputations

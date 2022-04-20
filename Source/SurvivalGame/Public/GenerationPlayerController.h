@@ -1,12 +1,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enums.h"
+#include "Enums/EBiomType.h"
 #include "VoxelChank.h"
 #include "GameFramework/PlayerController.h"
-#include "Structures.h"
+#include "Structures/FHeightParameters.h"
+#include "Structures/FTemperatureParameter.h"
+#include "Factories/CompositeDataTableFactory.h"
+#include "Structures/FBiomData.h"
+#include "Structures/FVoxelLine.h"
+#include "Structures/FGausianParameters.h"
+#include "Structures/FVoxelGeneraionData.h"
 #include "GenerationPlayerController.generated.h"
-
 
 UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
@@ -33,9 +38,9 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	FTemperatureParameters TemperatureParameters;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AVoxelChank> ToSpawn;
+	FVoxelGenerationData VoxelGenerationData;
 	UPROPERTY(EditAnywhere)
-	bool isTest;
+	TSubclassOf<AVoxelChank> ToSpawn;
 
 	TMap<EBiomType,FBiomData> BiomDataSet;
 	UPROPERTY(EditAnywhere)

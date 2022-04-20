@@ -1,4 +1,4 @@
-﻿#include "GausianFilter.h"
+﻿#include "Math/GausianFilter.h"
 
 #include <valarray>
 

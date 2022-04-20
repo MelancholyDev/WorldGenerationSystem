@@ -1,4 +1,4 @@
-﻿#include "BezierComputations.h"
+﻿#include "Math/BezierComputations.h"
 
 #include "Point.h"
 #include "vector"

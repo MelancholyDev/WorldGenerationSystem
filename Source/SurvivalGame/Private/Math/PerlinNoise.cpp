@@ -1,4 +1,4 @@
-﻿#include "PerlinNoise.h"
+﻿#include "Math/PerlinNoise.h"
 
 namespace
 {

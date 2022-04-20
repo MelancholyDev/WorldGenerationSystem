@@ -1,5 +1,6 @@
 #include "VoxelChank.h"
-#include "BezierComputations.h"
+#include "Math/BezierComputations.h"
+#include "SimplexNoiseBPLibrary.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
 
@@ -46,7 +47,7 @@ AVoxelChank::AVoxelChank()
 	InstanceStone->SetMobility(EComponentMobility::Static);
 	InstanceStone->SetupAttachment(Root);
 	InstanceStone->SetRelativeLocation(FVector(0, 0, 0));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>Stone(
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Stone(
 		TEXT("StaticMesh'/Game/SurvivalGeneration/Models/Meshes/Stone.Stone'"));
 	InstanceStone->SetStaticMesh(Stone.Object);
 }
@@ -56,157 +57,88 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	InstanceTopGrass->ClearInstances();
 	InstanceDirt->ClearInstances();
 	InstanceStone->ClearInstances();
-	for (int LoopX = ChunkSize * -1; LoopX <= ChunkSize; LoopX++)
+	for (int LoopX = Data.ChunkSize * -1; LoopX <= Data.ChunkSize; LoopX++)
 	{
-		for (int LoopY = ChunkSize * -1; LoopY <= ChunkSize; LoopY++)
+		for (int LoopY = Data.ChunkSize * -1; LoopY <= Data.ChunkSize; LoopY++)
 		{
 			int A;
 			int B;
-			int IndexShift = MapSize / 2;
+			int IndexShift = Data.MapSize / 2;
 			ActorLocationVoxelWorldXY(LoopX, LoopY, A, B);
-			int XIndex = A / VoxelSize + IndexShift;
-			int YIndex = B / VoxelSize + IndexShift;
+			int XIndex = A / Data.VoxelSize + IndexShift;
+			int YIndex = B / Data.VoxelSize + IndexShift;
 			float HeightNoise;
 			float HeatNoise;
-			if(CheckInBound(XIndex,MapSize) & CheckInBound(YIndex,MapSize))
+			if (CheckInBound(XIndex, Data.MapSize) & CheckInBound(YIndex, Data.MapSize))
 			{
-				HeightNoise = HeightMap[XIndex][YIndex];
-				HeatNoise = HeatMap[XIndex][YIndex];
-			}else
-			{
-				HeightNoise=0.1;
-				HeatNoise=0.1;
+				HeightNoise = Data.Map[XIndex][YIndex];
+				HeatNoise = Data.Heat[XIndex][YIndex];
 			}
-			
-			HeightNoise = HeightNoise*NoiseScale;
-			int FloorNoise=floor(HeightNoise);
-			int ShiftClamped = FloorNoise*VoxelSize;
-			FVector position(LoopX*VoxelSize, LoopY*VoxelSize, ShiftClamped);
+			else
+			{
+				HeightNoise = 0.1;
+				HeatNoise = 0.1;
+			}
+
+			HeightNoise = HeightNoise * Data.NoiseScale;
+			int FloorNoise = floor(HeightNoise);
+			int ShiftClamped = FloorNoise * Data.VoxelSize;
+			FVector position(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			if(HeatNoise<0.33)
+			if (HeatNoise < 0.33)
 			{
 				InstanceSnow->AddInstance(transform);
-			}else if((HeatNoise>=0.33) & (HeatNoise<0.66))
+			}
+			else if ((HeatNoise >= 0.33) & (HeatNoise < 0.66))
 			{
 				InstanceTopGrass->AddInstance(transform);
-			}else
+			}
+			else
 			{
 				InstanceSand->AddInstance(transform);
 			}
-			// int DepthCount=-(FloorNoise-Depth);
-			// for(int i=-1;i>DepthCount;i--)
-			// {
-			// 	position.Z=ShiftClamped+(i*VoxelSize);
-			// 	//position.Z=ShiftClamped-200;
-			// 	int A1,B1,C1;
-			// 	ActorLocationVoxelWorldXY(LoopX,LoopY,A1,B1);
-			// 	ActorLocationVoxelWorldZ(i,C1);
-			// 	float Noise3D=USimplexNoiseBPLibrary::SimplexNoise3D(A1,B1,C1,0.0006);
-			// 	if((Noise3D>Threshold3D) || (i>-3) || ((i-1)==DepthCount))
-			// 	{
-			// 		transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			// 		InstanceDirt->AddInstance(transform);
-			// 	}
-			//
-			// }
-			//float Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
-			//	A, B, NoiseDensityTemperature);
-			// if (Temperature < 0.33)
-			// {
-			// 	FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.5, 1, 0.25, 1, 1, 1);
-			// }
-			// else if ((Temperature >= 0.33) & (Temperature < 0.66))
-			// {
-			// 	FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
-			// }
-			// else
-			// {
-			// 	FinalNoise = BezierComputations::FilterMap(Noise2DSharp, Noise2DSmooth, 0.75, 0.5, 0.4, 0.4, 0.33, 0.2);
-			// }
-			// float NoiseShift2 = FinalNoise * NoiseScale;
-			// float Threshold3D = 0;
-			// float NoiseDensity3D = 0;
-			// int NoiseShift = NoiseShift2;
-			// int VoxelShift = VoxelSize;
-			// int CurrentLocation = NoiseShift * VoxelShift;
-			//float Noise = 
-			//for (int LoopZ = NoiseShift; LoopZ >= Depth; LoopZ--)
-			//for (int LoopZ = NoiseShift; LoopZ >= NoiseShift; LoopZ--)
-			//{
-			//FVector position(LoopX * VoxelSize, LoopY * VoxelSize, CurrentLocation);
-			//if ((LoopZ < NoiseShift-3) && (LoopZ != Depth))
-			// if (false)
-			// {
-			// 	float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
-			// 		A, B, CurrentLocation, NoiseDensity3D);
-			// 	if (!(Noise3D < Threshold3D))
-			// 	{
-			// 		FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			// 		InstanceDirt->AddInstance(transform);
-			// 	}
-			// }
-			// else
-			// {
-			// 	if (LoopZ == NoiseShift)
-			// 	{
-			// 		Temperature = USimplexNoiseBPLibrary::SimplexNoise2D(
-			// 			A, B, NoiseDensityTemperature);
-			// 		FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			// 		if (Temperature < 0.33)
-			// 		{
-			// 			InstanceSnow->AddInstance(transform);
-			// 		}
-			// 		else if ((Temperature >= 0.33) & (Temperature < 0.66))
-			// 		{
-			// 			InstanceTopGrass->AddInstance(transform);
-			// 		}
-			// 		else
-			// 		{
-			// 			InstanceSand->AddInstance(transform);
-			// 		}
-			// 	}
-			// 	else
-			// 	{
-			// 		FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			// 		InstanceDirt->AddInstance(transform);
-			// 	}
-			// }
-			// CurrentLocation -= VoxelShift;
-			//}
+			if (Data.IsAddDepth)
+			{
+				int DepthCount = -(FloorNoise - Data.Depth);
+				for (int i = -1; i > DepthCount; i--)
+				{
+					position.Z = ShiftClamped + i * Data.VoxelSize;
+					int A1, B1, C1;
+					ActorLocationVoxelWorldXY(LoopX, LoopY, A1, B1);
+					ActorLocationVoxelWorldZ(i, C1);
+					float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(A1, B1, C1, 0.0006);
+					if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
+					{
+						transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+						InstanceDirt->AddInstance(transform);
+					}
+				}
+			}
 		}
 	}
 }
 
-void AVoxelChank::InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,float Threshold3DParam,
-                                       int MapSizeParam, float** MapParam,float** HeatParam)
+void AVoxelChank::InitializeParameters(FVoxelGenerationData DataParam)
 {
-	VoxelSize = VoxelSizeParam;
-	NoiseScale = NoiseScaleParam;
-	ChunkSize = ChunkSizeParam;
-	Depth = DepthParam;
-	MapSize = MapSizeParam;
-	HeightMap = MapParam;
-	HeatMap = HeatParam;
-	Threshold3D=Threshold3DParam;
-	
+	Data = DataParam;
 }
 
 void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const
 {
 	const FVector Location = InstanceTopGrass->GetComponentLocation();
-	X = Location.X + XIndex * VoxelSize;
-	Y = Location.Y + YIndex * VoxelSize;
+	X = Location.X + XIndex * Data.VoxelSize;
+	Y = Location.Y + YIndex * Data.VoxelSize;
 }
 
 void AVoxelChank::ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const
 {
 	const FVector Location = InstanceTopGrass->GetComponentLocation();
-	Z = Location.Z + ZIndex * VoxelSize;
+	Z = Location.Z + ZIndex * Data.VoxelSize;
 }
 
-bool AVoxelChank::CheckInBound(int Index,int Size)
+bool AVoxelChank::CheckInBound(int Index, int Size)
 {
-	if((Index<Size) & (Index>=0))
+	if ((Index < Size) & (Index >= 0))
 		return true;
 	return false;
 }

@@ -1,9 +1,10 @@
 #include "GenerationPlayerController.h"
 #include <string>
-#include "BezierComputations.h"
+#include "Math/BezierComputations.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/IntVector.h"
-#include "GausianFilter.h"
+#include "Math/GausianFilter.h"
+#include "SimplexNoiseBPLibrary.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -18,9 +19,11 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	Chunk->InitializeParameters(HeightParameters.VoxelSize, HeightParameters.NoiseScale,
-	                            HeightParameters.ChunkSize, HeightParameters.Depth,
-	                            HeightParameters.Threshold3D, MapSize, HeightMap, HeatMap);
+	FVoxelGenerationData Data;
+	Data.Initialize(HeightParameters.IsAddDepth,HeightParameters.VoxelSize, HeightParameters.NoiseScale,
+								HeightParameters.ChunkSize, HeightParameters.Depth,HeightParameters.NoiseDensity3D,
+								HeightParameters.Threshold3D, MapSize, HeightMap, HeatMap);
+	Chunk->InitializeParameters(Data);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -348,7 +351,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 
 			TEnumAsByte<EBiomType> CurrentBiom;
 			FBiomData* CurrentBiomData;
-			if (isTest)
+			if (HeightParameters.IsTest)
 			{
 				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
 			}

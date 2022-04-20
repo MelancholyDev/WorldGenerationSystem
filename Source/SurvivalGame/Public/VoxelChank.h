@@ -3,21 +3,14 @@
 #include "CoreMinimal.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
+#include "Structures/FVoxelGeneraionData.h"
 #include "VoxelChank.generated.h"
 
 UCLASS()
 class SURVIVALGAME_API AVoxelChank : public AActor
 {
 	GENERATED_BODY()
-
-	float VoxelSize;
-	int NoiseScale;
-	int ChunkSize;
-	int Depth;
-	int MapSize;
-	float Threshold3D;
-	float** HeightMap;
-	float** HeatMap;
+	FVoxelGenerationData Data;
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
@@ -31,6 +24,7 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 	UInstancedStaticMeshComponent* InstanceSand;
 	UPROPERTY(VisibleAnywhere)
 	UInstancedStaticMeshComponent* InstanceSnow;
+	
 	void ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const;
 	void ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const;
 	bool CheckInBound(int Index,int Size);
@@ -38,6 +32,5 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 public:
 	AVoxelChank();
 	virtual void OnConstruction(const FTransform& Transform) override;
-	void InitializeParameters(float VoxelSizeParam, int NoiseScaleParam, int ChunkSizeParam, int DepthParam,float Threshold3Dparam,
-	                          int MapSizeParam,float** MapParam,float** HeatParam);
+	void InitializeParameters(FVoxelGenerationData DataParam);
 };
