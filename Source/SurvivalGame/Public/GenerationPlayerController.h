@@ -1,14 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Enums.h"
 #include "VoxelChank.h"
 #include "GameFramework/PlayerController.h"
 #include "Structures.h"
-#include "Enums.h"
 #include "GenerationPlayerController.generated.h"
 
 
@@ -16,34 +12,9 @@ UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
-	int OctaveSharp;
-	int OctaveSmooth;
-	bool HeightZeroToOne;
-	float HeightLacunarity;
-	float HeightPersistance;
 	int Multiplier;
 	int MapSize;
-	float ChunkSize;
-	float ChunkLength;
-	int RenderRange;
-	int Depth;
-	float HeightNoiseDensity;
-	float HeightNoiseScale;
-	TEnumAsByte<EBiomType> Biom;;
-	float VoxelSize;
-	float NoiseDensity3D;
-	float Threshold3D;
-	int WaterLevel;
-
-	int KernelSize;
-	int Sigma;
-	
-	float NoiseDensityTemperature;
-	float TemperatureLacunarity;
-	float PersistenceTemperature;
-	int OctaveTemperature;
-	bool TemperatureZeroToOne;
+	int ChunkLength;
 	
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
@@ -66,7 +37,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	bool isTest;
 
-	TMap<EBiomType,FBiomData*> BiomDataSet;
+	TMap<EBiomType,FBiomData> BiomDataSet;
 	UPROPERTY(EditAnywhere)
 	UDataTable* DataTableBiome;
 	
@@ -74,8 +45,6 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 private:
-	uint8 GetBiom(float Noise);
-	float Clamp(float x, float left, float right);
 	void GetFullSize();
 	void XShift(int X);
 	void YShift(int Y);
@@ -85,8 +54,14 @@ private:
 	void AddColumn(bool isLeft);
 	void AppendColumn(int Index, bool isLeft);
 	void DeleteColumn(int Index);
+	
 	void InitializeParameters();
 	void InitializeBiomData();
+	void InitializeGausianKernel();
+
+	uint8 GetBiom(float Noise);
+	float Clamp(float x, float left, float right);
+	
 	void GenerateMaps();
 	void GenerateHeightMap(int LeftBorder, int RightBorder);
 	void GenerateHeatMap(int LeftBorder, int RightBorder);

@@ -1,11 +1,8 @@
 #include "GenerationPlayerController.h"
-
 #include <string>
-
 #include "BezierComputations.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/IntVector.h"
-#include "Enums.h"
 #include "GausianFilter.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
@@ -21,8 +18,9 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	const FTransform Transform = FTransform(Location);
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
-	Chunk->InitializeParameters(VoxelSize, HeightNoiseScale, ChunkSize, Depth, Threshold3D, MapSize, HeightMap,
-	                            HeatMap);
+	Chunk->InitializeParameters(HeightParameters.VoxelSize, HeightParameters.NoiseScale,
+	                            HeightParameters.ChunkSize, HeightParameters.Depth,
+	                            HeightParameters.Threshold3D, MapSize, HeightMap, HeatMap);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -45,9 +43,9 @@ void AGenerationPlayerController::DeleteLine(int Index)
 void AGenerationPlayerController::AddLine(bool IsForward)
 {
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
-	int Shift = IsForward ? RenderRange : -RenderRange;
+	int Shift = IsForward ? HeightParameters.RenderRange : -HeightParameters.RenderRange;
 	FVoxelLine Line = FVoxelLine();
-	for (int i = RenderRange * -1; i <= RenderRange; i++)
+	for (int i = HeightParameters.RenderRange * -1; i <= HeightParameters.RenderRange; i++)
 	{
 		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + Shift) * ChunkLength,
 		                                       (CurrentCoordinates.Y + i) * ChunkLength, 0);
@@ -55,7 +53,7 @@ void AGenerationPlayerController::AddLine(bool IsForward)
 	}
 	if (IsForward)
 	{
-		Map->Insert(Line, RenderRange * 2);
+		Map->Insert(Line, HeightParameters.RenderRange * 2);
 	}
 	else
 	{
@@ -66,10 +64,10 @@ void AGenerationPlayerController::AddLine(bool IsForward)
 void AGenerationPlayerController::AddColumn(bool isLeft)
 {
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
-	int Shift = isLeft ? -RenderRange : RenderRange;
-	for (int i = 0; i <= RenderRange * 2; i++)
+	int Shift = isLeft ? -HeightParameters.RenderRange : HeightParameters.RenderRange;
+	for (int i = 0; i <= HeightParameters.RenderRange * 2; i++)
 	{
-		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + i - RenderRange) * ChunkLength,
+		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + i - HeightParameters.RenderRange) * ChunkLength,
 		                                       (CurrentCoordinates.Y + Shift) * ChunkLength, 0);
 		FVoxelLine* Line = &(*Map)[i];
 		if (isLeft)
@@ -78,7 +76,7 @@ void AGenerationPlayerController::AddColumn(bool isLeft)
 		}
 		else
 		{
-			Line->Voxels.Insert(CreatedChunk, RenderRange * 2);
+			Line->Voxels.Insert(CreatedChunk, HeightParameters.RenderRange * 2);
 		}
 	}
 }
@@ -92,24 +90,25 @@ void AGenerationPlayerController::AppendColumn(int Index, bool isLeft)
 	if (Index == 0)
 	{
 		Start = 1;
-		Last = RenderRange * 2;
+		Last = HeightParameters.RenderRange * 2;
 		Increment = 1;
 		XShift = 0;
 	}
 	else
 	{
-		Start = RenderRange * 2 - 1;
+		Start = HeightParameters.RenderRange * 2 - 1;
 		Last = 0;
 		Increment = -1;
 		XShift = 0;
 	}
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
-	int Shift = isLeft ? -RenderRange : RenderRange;
+	int Shift = isLeft ? -HeightParameters.RenderRange : HeightParameters.RenderRange;
 	for (int i = Start; Index > 0 ? i >= Last : i <= Last; i += Increment)
 	{
 		FVoxelLine* Line = &(*Map)[i];
-		AVoxelChank* chunk = SpawnChunk((CurrentCoordinates.X + i - RenderRange + XShift) * ChunkLength,
-		                                (CurrentCoordinates.Y + Shift) * ChunkLength, 0);
+		AVoxelChank* chunk = SpawnChunk(
+			(CurrentCoordinates.X + i - HeightParameters.RenderRange + XShift) * ChunkLength,
+			(CurrentCoordinates.Y + Shift) * ChunkLength, 0);
 		if (isLeft)
 		{
 			Line->Voxels.Insert(chunk, 0);
@@ -134,35 +133,13 @@ void AGenerationPlayerController::DeleteColumn(int Index)
 
 void AGenerationPlayerController::InitializeParameters()
 {
-	OctaveSharp = HeightParameters.OctaveSharp;
-	OctaveSmooth = HeightParameters.OctaveSmooth;
-	HeightZeroToOne = HeightParameters.ZeroToOne;
-	HeightLacunarity = HeightParameters.Lacunarity;
-	HeightPersistance = HeightParameters.Persistance;
 	Multiplier = HeightParameters.Multiplier;
-	ChunkSize = HeightParameters.ChunkSize;
-	RenderRange = HeightParameters.RenderRange;
-	Depth = HeightParameters.Depth;
-	HeightNoiseDensity = HeightParameters.NoiseDensity;
-	HeightNoiseScale = HeightParameters.NoiseScale;
-	Biom = HeightParameters.Biom;
-	VoxelSize = HeightParameters.VoxelSize;
-	NoiseDensity3D = HeightParameters.NoiseDensity3D;
-	Threshold3D = HeightParameters.Threshold3D;
-	
-	NoiseDensityTemperature = TemperatureParameters.NoiseDensity;
-	TemperatureZeroToOne = TemperatureParameters.ZeroToOne;
-	TemperatureLacunarity = TemperatureParameters.Lacunarity;
-	PersistenceTemperature = TemperatureParameters.Persistence;
-	OctaveTemperature = TemperatureParameters.Octaves;
-	KernelSize = GausianParameters.KernelSize;
-	Sigma = GausianParameters.Sigma;
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
-	MapSize = (ChunkSize * 2 + 1) * Multiplier;
+	MapSize = (HeightParameters.ChunkSize * 2 + 1) * Multiplier;
 	ChunkRenderLines = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
-	for (int i = RenderRange * -1; i <= RenderRange; i++)
+	for (int i = HeightParameters.RenderRange * -1; i <= HeightParameters.RenderRange; i++)
 	{
 		Map->Add(FVoxelLine());
 	}
@@ -170,20 +147,27 @@ void AGenerationPlayerController::InitializeParameters()
 
 void AGenerationPlayerController::InitializeBiomData()
 {
-	static ConstructorHelpers::FObjectFinder<UDataTable> BiomDatatable(TEXT("DataTable'/Game/SurvivalGeneration/Datasets/DT_Biome.DT_Biome'"));
-	DataTableBiome=BiomDatatable.Object;
 	TArray<FName> RowNames = DataTableBiome->GetRowNames();
 	FString EmptyString;
-	for ( auto& Name : RowNames )
+	for (auto& Name : RowNames)
 	{
-		FBiomData* Data= DataTableBiome->FindRow<FBiomData>(Name,EmptyString);
-		BiomDataSet.Add(Data->Type,Data);
+		FBiomData Data = *DataTableBiome->FindRow<FBiomData>(Name, EmptyString);
+		BiomDataSet.Add(Data.Type, Data);
+	}
+}
+
+void AGenerationPlayerController::InitializeGausianKernel()
+{
+	GausianKernel = new float*[GausianParameters.KernelSize];
+	for (int i = 0; i < GausianParameters.KernelSize; i++)
+	{
+		GausianKernel[i] = new float[GausianParameters.KernelSize];
 	}
 }
 
 void AGenerationPlayerController::GetFullSize()
 {
-	for (int i = 0; i <= RenderRange * 2; i++)
+	for (int i = 0; i <= HeightParameters.RenderRange * 2; i++)
 	{
 		FVoxelLine* Line = &(*Map)[i];
 		FString a = FString::Printf(TEXT("%d %d"), Line->Voxels.Num(), i);
@@ -207,7 +191,7 @@ void AGenerationPlayerController::XShift(int X)
 	}
 	else
 	{
-		DeleteLine(RenderRange * 2);
+		DeleteLine(HeightParameters.RenderRange * 2);
 		AddLine(false);
 	}
 }
@@ -216,7 +200,7 @@ void AGenerationPlayerController::YShift(int Y)
 {
 	if (Y < 0)
 	{
-		DeleteColumn(RenderRange * 2);
+		DeleteColumn(HeightParameters.RenderRange * 2);
 		AddColumn(true);
 	}
 	else
@@ -236,29 +220,29 @@ void AGenerationPlayerController::Diagonal(int X, int Y)
 			DeleteLine(0);
 			DeleteColumn(0);
 			AddLine(true);
-			AppendColumn(RenderRange * 2, false);
+			AppendColumn(HeightParameters.RenderRange * 2, false);
 		}
 		else
 		{
 			DeleteLine(0);
-			DeleteColumn(RenderRange * 2);
+			DeleteColumn(HeightParameters.RenderRange * 2);
 			AddLine(true);
-			AppendColumn(RenderRange * 2, true);
+			AppendColumn(HeightParameters.RenderRange * 2, true);
 		}
 	}
 	else
 	{
 		if (Y > 0)
 		{
-			DeleteLine(RenderRange * 2);
+			DeleteLine(HeightParameters.RenderRange * 2);
 			DeleteColumn(0);
 			AddLine(false);
 			AppendColumn(0, false);
 		}
 		else
 		{
-			DeleteLine(RenderRange * 2);
-			DeleteColumn(RenderRange * 2);
+			DeleteLine(HeightParameters.RenderRange * 2);
+			DeleteColumn(HeightParameters.RenderRange * 2);
 			AddLine(false);
 			AppendColumn(0, true);
 		}
@@ -270,24 +254,24 @@ void AGenerationPlayerController::BeginPlay()
 	InitializeParameters();
 	InitializeBiomData();
 	GenerateMaps();
-	ChunkLength = ChunkSize * VoxelSize * 2 + VoxelSize;
+	ChunkLength = HeightParameters.ChunkSize * HeightParameters.VoxelSize * 2 + HeightParameters.VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
-	for (int i = RenderRange * -1; i <= RenderRange; i++)
+	for (int i = HeightParameters.RenderRange * -1; i <= HeightParameters.RenderRange; i++)
 	{
-		for (int j = RenderRange * -1; j <= RenderRange; j++)
+		for (int j = HeightParameters.RenderRange * -1; j <= HeightParameters.RenderRange; j++)
 		{
 			FIntVector Vector = GetPlayerChunkCoordinates();
 			int XCoord = (Vector.X + i) * ChunkLength;
 			int YCoord = (Vector.Y + j) * ChunkLength;
 			AVoxelChank* chunk = SpawnChunk(XCoord, YCoord, 0);
-			(*Map)[i + RenderRange].Voxels.Add(chunk);
+			(*Map)[i + HeightParameters.RenderRange].Voxels.Add(chunk);
 		}
 	}
 }
 
 void AGenerationPlayerController::Tick(float DeltaSeconds)
 {
-	std::string s = std::to_string(RenderRange);
+	std::string s = std::to_string(HeightParameters.RenderRange);
 	FString str = s.c_str();
 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
 	int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
@@ -315,8 +299,10 @@ void AGenerationPlayerController::GenerateMaps()
 	WaterMap = new float*[MapSize];
 	MoistureMap = new float*[MapSize];
 	GausianKernel = new float*[MapSize];
+
 	const int LeftBorder = -(MapSize - 1) / 2;
 	const int RightBorder = -LeftBorder;
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 	{
 		int Index = i + RightBorder;
@@ -333,19 +319,14 @@ void AGenerationPlayerController::GenerateMaps()
 void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
 {
 	USimplexNoiseBPLibrary::setNoiseSeed(16);
-	GausianKernel = new float*[KernelSize];
-	for (int i = 0; i <KernelSize; i++)
-	{
-		GausianKernel[i] = new float[KernelSize];
-	}
-
+	InitializeGausianKernel();
 	float** TempHeightMap = new float*[MapSize];
 	for (int i = 0; i < MapSize; i++)
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
 
-	GausianFilter::CreateKernel(GausianKernel, KernelSize, Sigma);
+	GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -353,54 +334,59 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			const int YIndex = j + RightBorder;
 			float SharpNoise;
 			float SmoothNoise;
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),HeightPersistance));
+
 			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightLacunarity, HeightPersistance, OctaveSharp, HeightNoiseDensity, HeightZeroToOne);
+				i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSharp,
+				HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
+
 			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightLacunarity, HeightPersistance, OctaveSmooth, HeightNoiseDensity, HeightZeroToOne);
+				i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSmooth,
+				HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
+
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
-			
+
 			TEnumAsByte<EBiomType> CurrentBiom;
+			FBiomData* CurrentBiomData;
 			if (isTest)
 			{
-				CurrentBiom = (TEnumAsByte<EBiomType>)AGenerationPlayerController::GetBiom(HeatMap[XIndex][YIndex]);
+				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
 			}
 			else
 			{
-				CurrentBiom = Biom;
+				CurrentBiom = HeightParameters.Biom;
 			}
-
-			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, FBiomData());
+			CurrentBiomData = BiomDataSet.Find(CurrentBiom);
+			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise,*CurrentBiomData);
 			if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
-			if(true)
-			{
-				FinalNoise = 1 - FinalNoise;
-			}
+				if (true)
+				{
+					FinalNoise = 1 - FinalNoise;
+				}
 
-			TempHeightMap[XIndex][YIndex] = Clamp(FinalNoise,0,1);
+			TempHeightMap[XIndex][YIndex] = Clamp(FinalNoise, 0, 1);
 		}
 	for (int i = 0; i < MapSize; i++)
 	{
 		if ((i == 0) | (i + 1 == MapSize))
 			for (int j = 0; j < MapSize; j++)
 			{
-				HeightMap[i][j]=TempHeightMap[i][j];
+				HeightMap[i][j] = TempHeightMap[i][j];
 			}
 		else
 		{
-			HeightMap[i][0]=TempHeightMap[i][0];
-			HeightMap[i][MapSize-1]=TempHeightMap[i][MapSize-1];
+			HeightMap[i][0] = TempHeightMap[i][0];
+			HeightMap[i][MapSize - 1] = TempHeightMap[i][MapSize - 1];
 		}
 	}
-	if(GausianParameters.IsApplyGausianFilter)
+	if (GausianParameters.IsApplyGausianFilter)
 	{
-		GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel,KernelSize);
-	}else
-	{
-		HeightMap=TempHeightMap;
+		GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel, GausianParameters.KernelSize);
 	}
-	
+	else
+	{
+		HeightMap = TempHeightMap;
+	}
 }
 
 void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorder)
@@ -409,8 +395,11 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),TemperatureLacunarity));
-			float HeatNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(i, -j,TemperatureLacunarity,PersistenceTemperature,OctaveTemperature, NoiseDensityTemperature,TemperatureZeroToOne);
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+			                                 FString::Printf(TEXT("%f"), TemperatureParameters.Lacunarity));
+			float HeatNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
+				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
 			HeatNoise = Clamp(HeatNoise, 0, 1);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;

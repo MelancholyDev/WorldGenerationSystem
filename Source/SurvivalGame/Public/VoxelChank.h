@@ -1,14 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include <vector>
-
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
-#include "SimplexNoise/Public/SimplexNoiseBPLibrary.h"
 #include "VoxelChank.generated.h"
 
 UCLASS()
