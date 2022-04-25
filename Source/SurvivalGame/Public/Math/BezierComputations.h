@@ -14,5 +14,5 @@ public:
 
 
 int NearestNeighbourIndex(std::vector<float> &x, float &value);
-std::vector<float> Interpolation1(std::vector<float> &x, std::vector<float> &y, std::vector<float> &x_new);
+float  Interpolation1(std::vector<float> &x, std::vector<float> &y, float &x_new);
 std::vector<float> Linspace(float start_in, float end_in, int num_in);

@@ -2,6 +2,8 @@
 
 #include <valarray>
 
+#include "Math/SupportMethods.h"
+
 using namespace std;
 
 void GausianFilter::CreateKernel(float** Kernel, int Size, float Sigma)
@@ -20,9 +22,8 @@ void GausianFilter::CreateKernel(float** Kernel, int Size, float Sigma)
 		for (int j = 0; j < Size; j++)
 		{
 			Kernel[i][j] /= Sum;
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Kernel[i][j]));
 		}
-	
+		SupportMethods::PrintMass(Kernel,Size);
 }
 
 
@@ -47,14 +48,14 @@ void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float*
 			{
 				for(int l = 0;l<KernelSize;l++)
 				{
-					PixelMap[k][l] = Map[i+k-Border][j+l-Border]*Kernel[0][1];
+					PixelMap[k][l] = Map[i+k-Border][j+l-Border]*Kernel[k][l];
 				}
 			}
 			float Sum = 0;
 			for(int k=0;k<KernelSize;k++)
 				for(int l=0;l<KernelSize;l++)
 					Sum+=PixelMap[k][l];
-			FinalMap[i][j] = Sum / (KernelSize*KernelSize);
+			FinalMap[i][j] = Sum;
 		}
 }
 

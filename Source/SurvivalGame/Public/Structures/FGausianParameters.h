@@ -10,5 +10,5 @@ struct FGausianParameters
 	UPROPERTY(EditAnywhere)
 	int KernelSize;
 	UPROPERTY(EditAnywhere)
-	int Sigma;
+	float Sigma;
 };

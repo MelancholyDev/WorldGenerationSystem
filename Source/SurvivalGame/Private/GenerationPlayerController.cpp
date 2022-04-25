@@ -398,8 +398,6 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-			                                 FString::Printf(TEXT("%f"), TemperatureParameters.Lacunarity));
 			float HeatNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
 				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
