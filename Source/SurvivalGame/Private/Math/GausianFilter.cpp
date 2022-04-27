@@ -41,20 +41,28 @@ void GausianFilter::SmoothMap(float** Map, int MapSize, float** FinalMap, float*
 		PixelMap[i] = new float[KernelSize];
 	}
 	const int Border = (KernelSize-1)/2;
-	for (int i = Border; i < MapSize - Border; i++)
-		for (int j = Border; j < MapSize - Border; j++)
+	for (int i = 0; i < MapSize; i++)
+		for (int j = 0; j < MapSize; j++)
 		{
 			for(int k = 0;k<KernelSize;k++)
 			{
 				for(int l = 0;l<KernelSize;l++)
 				{
-					PixelMap[k][l] = Map[i+k-Border][j+l-Border]*Kernel[k][l];
+					int XIndex =i+k-Border;
+					int YIndex = j+l-Border;
+					if((XIndex>0) & (XIndex<MapSize) & (YIndex>0) & (YIndex<MapSize))
+					{
+						PixelMap[k][l] = Map[i+k-Border][j+l-Border]*Kernel[k][l];
+					}else
+					{
+						PixelMap[k][l]=-1;
+					}
 				}
 			}
 			float Sum = 0;
 			for(int k=0;k<KernelSize;k++)
 				for(int l=0;l<KernelSize;l++)
-					Sum+=PixelMap[k][l];
+					Sum+=PixelMap[k][l]<0?0:PixelMap[k][l];
 			FinalMap[i][j] = Sum;
 		}
 }
