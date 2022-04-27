@@ -20,9 +20,9 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	FVoxelGenerationData Data;
-	Data.Initialize(VoxelGenerationData.IsAddDepth,HeightParameters.VoxelSize, HeightParameters.NoiseScale,
-								HeightParameters.ChunkSize, HeightParameters.Depth,VoxelGenerationData.NoiseDensity3D,
-								VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap);
+	Data.Initialize(VoxelGenerationData.IsAddDepth, HeightParameters.VoxelSize, HeightParameters.NoiseScale,
+	                HeightParameters.ChunkSize, HeightParameters.Depth, VoxelGenerationData.NoiseDensity3D,
+	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap);
 	Chunk->InitializeParameters(Data);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
@@ -350,7 +350,6 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			SharpNoise = Clamp(SharpNoise, 0, 1);
 
 			TEnumAsByte<EBiomType> CurrentBiom;
-			FBiomData* CurrentBiomData;
 			if (HeightParameters.IsTest)
 			{
 				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
@@ -359,15 +358,16 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			{
 				CurrentBiom = HeightParameters.Biom;
 			}
-			CurrentBiomData = BiomDataSet.Find(CurrentBiom);
-			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise,*CurrentBiomData);
-			if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
-				if (true)
-				{
-					FinalNoise = 1 - FinalNoise;
-				}
-
-			TempHeightMap[XIndex][YIndex] = Clamp(FinalNoise, 0, 1);
+			FBiomData* CurrentBiomData = BiomDataSet.Find(CurrentBiom);
+			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, *CurrentBiomData);
+			// if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
+			// 	if (true)
+			// 	{
+			// 		FinalNoise = 1 - FinalNoise;
+			// 	}
+			float Clamped = Clamp(FinalNoise, 0, 1);
+			CurrentBiomData->CheckValue(Clamped);
+			TempHeightMap[XIndex][YIndex] = Clamped;
 		}
 	for (int i = 0; i < MapSize; i++)
 	{
@@ -381,6 +381,10 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 			HeightMap[i][0] = TempHeightMap[i][0];
 			HeightMap[i][MapSize - 1] = TempHeightMap[i][MapSize - 1];
 		}
+	}
+	if(isInvert)
+	{
+		InvertMap(TempHeightMap,LeftBorder,RightBorder);
 	}
 	if (GausianParameters.IsApplyGausianFilter)
 	{
@@ -404,6 +408,7 @@ void AGenerationPlayerController::GenerateHeatMap(int LeftBorder, int RightBorde
 			HeatNoise = Clamp(HeatNoise, 0, 1);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
+
 			HeatMap[XIndex][YIndex] = HeatNoise;
 		}
 }
@@ -414,11 +419,33 @@ float AGenerationPlayerController::Clamp(float x, float left, float right)
 	if (x < left)
 	{
 		return -x;
-		//return left;
 	}
 	if (x > right)
 		return right;
 	return x;
+}
+
+void AGenerationPlayerController::InvertMap(float** MapForInvert,int LeftBorder, int RightBorder)
+{
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
+		{
+			const int XIndex = i + RightBorder;
+			const int YIndex = j + RightBorder;
+			TEnumAsByte<EBiomType> CurrentBiom;
+			if (HeightParameters.IsTest)
+			{
+				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
+			}
+			else
+			{
+				CurrentBiom = HeightParameters.Biom;
+			}
+			FBiomData* CurrentBiomData = BiomDataSet.Find(CurrentBiom);
+			float Noise = MapForInvert[XIndex][YIndex];
+			Noise = CurrentBiomData->Max-(Noise-CurrentBiomData->Min);
+			MapForInvert[XIndex][YIndex] = Noise;
+		}
 }
 
 uint8 AGenerationPlayerController::GetBiom(float Noise)

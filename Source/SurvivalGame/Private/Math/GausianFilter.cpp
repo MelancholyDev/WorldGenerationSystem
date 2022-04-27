@@ -23,7 +23,7 @@ void GausianFilter::CreateKernel(float** Kernel, int Size, float Sigma)
 		{
 			Kernel[i][j] /= Sum;
 		}
-		SupportMethods::PrintMass(Kernel,Size);
+		//SupportMethods::PrintMass(Kernel,Size);
 }
 
 

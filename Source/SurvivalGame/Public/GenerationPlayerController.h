@@ -20,7 +20,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	int Multiplier;
 	int MapSize;
 	int ChunkLength;
-	
+	UPROPERTY(EditAnywhere)
+	bool isInvert;
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
@@ -66,7 +67,7 @@ private:
 
 	uint8 GetBiom(float Noise);
 	float Clamp(float x, float left, float right);
-	
+	void InvertMap(float** Map,int LeftBorder, int RightBorder);
 	void GenerateMaps();
 	void GenerateHeightMap(int LeftBorder, int RightBorder);
 	void GenerateHeatMap(int LeftBorder, int RightBorder);

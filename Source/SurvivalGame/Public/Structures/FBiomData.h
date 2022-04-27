@@ -10,9 +10,9 @@ struct FBiomData : public FTableRowBase
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EBiomType> Type;
 	UPROPERTY(EditAnywhere)
-	int Max = 0;
+	float Max;
 	UPROPERTY(EditAnywhere)
-	int Min = 1;
+	float Min;
 	UPROPERTY(EditAnywhere)
 	float B;
 	UPROPERTY(EditAnywhere)
@@ -26,7 +26,7 @@ struct FBiomData : public FTableRowBase
 	UPROPERTY(EditAnywhere)
 	float Y2;
 
-	void CheckValue(int Number)
+	void CheckValue(float Number)
 	{
 		if (Number < Min)
 		{
@@ -35,6 +35,7 @@ struct FBiomData : public FTableRowBase
 		if (Number > Max)
 		{
 			Max = Number;
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),Max));
 		}
 	}
 };
