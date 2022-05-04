@@ -11,6 +11,7 @@
 #include "Structures/FVoxelLine.h"
 #include "Structures/FGausianParameters.h"
 #include "Structures/FVoxelGeneraionData.h"
+#include "Structures/FGenerationParameters.h"
 #include "GenerationPlayerController.generated.h"
 
 UCLASS()
@@ -31,7 +32,9 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	float** MoistureMap;
 	float** WaterMap;
 	float** GausianKernel;
-
+	
+	UPROPERTY(EditAnywhere)
+	FGenerationParameters GenerationParameters;
 	UPROPERTY(EditAnywhere)
 	FGausianParameters GausianParameters;
 	UPROPERTY(EditAnywhere)
@@ -60,7 +63,7 @@ private:
 	void AddColumn(bool isLeft);
 	void AppendColumn(int Index, bool isLeft);
 	void DeleteColumn(int Index);
-	
+
 	void InitializeParameters();
 	void InitializeBiomData();
 	void InitializeGausianKernel();
@@ -74,4 +77,7 @@ private:
 	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
+
+	UFUNCTION(BlueprintCallable)
+	void GenerateTestMap();
 };

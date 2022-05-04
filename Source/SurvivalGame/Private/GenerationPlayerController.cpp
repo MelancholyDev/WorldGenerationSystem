@@ -5,6 +5,7 @@
 #include "Math/IntVector.h"
 #include "Math/GausianFilter.h"
 #include "SimplexNoiseBPLibrary.h"
+#include "Math/DiamondSquare.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -12,6 +13,30 @@ FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 	location = location / ChunkLength;
 	return FIntVector(round(location.X), round(location.Y), 0);
 }
+
+void AGenerationPlayerController::GenerateTestMap()
+{
+	int Size = 5;
+	float Roughness = 0.5f;
+	float** Mass=new float*[Size];
+	for(int i=0;i<Size;i++)
+	{
+		Mass[i]=new float[Size];
+	}
+	DiamondSquare::GenerateMap(Mass,Size,Roughness);
+	for(int i=0;i<Size;i++)
+	{
+		FString String="";
+		for(int j=0;j<Size;j++)
+		{
+			String+=FString::Printf(TEXT("%f"),Mass[i][j]);
+			String+=" ";
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, String);
+		
+	}
+}
+
 
 AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 {
@@ -321,78 +346,76 @@ void AGenerationPlayerController::GenerateMaps()
 
 void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
 {
-	USimplexNoiseBPLibrary::setNoiseSeed(16);
-	InitializeGausianKernel();
-	float** TempHeightMap = new float*[MapSize];
-	for (int i = 0; i < MapSize; i++)
+	if(GenerationParameters.GenerationType==PERLIN_NOISE)
 	{
-		TempHeightMap[i] = new float[MapSize];
-	}
-
-	GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
-	for (int i = LeftBorder; i <= RightBorder; i++)
-		for (int j = RightBorder; j >= LeftBorder; j--)
+		USimplexNoiseBPLibrary::setNoiseSeed(16);
+		InitializeGausianKernel();
+		float** TempHeightMap = new float*[MapSize];
+		for (int i = 0; i < MapSize; i++)
 		{
-			const int XIndex = i + RightBorder;
-			const int YIndex = j + RightBorder;
-			float SharpNoise;
-			float SmoothNoise;
+			TempHeightMap[i] = new float[MapSize];
+		}
 
-			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSharp,
-				HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
-
-			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSmooth,
-				HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
-
-			SmoothNoise = Clamp(SmoothNoise, 0, 1);
-			SharpNoise = Clamp(SharpNoise, 0, 1);
-
-			TEnumAsByte<EBiomType> CurrentBiom;
-			if (HeightParameters.IsTest)
+		GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
+		for (int i = LeftBorder; i <= RightBorder; i++)
+			for (int j = RightBorder; j >= LeftBorder; j--)
 			{
-				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
+				const int XIndex = i + RightBorder;
+				const int YIndex = j + RightBorder;
+				float SharpNoise;
+				float SmoothNoise;
+
+				SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+					i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSharp,
+					HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
+
+				SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+					i, -j, HeightParameters.Lacunarity, HeightParameters.Persistance, HeightParameters.OctaveSmooth,
+					HeightParameters.NoiseDensity, HeightParameters.ZeroToOne);
+
+				SmoothNoise = Clamp(SmoothNoise, 0, 1);
+				SharpNoise = Clamp(SharpNoise, 0, 1);
+
+				TEnumAsByte<EBiomType> CurrentBiom;
+				if (HeightParameters.IsTest)
+				{
+					CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
+				}
+				else
+				{
+					CurrentBiom = HeightParameters.Biom;
+				}
+				FBiomData* CurrentBiomData = BiomDataSet.Find(CurrentBiom);
+				float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, *CurrentBiomData);
+				float Clamped = Clamp(FinalNoise, 0, 1);
+				CurrentBiomData->CheckValue(Clamped);
+				TempHeightMap[XIndex][YIndex] = Clamped;
 			}
+		for (int i = 0; i < MapSize; i++)
+		{
+			if ((i == 0) | (i + 1 == MapSize))
+				for (int j = 0; j < MapSize; j++)
+				{
+					HeightMap[i][j] = TempHeightMap[i][j];
+				}
 			else
 			{
-				CurrentBiom = HeightParameters.Biom;
+				HeightMap[i][0] = TempHeightMap[i][0];
+				HeightMap[i][MapSize - 1] = TempHeightMap[i][MapSize - 1];
 			}
-			FBiomData* CurrentBiomData = BiomDataSet.Find(CurrentBiom);
-			float FinalNoise = BezierComputations::FilterMap(SharpNoise, SmoothNoise, *CurrentBiomData);
-			// if ((CurrentBiom == TUNDRA | CurrentBiom == TROPICAL_WOODLAND))
-			// 	if (true)
-			// 	{
-			// 		FinalNoise = 1 - FinalNoise;
-			// 	}
-			float Clamped = Clamp(FinalNoise, 0, 1);
-			CurrentBiomData->CheckValue(Clamped);
-			TempHeightMap[XIndex][YIndex] = Clamped;
 		}
-	for (int i = 0; i < MapSize; i++)
-	{
-		if ((i == 0) | (i + 1 == MapSize))
-			for (int j = 0; j < MapSize; j++)
-			{
-				HeightMap[i][j] = TempHeightMap[i][j];
-			}
+		if(isInvert)
+		{
+			InvertMap(TempHeightMap,LeftBorder,RightBorder);
+		}
+		if (GausianParameters.IsApplyGausianFilter)
+		{
+			GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel, GausianParameters.KernelSize);
+		}
 		else
 		{
-			HeightMap[i][0] = TempHeightMap[i][0];
-			HeightMap[i][MapSize - 1] = TempHeightMap[i][MapSize - 1];
+			HeightMap = TempHeightMap;
 		}
-	}
-	if(isInvert)
-	{
-		InvertMap(TempHeightMap,LeftBorder,RightBorder);
-	}
-	if (GausianParameters.IsApplyGausianFilter)
-	{
-		GausianFilter::SmoothMap(TempHeightMap, MapSize, HeightMap, GausianKernel, GausianParameters.KernelSize);
-	}
-	else
-	{
-		HeightMap = TempHeightMap;
 	}
 }
 
