@@ -41,10 +41,9 @@ void DiamondSquareMapGeneration::generateWorld(float** tiles,int worldSize)
 	}
 }
 
-double DiamondSquareMapGeneration::fRand2(double fMin, double fMax)
+double DiamondSquareMapGeneration::fRand2(float fMin, float fMax)
 {
-	double f = (double)rand() / RAND_MAX;
-	return fMin + f * (fMax - fMin);
+	return FMath::RandRange(fMin,fMax);
 }
 
 void DiamondSquareMapGeneration::timeReset()

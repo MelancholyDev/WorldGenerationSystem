@@ -9,5 +9,5 @@ private:
 	static void InitializeCorners(float** Map,int Size);
 	static void DiamondStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
 	static void SquareStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
-	static float RandomValue(int Iteration,float Roughness);
+	static float RandomValue(float Min,float Max);
 };

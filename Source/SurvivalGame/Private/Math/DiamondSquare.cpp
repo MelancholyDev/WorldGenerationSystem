@@ -1,5 +1,7 @@
 #include "Math/DiamondSquare.h"
 
+#include "TestDiamond/DiamondSquareMapGeneration.h"
+
 void DiamondSquare::GenerateMap(float** Map, int Size, float Roughness)
 {
 	InitializeCorners(Map, Size);
@@ -11,7 +13,8 @@ void DiamondSquare::InitializeCorners(float** Map, int Size)
 	int Shift = Size - 1;
 	for (int i = 0; i < Size; i += Shift)
 		for (int j = 0; j < Size; j += Shift)
-			Map[i][j] = FMath::RandRange(.0f, 1.0f);
+			//Map[i][j] = FMath::RandRange(.0f, 1.0f);
+			Map[i][j] =0;
 }
 
 void DiamondSquare::DiamondAlgorithm(float** Map, int Size,int MapSize,int Iteration,float Roughness)
@@ -37,7 +40,7 @@ void DiamondSquare::DiamondAlgorithm(float** Map, int Size,int MapSize,int Itera
 				DiamondStep(Map, i, j, Half,Iteration,MapSize,Roughness);
 		Column++;
 	}
-	DiamondAlgorithm(Map,Half,MapSize,Iteration+1,Roughness);
+	DiamondAlgorithm(Map,Half,MapSize,Iteration+1,Roughness/2);
 }
 
 void DiamondSquare::DiamondStep(float** Map, int X,int Y,int Reach,int Iteration,int MapSize,float Roughness)
@@ -64,9 +67,8 @@ void DiamondSquare::DiamondStep(float** Map, int X,int Y,int Reach,int Iteration
 		Sum += Map[X][Y+Reach];
 		Count++;
 	}
-	Sum/=Count;
-	Sum+=RandomValue(Iteration,Roughness);
-	Map[X][Y]=Sum;
+	float Avg=Sum/Count;
+	Map[X][Y]=Avg+(RandomValue(Iteration,Roughness)*2*Roughness)-Roughness;
 }
 
 void DiamondSquare::SquareStep(float** Map, int X,int Y,int Reach,int Iteration,int MapSize,float Roughness)
@@ -93,13 +95,11 @@ void DiamondSquare::SquareStep(float** Map, int X,int Y,int Reach,int Iteration,
 		Sum += Map[X+Reach][Y+Reach];
 		Count++;
 	}
-	Sum/=Count;
-	Sum+=RandomValue(Iteration,Roughness);
-	Map[X][Y]=Sum;
+	float Avg=Sum/Count;
+	Map[X][Y]=Avg+(RandomValue(Iteration,Roughness)*2*Roughness)-Roughness;
 }
 
-float DiamondSquare::RandomValue(int Iteration,float Roughness)
+float DiamondSquare::RandomValue(float Min,float Max)
 {
-	//return FMath::RandRange(-FMath::Pow(Roughness, Iteration), FMath::Pow(Roughness, Iteration));
-	return FMath::RandRange(0.0f,1.0f);
+	return FMath::RandRange(Min,Max);
 }
