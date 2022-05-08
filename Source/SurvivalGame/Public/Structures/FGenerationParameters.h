@@ -10,5 +10,7 @@ struct FGenerationParameters
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EGenerationType> GenerationType;
 	UPROPERTY(EditAnywhere)
-	int Baza;
+	float Roughness;
+	UPROPERTY(EditAnywhere)
+	int DiamondMapSizeMultiplier;
 };

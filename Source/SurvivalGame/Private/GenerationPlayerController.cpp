@@ -6,6 +6,7 @@
 #include "Math/GausianFilter.h"
 #include "SimplexNoiseBPLibrary.h"
 #include "Math/DiamondSquare.h"
+#include "Math/TestDiamond/DiamondSquareMapGeneration.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
@@ -16,25 +17,35 @@ FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 
 void AGenerationPlayerController::GenerateTestMap()
 {
-	int Size = 5;
+	int SizeMult = 1;
 	float Roughness = 0.5f;
-	float** Mass=new float*[Size];
-	for(int i=0;i<Size;i++)
+	int Size = FMath::Pow(2,SizeMult)+1;
+	float** Mass = new float*[Size];
+	for (int i = 0; i < Size; i++)
 	{
-		Mass[i]=new float[Size];
+		Mass[i] = new float[Size];
 	}
-	DiamondSquare::GenerateMap(Mass,Size,Roughness);
-	for(int i=0;i<Size;i++)
+	DiamondSquareMapGeneration::generateWorld(Mass,Size);
+	//DiamondSquare::GenerateMap(Mass, Size, Roughness);
+	for (int i = 0; i < Size; i++)
 	{
-		FString String="";
-		for(int j=0;j<Size;j++)
+		FString String = "";
+		for (int j = 0; j < Size; j++)
 		{
-			String+=FString::Printf(TEXT("%f"),Mass[i][j]);
-			String+=" ";
+			String += FString::Printf(TEXT("%f"), Mass[i][j]);
+			String += " ";
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, String);
-		
 	}
+}
+
+void AGenerationPlayerController::PrintCorners()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[0][0]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[0][MapSize-1]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[MapSize-1][0]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[MapSize-1][MapSize-1]));
+	
 }
 
 
@@ -164,7 +175,14 @@ void AGenerationPlayerController::InitializeParameters()
 	Multiplier = HeightParameters.Multiplier;
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
-	MapSize = (HeightParameters.ChunkSize * 2 + 1) * Multiplier;
+	if(GenerationParameters.GenerationType==PERLIN_NOISE)
+	{
+		MapSize = (HeightParameters.ChunkSize * 2 + 1) * Multiplier;
+	}
+	else
+	{
+		MapSize = FMath::Pow(2,GenerationParameters.DiamondMapSizeMultiplier)+1;
+	}
 	ChunkRenderLines = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
 	for (int i = HeightParameters.RenderRange * -1; i <= HeightParameters.RenderRange; i++)
@@ -346,17 +364,17 @@ void AGenerationPlayerController::GenerateMaps()
 
 void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBorder)
 {
-	if(GenerationParameters.GenerationType==PERLIN_NOISE)
+	InitializeGausianKernel();
+	GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
+	
+	if (GenerationParameters.GenerationType == PERLIN_NOISE)
 	{
-		USimplexNoiseBPLibrary::setNoiseSeed(16);
-		InitializeGausianKernel();
 		float** TempHeightMap = new float*[MapSize];
 		for (int i = 0; i < MapSize; i++)
 		{
 			TempHeightMap[i] = new float[MapSize];
 		}
-
-		GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
+		USimplexNoiseBPLibrary::setNoiseSeed(16);
 		for (int i = LeftBorder; i <= RightBorder; i++)
 			for (int j = RightBorder; j >= LeftBorder; j--)
 			{
@@ -404,9 +422,9 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 				HeightMap[i][MapSize - 1] = TempHeightMap[i][MapSize - 1];
 			}
 		}
-		if(isInvert)
+		if (isInvert)
 		{
-			InvertMap(TempHeightMap,LeftBorder,RightBorder);
+			InvertMap(TempHeightMap, LeftBorder, RightBorder);
 		}
 		if (GausianParameters.IsApplyGausianFilter)
 		{
@@ -416,6 +434,11 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 		{
 			HeightMap = TempHeightMap;
 		}
+	}
+	else
+	{
+		//DiamondSquare::GenerateMap(HeightMap, MapSize, GenerationParameters.Roughness);
+		DiamondSquareMapGeneration::generateWorld(HeightMap,MapSize);
 	}
 }
 
@@ -448,7 +471,7 @@ float AGenerationPlayerController::Clamp(float x, float left, float right)
 	return x;
 }
 
-void AGenerationPlayerController::InvertMap(float** MapForInvert,int LeftBorder, int RightBorder)
+void AGenerationPlayerController::InvertMap(float** MapForInvert, int LeftBorder, int RightBorder)
 {
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
@@ -466,7 +489,7 @@ void AGenerationPlayerController::InvertMap(float** MapForInvert,int LeftBorder,
 			}
 			FBiomData* CurrentBiomData = BiomDataSet.Find(CurrentBiom);
 			float Noise = MapForInvert[XIndex][YIndex];
-			Noise = CurrentBiomData->Max-(Noise-CurrentBiomData->Min);
+			Noise = CurrentBiomData->Max - (Noise - CurrentBiomData->Min);
 			MapForInvert[XIndex][YIndex] = Noise;
 		}
 }

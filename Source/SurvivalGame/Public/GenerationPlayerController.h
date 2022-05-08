@@ -80,4 +80,6 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void GenerateTestMap();
+	UFUNCTION(BlueprintCallable)
+	void PrintCorners();
 };

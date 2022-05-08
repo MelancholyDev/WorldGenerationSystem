@@ -64,8 +64,8 @@ void DiamondSquare::DiamondStep(float** Map, int X,int Y,int Reach,int Iteration
 		Sum += Map[X][Y+Reach];
 		Count++;
 	}
-	Sum+=RandomValue(Iteration,Roughness);
 	Sum/=Count;
+	Sum+=RandomValue(Iteration,Roughness);
 	Map[X][Y]=Sum;
 }
 
@@ -93,12 +93,13 @@ void DiamondSquare::SquareStep(float** Map, int X,int Y,int Reach,int Iteration,
 		Sum += Map[X+Reach][Y+Reach];
 		Count++;
 	}
-	Sum+=RandomValue(Iteration,Roughness);
 	Sum/=Count;
+	Sum+=RandomValue(Iteration,Roughness);
 	Map[X][Y]=Sum;
 }
 
 float DiamondSquare::RandomValue(int Iteration,float Roughness)
 {
-	return FMath::RandRange(-FMath::Pow(Roughness, Iteration), FMath::Pow(Roughness, Iteration));
+	//return FMath::RandRange(-FMath::Pow(Roughness, Iteration), FMath::Pow(Roughness, Iteration));
+	return FMath::RandRange(0.0f,1.0f);
 }
