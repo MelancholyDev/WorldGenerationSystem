@@ -3,8 +3,9 @@
 #include "CoreMinimal.h"
 #include "Enums/EBiomType.h"
 #include "VoxelChank.h"
+#include "Classes/Generator.h"
 #include "GameFramework/PlayerController.h"
-#include "Structures/FHeightParameters.h"
+#include "Structures/FPerlinNoiseParameters.h"
 #include "Structures/FTemperatureParameter.h"
 #include "Factories/CompositeDataTableFactory.h"
 #include "Structures/FBiomData.h"
@@ -18,41 +19,32 @@ UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	int Multiplier;
 	int MapSize;
 	int ChunkLength;
-	UPROPERTY(EditAnywhere)
-	bool isInvert;
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
 	
+	Generator* GeneratorInstance;
 	float** HeightMap;
 	float** HeatMap;
 	float** MoistureMap;
 	float** WaterMap;
-	float** GausianKernel;
 	
 	UPROPERTY(EditAnywhere)
 	FGenerationParameters GenerationParameters;
 	UPROPERTY(EditAnywhere)
-	FGausianParameters GausianParameters;
-	UPROPERTY(EditAnywhere)
-	FHeightParameters HeightParameters;
-	UPROPERTY(EditAnywhere)
-	FTemperatureParameters TemperatureParameters;
+	UDataTable* BiomDataSet;
 	UPROPERTY(EditAnywhere)
 	FVoxelGenerationData VoxelGenerationData;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;
-
-	TMap<EBiomType,FBiomData> BiomDataSet;
-	UPROPERTY(EditAnywhere)
-	UDataTable* DataTableBiome;
 	
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	UFUNCTION(BlueprintCallable)
+	void PrintFullMap();
 private:
 	void GetFullSize();
 	void XShift(int X);
@@ -65,23 +57,10 @@ private:
 	void DeleteColumn(int Index);
 
 	void InitializeParameters();
-	void InitializeBiomData();
-	void InitializeGausianKernel();
-
-	uint8 GetBiom(float Noise);
-	float Clamp(float x, float left, float right);
-	void InvertMap(float** Map,int LeftBorder, int RightBorder);
 	void GenerateMaps();
-	void GenerateHeightMap(int LeftBorder, int RightBorder);
-	void GenerateHeatMap(int LeftBorder, int RightBorder);
+	void GenerateHeightMap();
+	void GenerateHeatMap();
 	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
-
-	UFUNCTION(BlueprintCallable)
-	void GenerateTestMapNew();
-	UFUNCTION(BlueprintCallable)
-	void GenerateTestMapOld();
-	UFUNCTION(BlueprintCallable)
-	void PrintCorners();
 };

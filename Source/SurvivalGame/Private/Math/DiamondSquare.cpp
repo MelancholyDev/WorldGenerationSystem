@@ -1,26 +1,38 @@
 #include "Math/DiamondSquare.h"
 
-void DiamondSquare::GenerateMap(float** Map, int Size, float Roughness, int Seed)
+DiamondSquare::DiamondSquare(FDiamondSquareParameters Parameters, int Size)
 {
+	CurrentMap = nullptr;
+	Roughness = Parameters.Roughness;
+	CurrentRoughness=Roughness;
+	DisplacementType = Parameters.DisplacementType;
+	MapSize = Size;
+	Seed = Parameters.Seed;
+}
+
+void DiamondSquare::GenerateMap(float** Map)
+{
+	CurrentRoughness = Roughness;
 	FMath::SRandInit(Seed);
-	for (int i = 0; i < Size; i++)
-		for (int j = 0; j < Size; j++)
+	CurrentMap = Map;
+	for (int i = 0; i < MapSize; i++)
+		for (int j = 0; j < MapSize; j++)
 		{
 			Map[i][j] = 0;
 		}
-	InitializeCorners(Map, Size);
-	DiamondAlgorithm(Map, Size - 1, Size, 1, Roughness);
+	InitializeCorners();
+	DiamondAlgorithm(MapSize - 1, 1);
 }
 
-void DiamondSquare::InitializeCorners(float** Map, int Size)
+void DiamondSquare::InitializeCorners()
 {
-	int Shift = Size - 1;
-	for (int i = 0; i < Size; i += Shift)
-		for (int j = 0; j < Size; j += Shift)
-			Map[i][j] = 0;
+	int Shift = MapSize - 1;
+	for (int i = 0; i < MapSize; i += Shift)
+		for (int j = 0; j < MapSize; j += Shift)
+			CurrentMap[i][j] = 0;
 }
 
-void DiamondSquare::DiamondAlgorithm(float** Map, int Size, int MapSize, int Iteration, float Roughness)
+void DiamondSquare::DiamondAlgorithm(int Size, int Iteration)
 {
 	if (Size < 2)
 	{
@@ -30,63 +42,71 @@ void DiamondSquare::DiamondAlgorithm(float** Map, int Size, int MapSize, int Ite
 	for (int i = Half; i < MapSize; i += Size)
 		for (int j = Half; j < MapSize; j += Size)
 		{
-			DiamondStep(Map, i, j, Half, Iteration, MapSize, Roughness);
+			DiamondStep(i, j, Half, Iteration);
 		}
 	int Column = 0;
 	for (int i = 0; i < MapSize; i += Half)
 	{
 		if (Column % 2 == 0)
 			for (int j = Half; j < MapSize; j += Size)
-				SquareStep(Map, i, j, Half, Iteration, MapSize, Roughness);
+				SquareStep(i, j, Half, Iteration);
 		else
 			for (int j = 0; j < MapSize; j += Size)
-				SquareStep(Map, i, j, Half, Iteration, MapSize, Roughness);
+				SquareStep(i, j, Half, Iteration);
 		Column++;
 	}
-	DiamondAlgorithm(Map, Half, MapSize, Iteration + 1, Roughness );
+	if (DisplacementType == VERSION_1)
+		CurrentRoughness = CurrentRoughness / 2;
+	DiamondAlgorithm(Half, Iteration + 1);
 }
 
-void DiamondSquare::SquareStep(float** Map, int X, int Y, int Reach, int Iteration, int MapSize, float Roughness)
+void DiamondSquare::SquareStep(int X, int Y, int Reach, int Iteration)
 {
 	float Sum = 0;
-	
-	Sum += Map[(X - Reach + MapSize - 1) % (MapSize - 1)][Y];
-	Sum += Map[(X + Reach) % (MapSize-1)][Y];
-	Sum += Map[X][(Y - Reach + MapSize - 1) % (MapSize - 1)];
-	Sum += Map[X][(Y + Reach) % (MapSize-1)];
-	
+
+	Sum += CurrentMap[(X - Reach + MapSize - 1) % (MapSize - 1)][Y];
+	Sum += CurrentMap[(X + Reach) % (MapSize - 1)][Y];
+	Sum += CurrentMap[X][(Y - Reach + MapSize - 1) % (MapSize - 1)];
+	Sum += CurrentMap[X][(Y + Reach) % (MapSize - 1)];
+
 	const float Avg = Sum / 4;
-	const float RandomAdd = RandomValue(-FMath::Pow(Roughness,Iteration), FMath::Pow(Roughness,Iteration));
-	//Map[X][Y] = Avg + (RandomAdd * 2 * Roughness) - Roughness;
-	Map[X][Y] = Avg + RandomAdd;
+	CurrentMap[X][Y] = CalculateDisplacement(Avg, Iteration);
 }
 
-void DiamondSquare::DiamondStep(float** Map, int X, int Y, int Reach, int Iteration, int MapSize, float Roughness)
+void DiamondSquare::DiamondStep(int X, int Y, int Reach, int Iteration)
 {
 	float Sum = 0;
-	
-	Sum += Map[X - Reach][Y - Reach];
-	Sum += Map[X - Reach][Y + Reach];
-	Sum += Map[X + Reach][Y - Reach];
-	Sum += Map[X + Reach][Y + Reach];
-	
+
+	Sum += CurrentMap[X - Reach][Y - Reach];
+	Sum += CurrentMap[X - Reach][Y + Reach];
+	Sum += CurrentMap[X + Reach][Y - Reach];
+	Sum += CurrentMap[X + Reach][Y + Reach];
+
 	const float Avg = Sum / 4;
-	//const float RandomAdd = RandomValue(0, 1);
-	const float RandomAdd = RandomValue(-FMath::Pow(Roughness,Iteration), FMath::Pow(Roughness,Iteration));
-	//Map[X][Y] = Avg + (RandomAdd * 2 * Roughness) - Roughness;
-	Map[X][Y] = Avg + RandomAdd;
+	CurrentMap[X][Y] = CalculateDisplacement(Avg, Iteration);
 }
 
-float DiamondSquare::CalculateFinalV1(float Avg, float Roughness)
+float DiamondSquare::CalculateDisplacement(float Avg, float Iteration)
+{
+	switch (DisplacementType)
+	{
+	case VERSION_1: { return CalculateFinalV1(Avg); }
+	case VERSION_2: { return CalculateFinalV2(Avg, Iteration); }
+	default: return 0;
+	}
+}
+
+float DiamondSquare::CalculateFinalV1(float Avg)
 {
 	const float RandomAdd = RandomValue(0, 1);
-	return Avg + (RandomAdd * 2 * Roughness) - Roughness;
+	return Avg + (RandomAdd * 2 * CurrentRoughness) - CurrentRoughness;
 }
 
-float DiamondSquare::CalculateFinalV2(float Avg, float Roughness, float Iteration)
+float DiamondSquare::CalculateFinalV2(float Avg, float Iteration)
 {
-	const float RandomAdd = RandomValue(-FMath::Pow(Roughness,Iteration), FMath::Pow(Roughness,Iteration));
-	return Avg+RandomAdd;
+	const float RandomAdd = RandomValue(-FMath::Pow(CurrentRoughness, Iteration),
+	                                    FMath::Pow(CurrentRoughness, Iteration));
+	return Avg + RandomAdd;
 }
 
 float DiamondSquare::RandomValue(float Min, float Max)

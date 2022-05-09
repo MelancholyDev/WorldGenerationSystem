@@ -11,10 +11,11 @@ struct FVoxelGenerationData
 	float Threshold3D=0;
 	UPROPERTY(EditAnywhere)
 	float NoiseDensity3D=0;
+	UPROPERTY(EditAnywhere)
+	int Depth=0;
 	float VoxelSize=0;
 	int NoiseScale=0;
 	int ChunkSize=0;
-	int Depth=0;
 	int MapSize=0;
 	float **Map=0;
 	float **Heat=0;

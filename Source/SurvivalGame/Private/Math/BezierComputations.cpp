@@ -3,14 +3,14 @@
 #include "Point.h"
 #include "vector"
 
-float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, float A, float X)
+float BezierComputations::BezierLut(float X)
 {
 	auto t = Linspace(0, 1, 256);
 	std::vector<float> vecX{};
 	std::vector<float> vecY{};
 	for (int i = 0; i < t.size(); i++)
 	{
-		Point a = Bezier(X1, Y1, X2, Y2, A, t.at(i));
+		Point a = Bezier(t.at(i));
 		vecX.push_back(a.X);
 		vecY.push_back(a.Y);
 	}
@@ -18,7 +18,7 @@ float BezierComputations::BezierLut(float X1, float Y1, float X2, float Y2, floa
 	return result;
 }
 
-Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A, float T)
+Point BezierComputations::Bezier( float T) const
 {
 	Point P1 = Point(0, 0);
 	Point P2 = Point(X1, Y1);
@@ -28,15 +28,37 @@ Point BezierComputations::Bezier(float X1, float Y1, float X2, float Y2, float A
 	return Result;
 }
 
-float BezierComputations::FilterMap(float HeightMap, float SmoothMap, FBiomData Biom)
+BezierComputations::BezierComputations(TMap<EBiomType, FBiomData> BiomDataSet)
 {
-	float B = Biom.B;
+	DataSet=BiomDataSet;
+	X1 =0;
+	X2=0;
+	Y1=0;
+	Y2=0;
+	A=0;
+}
+
+float BezierComputations::FilterMap(float HeightMap, float SmoothMap, TEnumAsByte<EBiomType> BiomData)
+{
+	FBiomData* Biom = DataSet.Find(BiomData);
+	float B = Biom->B;
+	X1 = Biom->X1;
+	X2 = Biom->X2;
+	Y1 = Biom->Y1;
+	Y2 = Biom->Y2;
+	A = Biom->A;
 	float X = B * HeightMap + (1 - B) * SmoothMap;
-	float Y = BezierLut(Biom.X1, Biom.Y1, Biom.X2, Biom.Y2, Biom.A, X);
+	float Y = BezierLut(X);
 	return Y;
 }
 
-int NearestNeighbourIndex(std::vector<float>& x, float& value)
+void BezierComputations::CheckValue(float Value,TEnumAsByte<EBiomType> BiomData)
+{
+	FBiomData* Biom = DataSet.Find(BiomData);
+	Biom->CheckValue(Value);
+}
+
+int BezierComputations::NearestNeighbourIndex(std::vector<float>& x, float& value)
 {
 	float dist = std::numeric_limits<float>::max();
 	float newDist;
@@ -51,11 +73,11 @@ int NearestNeighbourIndex(std::vector<float>& x, float& value)
 			idx = i;
 		}
 	}
-	
+
 	return idx;
 }
 
-float Interpolation1(std::vector<float>& x, std::vector<float>& y, float& x_new)
+float BezierComputations::Interpolation1(std::vector<float>& x, std::vector<float>& y, float& x_new)
 {
 	float y_new;
 	float dx, dy, m, b;
@@ -78,7 +100,7 @@ float Interpolation1(std::vector<float>& x, std::vector<float>& y, float& x_new)
 	return y_new;
 }
 
-std::vector<float> Linspace(float start_in, float end_in, int num_in)
+std::vector<float> BezierComputations::Linspace(float start_in, float end_in, int num_in)
 {
 	std::vector<float> linspaced;
 
@@ -102,3 +124,4 @@ std::vector<float> Linspace(float start_in, float end_in, int num_in)
 	linspaced.push_back(end);
 	return linspaced;
 }
+

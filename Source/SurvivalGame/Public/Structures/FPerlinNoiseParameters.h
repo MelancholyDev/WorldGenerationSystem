@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "Enums/EBiomType.h"
-#include "FHeightParameters.generated.h"
+#include "FPerlinNoiseParameters.generated.h"
 
 USTRUCT()
-struct FHeightParameters
+struct FPerlinNoiseParameters
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
@@ -19,12 +19,6 @@ struct FHeightParameters
 	UPROPERTY(EditAnywhere)
 	int Multiplier;
 	UPROPERTY(EditAnywhere)
-	int ChunkSize;
-	UPROPERTY(EditAnywhere)
-	int RenderRange;
-	UPROPERTY(EditAnywhere)
-	int Depth;
-	UPROPERTY(EditAnywhere)
 	float NoiseDensity;
 	UPROPERTY(EditAnywhere)
 	int NoiseScale;
@@ -33,5 +27,5 @@ struct FHeightParameters
 	UPROPERTY(EditAnywhere)
 	bool IsTest;
 	UPROPERTY(EditAnywhere)
-	int VoxelSize;
+	bool IsInvert;
 };

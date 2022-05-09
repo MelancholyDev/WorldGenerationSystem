@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "Enums/EBiomType.h"
 #include "Engine/DataTable.h"
-#include "FbiomData.generated.h"
+#include "FBiomData.generated.h"
 
 USTRUCT(BlueprintType)
 struct FBiomData : public FTableRowBase
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EBiomType> Type;
 	UPROPERTY(EditAnywhere)
@@ -35,7 +35,6 @@ struct FBiomData : public FTableRowBase
 		if (Number > Max)
 		{
 			Max = Number;
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),Max));
 		}
 	}
 };
