@@ -16,6 +16,14 @@ struct FGenerationParameters
 	UPROPERTY(EditAnywhere)
 	bool IsApplyGausianFilter;
 	UPROPERTY(EditAnywhere)
+	bool IsAddBezierFunction;
+	UPROPERTY(EditAnywhere)
+	int RenderRange;
+	UPROPERTY(EditAnywhere)
+	int ChunkSize;
+	UPROPERTY(EditAnywhere)
+	int VoxelSize;
+	UPROPERTY(EditAnywhere)
 	FDiamondSquareParameters DiamondSquareParameters;
 	UPROPERTY(EditAnywhere)
 	FPerlinNoiseParameters PerlinNoiseParameters;
@@ -23,10 +31,4 @@ struct FGenerationParameters
 	FGausianParameters GausianParameters;
 	UPROPERTY(EditAnywhere)
 	FTemperatureParameters TemperatureParameters;
-	UPROPERTY(EditAnywhere)
-	int RenderRange;
-	UPROPERTY(EditAnywhere)
-	int ChunkSize;
-	UPROPERTY(EditAnywhere)
-	int VoxelSize;
 };

@@ -15,13 +15,12 @@ public:
 private:
 	float BezierLut(float X);
 	Point Bezier(float T) const;
-	int NearestNeighbourIndex(std::vector<float>& x, float& value);
-	float Interpolation1(std::vector<float>& x, std::vector<float>& y, float& x_new);
-	static std::vector<float> Linspace(float start_in, float end_in, int num_in);
+	int NearestNeighbourIndex(std::vector<float>& X, float& Value);
+	float Interpolation1(std::vector<float>& X, std::vector<float>& Y, float& XNew);
+	static std::vector<float> Linspace(float StartIn, float EndIn, int NumIn);
 	float X1;
 	float Y1;
 	float X2;
 	float Y2;
 	float A;
-
 };

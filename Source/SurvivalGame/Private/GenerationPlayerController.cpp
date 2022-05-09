@@ -1,11 +1,7 @@
 #include "GenerationPlayerController.h"
 #include <string>
-#include "Math/BezierComputations.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/IntVector.h"
-#include "Math/GausianFilter.h"
-#include "SimplexNoiseBPLibrary.h"
-#include "Math/DiamondSquare.h"
 
 FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 {
