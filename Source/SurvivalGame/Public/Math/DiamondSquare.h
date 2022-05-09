@@ -3,11 +3,14 @@
 class DiamondSquare
 {
 public:
-	static void GenerateMap(float** Map,int Size,float RoughnessFactorParam);
+	void GenerateMap(float** Map,int Size,float RoughnessFactorParam,int Seed);
 private:
-	static void DiamondAlgorithm(float** Map,int Size,int MapSize,int Iteration,float Roughness);
-	static void InitializeCorners(float** Map,int Size);
-	static void DiamondStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
-	static void SquareStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
-	static float RandomValue(float Min,float Max);
+	void DiamondAlgorithm(float** Map,int Size,int MapSize,int Iteration,float Roughness);
+	void InitializeCorners(float** Map,int Size);
+	void SquareStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
+	void DiamondStep(float** Map,int X,int Y,int Reach,int Iteration,int MapSize,float Roughness);
+
+	float CalculateFinalV1(float Avg,float Roughness);
+	float CalculateFinalV2(float Avg,float Roughness,float Iteration);
+	float RandomValue(float Min,float Max);
 };

@@ -15,18 +15,19 @@ FIntVector AGenerationPlayerController::GetPlayerChunkCoordinates()
 	return FIntVector(round(location.X), round(location.Y), 0);
 }
 
-void AGenerationPlayerController::GenerateTestMap()
+void AGenerationPlayerController::GenerateTestMapNew()
 {
-	int SizeMult = 1;
-	float Roughness = 0.5f;
-	int Size = FMath::Pow(2,SizeMult)+1;
+	int SizeMult = 2;
+	int Size = FMath::Pow(2, SizeMult) + 1;
 	float** Mass = new float*[Size];
 	for (int i = 0; i < Size; i++)
 	{
 		Mass[i] = new float[Size];
 	}
-	DiamondSquareMapGeneration::generateWorld(Mass,Size);
-	//DiamondSquare::GenerateMap(Mass, Size, Roughness);
+	for (int i = 0; i < Size; i++)
+		for (int j = 0; j <Size; j++)
+			Mass[i][j] = 0;
+	DiamondSquareMapGeneration::generateWorld(Mass, Size);
 	for (int i = 0; i < Size; i++)
 	{
 		FString String = "";
@@ -37,15 +38,43 @@ void AGenerationPlayerController::GenerateTestMap()
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, String);
 	}
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT(" "));
+}
+
+void AGenerationPlayerController::GenerateTestMapOld()
+{
+	int SizeMult = 2;
+	float Roughness = 0.75f;
+	int Size = FMath::Pow(2, SizeMult) + 1;
+	float** Mass = new float*[Size];
+	for (int i = 0; i < Size; i++)
+	{
+		Mass[i] = new float[Size];
+	}
+	for (int i = 0; i < Size; i++)
+		for (int j = 0; j < Size; j++)
+			Mass[i][j] = 0;
+	DiamondSquare::GenerateMap(Mass, Size, Roughness, 1);
+	for (int i = 0; i < Size; i++)
+	{
+		FString String = "";
+		for (int j = 0; j < Size; j++)
+		{
+			String += FString::Printf(TEXT("%f"), Mass[i][j]);
+			String += " ";
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, String);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT(" "));
 }
 
 void AGenerationPlayerController::PrintCorners()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[0][0]));
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[0][MapSize-1]));
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[MapSize-1][0]));
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"),HeightMap[MapSize-1][MapSize-1]));
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"), HeightMap[0][0]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"), HeightMap[0][MapSize - 1]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("%f"), HeightMap[MapSize - 1][0]));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
+	                                 FString::Printf(TEXT("%f"), HeightMap[MapSize - 1][MapSize - 1]));
 }
 
 
@@ -175,13 +204,13 @@ void AGenerationPlayerController::InitializeParameters()
 	Multiplier = HeightParameters.Multiplier;
 	if (Multiplier % 2 == 0)
 		Multiplier += 1;
-	if(GenerationParameters.GenerationType==PERLIN_NOISE)
+	if (GenerationParameters.GenerationType == PERLIN_NOISE)
 	{
 		MapSize = (HeightParameters.ChunkSize * 2 + 1) * Multiplier;
 	}
 	else
 	{
-		MapSize = FMath::Pow(2,GenerationParameters.DiamondMapSizeMultiplier)+1;
+		MapSize = FMath::Pow(2, GenerationParameters.DiamondMapSizeMultiplier) + 1;
 	}
 	ChunkRenderLines = new FActorSpawnParameters();
 	Map = new TArray<FVoxelLine>();
@@ -366,7 +395,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 {
 	InitializeGausianKernel();
 	GausianFilter::CreateKernel(GausianKernel, GausianParameters.KernelSize, GausianParameters.Sigma);
-	
+
 	if (GenerationParameters.GenerationType == PERLIN_NOISE)
 	{
 		float** TempHeightMap = new float*[MapSize];
@@ -437,8 +466,7 @@ void AGenerationPlayerController::GenerateHeightMap(int LeftBorder, int RightBor
 	}
 	else
 	{
-		//DiamondSquare::GenerateMap(HeightMap, MapSize, GenerationParameters.Roughness);
-		DiamondSquareMapGeneration::generateWorld(HeightMap,MapSize);
+		DiamondSquare::GenerateMap(HeightMap, MapSize, GenerationParameters.Roughness,1);
 	}
 }
 

@@ -79,7 +79,9 @@ private:
 	FIntVector GetPlayerChunkCoordinates();
 
 	UFUNCTION(BlueprintCallable)
-	void GenerateTestMap();
+	void GenerateTestMapNew();
+	UFUNCTION(BlueprintCallable)
+	void GenerateTestMapOld();
 	UFUNCTION(BlueprintCallable)
 	void PrintCorners();
 };
