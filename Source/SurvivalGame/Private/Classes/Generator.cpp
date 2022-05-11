@@ -8,7 +8,6 @@ Generator::Generator(FGenerationParameters Parameters,UDataTable* Table)
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
 	TemperatureParameters = Parameters.TemperatureParameters;
 	DiamondSquareParameters = Parameters.DiamondSquareParameters;
-
 	GenerationParameters = Parameters;
 	DataTableBiome = Table;
 	InitializeBiomData();
@@ -57,6 +56,8 @@ void Generator::GenerateHeightMap(float** Map, float** HeatMap)
 
 void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 {
+	USimplexNoiseBPLibrary::createSeed(21);
+	USimplexNoiseBPLibrary::createSeed(53);
 	USimplexNoiseBPLibrary::setNoiseSeed(21);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
@@ -123,11 +124,13 @@ uint8 Generator::GetBiom(float Noise)
 
 void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 {
+	
 	float** TempHeightMap = new float*[MapSize];
 	for (int i = 0; i < MapSize; i++)
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
+	USimplexNoiseBPLibrary::createSeed(16);
 	USimplexNoiseBPLibrary::setNoiseSeed(16);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
