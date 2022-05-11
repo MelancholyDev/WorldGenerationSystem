@@ -6,7 +6,7 @@
 #include "Classes/Generator.h"
 #include "GameFramework/PlayerController.h"
 #include "Structures/FPerlinNoiseParameters.h"
-#include "Structures/FTemperatureParameter.h"
+#include "Structures/FTemperatureAndMoistureParameters.h"
 #include "Factories/CompositeDataTableFactory.h"
 #include "Structures/FBiomData.h"
 #include "Structures/FVoxelLine.h"

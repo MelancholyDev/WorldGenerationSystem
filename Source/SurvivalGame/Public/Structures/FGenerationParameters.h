@@ -1,8 +1,9 @@
 #pragma once
+#include "FBiomMapGenerateParameters.h"
 #include "FDiamondSquareParameters.h"
 #include "FGausianParameters.h"
 #include "FPerlinNoiseParameters.h"
-#include "FTemperatureParameter.h"
+#include "FTemperatureAndMoistureParameters.h"
 #include "Enums/EGenerationType.h"
 #include "FGenerationParameters.generated.h"
 
@@ -30,5 +31,5 @@ struct FGenerationParameters
 	UPROPERTY(EditAnywhere)
 	FGausianParameters GausianParameters;
 	UPROPERTY(EditAnywhere)
-	FTemperatureParameters TemperatureParameters;
+	FTemperatureAndMoistureParameters TemperatureAndMoistureParameters;
 };

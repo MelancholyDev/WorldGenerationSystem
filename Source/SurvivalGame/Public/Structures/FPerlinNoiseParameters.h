@@ -7,6 +7,8 @@ struct FPerlinNoiseParameters
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
+	int Seed;
+	UPROPERTY(EditAnywhere)
 	int OctaveSharp;
 	UPROPERTY(EditAnywhere)
 	int OctaveSmooth;

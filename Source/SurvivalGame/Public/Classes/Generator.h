@@ -3,7 +3,7 @@
 #include "Math/DiamondSquare.h"
 #include "Math/GausianFilter.h"
 #include "Structures/FPerlinNoiseParameters.h"
-#include "Structures/FTemperatureParameter.h"
+#include "Structures/FTemperatureAndMoistureParameters.h"
 
 class Generator
 {
@@ -27,7 +27,10 @@ private:
 
 	FGausianParameters GausianParameters;
 	FPerlinNoiseParameters PerlinNoiseParameters;
-	FTemperatureParameters TemperatureParameters;
+	
+	FBiomMapGenerateParameters MoistureParameters;
+	FBiomMapGenerateParameters TemperatureParameters;
+	
 	FDiamondSquareParameters DiamondSquareParameters;
 
 	TMap<EBiomType, FBiomData> BiomDataSet;

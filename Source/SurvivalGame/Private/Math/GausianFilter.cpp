@@ -49,10 +49,6 @@ void GausianFilter::SmoothMap(float** Map, float** FinalMap)
 	{
 		PixelMap[i] = new float[KernelSize];
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"), KernelSize));
-	for (int i = 0; i < KernelSize; i++)
-		for (int j = 0; j < KernelSize; j++)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"), Kernel[i][j]));
 	const int Border = (KernelSize - 1) / 2;
 	for (int i = 0; i < MapSize; i++)
 		for (int j = 0; j < MapSize; j++)

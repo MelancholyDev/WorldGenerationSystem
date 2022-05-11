@@ -6,7 +6,8 @@ Generator::Generator(FGenerationParameters Parameters,UDataTable* Table)
 {
 	GausianParameters = Parameters.GausianParameters;
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
-	TemperatureParameters = Parameters.TemperatureParameters;
+	TemperatureParameters = Parameters.TemperatureAndMoistureParameters.TemperatureParameters;
+	MoistureParameters = Parameters.TemperatureAndMoistureParameters.MoistureParameters;
 	DiamondSquareParameters = Parameters.DiamondSquareParameters;
 	GenerationParameters = Parameters;
 	DataTableBiome = Table;
@@ -56,8 +57,8 @@ void Generator::GenerateHeightMap(float** Map, float** HeatMap, float** Moisture
 
 void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 {
-	USimplexNoiseBPLibrary::createSeed(11);
-	USimplexNoiseBPLibrary::setNoiseSeed(11);
+	USimplexNoiseBPLibrary::createSeed(TemperatureParameters.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(TemperatureParameters.Seed);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -68,20 +69,21 @@ void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
 
-			//TemperatureMap[XIndex][YIndex] = HeatNoise;
 			TemperatureMap[XIndex][YIndex] = HeatNoise;
 		}
-	USimplexNoiseBPLibrary::createSeed(21);
-	USimplexNoiseBPLibrary::setNoiseSeed(21);
+	USimplexNoiseBPLibrary::createSeed(MoistureParameters.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(MoistureParameters.Seed);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			float MoistureNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
-				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
+				i, -j, MoistureParameters.Lacunarity, MoistureParameters.Persistence,
+				MoistureParameters.Octaves, MoistureParameters.NoiseDensity, MoistureParameters.ZeroToOne);
 			MoistureNoise = Clamp(MoistureNoise, 0, 1);
+			
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
+			
 			MoistureMap[XIndex][YIndex] = MoistureNoise;
 		}
 }
@@ -170,8 +172,8 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap,float** Moi
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
-	USimplexNoiseBPLibrary::createSeed(400);
-	USimplexNoiseBPLibrary::setNoiseSeed(400);
+	USimplexNoiseBPLibrary::createSeed(PerlinNoiseParameters.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(PerlinNoiseParameters.Seed);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
