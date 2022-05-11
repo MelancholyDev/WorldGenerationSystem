@@ -57,6 +57,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	InstanceTopGrass->ClearInstances();
 	InstanceDirt->ClearInstances();
 	InstanceStone->ClearInstances();
+	
 	for (int LoopX = Data.ChunkSize * -1; LoopX <= Data.ChunkSize; LoopX++)
 	{
 		for (int LoopY = Data.ChunkSize * -1; LoopY <= Data.ChunkSize; LoopY++)
@@ -76,8 +77,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			}
 			else
 			{
-				HeightNoise = 0.1;
-				HeatNoise = 0.1;
+				HeightNoise = 1;
+				HeatNoise =1;
 			}
 
 			HeightNoise = HeightNoise * Data.NoiseScale;

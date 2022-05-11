@@ -38,13 +38,13 @@ float Generator::Clamp(float x, float left, float right)
 	return x;
 }
 
-void Generator::GenerateHeightMap(float** Map, float** HeatMap)
+void Generator::GenerateHeightMap(float** Map, float** HeatMap, float** MoistureMap)
 {
 	switch (GenerationParameters.GenerationType)
 	{
 	case PERLIN_NOISE:
 		{
-			GenerateWithPerlinNoise(Map, HeatMap);
+			GenerateWithPerlinNoise(Map, HeatMap,MoistureMap);
 		}break;
 	case DIAMOND_SQUARE:
 		{
@@ -56,9 +56,8 @@ void Generator::GenerateHeightMap(float** Map, float** HeatMap)
 
 void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 {
-	USimplexNoiseBPLibrary::createSeed(21);
-	USimplexNoiseBPLibrary::createSeed(53);
-	USimplexNoiseBPLibrary::setNoiseSeed(21);
+	USimplexNoiseBPLibrary::createSeed(11);
+	USimplexNoiseBPLibrary::setNoiseSeed(11);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -69,7 +68,21 @@ void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
 
+			//TemperatureMap[XIndex][YIndex] = HeatNoise;
 			TemperatureMap[XIndex][YIndex] = HeatNoise;
+		}
+	USimplexNoiseBPLibrary::createSeed(21);
+	USimplexNoiseBPLibrary::setNoiseSeed(21);
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
+		{
+			float MoistureNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
+				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
+			MoistureNoise = Clamp(MoistureNoise, 0, 1);
+			const int XIndex = i + RightBorder;
+			const int YIndex = j + RightBorder;
+			MoistureMap[XIndex][YIndex] = MoistureNoise;
 		}
 }
 
@@ -104,25 +117,52 @@ void Generator::GenerateWithDiamondSquare(float** Map)
 	}
 }
 
-uint8 Generator::GetBiom(float Noise)
+uint8 Generator::GetBiom(float Heat,float Moisture)
 {
 	uint8 bytes;
-	if (Noise < 0.33)
+	if (Heat < 0.33)
 	{
-		bytes = (uint8)TUNDRA;
+		if(Moisture < 0.33)
+		{
+			bytes = (uint8)BOREAL;
+		}else if ((Moisture >= 0.33) & (Moisture < 0.66))
+		{
+			bytes = (uint8)SEASONAL_FOREST;
+		}else
+		{
+			bytes = (uint8)TUNDRA;
+		}
 	}
-	else if ((Noise >= 0.33) & (Noise < 0.66))
+	else if ((Heat >= 0.33) & (Heat < 0.66))
 	{
-		bytes = (uint8)TROPICAL_WOODLAND;
+		if(Moisture < 0.33)
+		{
+			bytes = (uint8)SEASONAL_FOREST;
+		}else if ((Moisture >= 0.33) & (Moisture < 0.66))
+		{
+			bytes = (uint8)TEMPERATE_FOREST;
+		}else
+		{
+			bytes = (uint8)TEMPERATE_RAINFOREST;
+		}
 	}
 	else
 	{
-		bytes = (uint8)DESERT;
+		if(Moisture < 0.33)
+		{
+			bytes = (uint8)DESERT;
+		}else if ((Moisture >= 0.33) & (Moisture < 0.66))
+		{
+			bytes = (uint8)SAVANNA;
+		}else
+		{
+			bytes = (uint8)RAIN_FOREST;
+		}
 	}
 	return bytes;
 }
 
-void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
+void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap,float** MoistureMap)
 {
 	
 	float** TempHeightMap = new float*[MapSize];
@@ -130,8 +170,8 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
-	USimplexNoiseBPLibrary::createSeed(16);
-	USimplexNoiseBPLibrary::setNoiseSeed(16);
+	USimplexNoiseBPLibrary::createSeed(400);
+	USimplexNoiseBPLibrary::setNoiseSeed(400);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -144,6 +184,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 				i, -j, PerlinNoiseParameters.Lacunarity, PerlinNoiseParameters.Persistance,
 				PerlinNoiseParameters.OctaveSharp,
 				PerlinNoiseParameters.NoiseDensity, PerlinNoiseParameters.ZeroToOne);
+			
 
 			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
 				i, -j, PerlinNoiseParameters.Lacunarity, PerlinNoiseParameters.Persistance,
@@ -156,7 +197,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 			TEnumAsByte<EBiomType> CurrentBiom;
 			if (PerlinNoiseParameters.IsTest)
 			{
-				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
+				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex],MoistureMap[XIndex][YIndex]);
 			}
 			else
 			{
@@ -170,7 +211,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 
 	if (PerlinNoiseParameters.IsInvert)
 	{
-		InvertMap(TempHeightMap, HeatMap);
+		InvertMap(TempHeightMap, HeatMap,MoistureMap);
 	}
 	for(int i=0;i<MapSize;i++)
 	{
@@ -185,7 +226,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, float** HeatMap)
 	}
 }
 
-void Generator::InvertMap(float** MapForInvert, float** HeatMap)
+void Generator::InvertMap(float** MapForInvert, float** HeatMap,float** MoistureMap)
 {
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
@@ -195,7 +236,7 @@ void Generator::InvertMap(float** MapForInvert, float** HeatMap)
 			TEnumAsByte<EBiomType> CurrentBiom;
 			if (PerlinNoiseParameters.IsTest)
 			{
-				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex]);
+				CurrentBiom = (TEnumAsByte<EBiomType>)GetBiom(HeatMap[XIndex][YIndex],MoistureMap[XIndex][YIndex]);
 			}
 			else
 			{

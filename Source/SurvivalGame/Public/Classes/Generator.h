@@ -9,16 +9,16 @@ class Generator
 {
 public:
 	Generator(FGenerationParameters Parameters, UDataTable* Table);
-	void GenerateHeightMap(float** Map, float** HeatMap);
+	void GenerateHeightMap(float** Map, float** HeatMap,float** MoistureMap);
 	void GenerateBiomMaps(float** TemperatureMap,float** MoistureMap);
 	void GenerateSeaMap(float** Map);
 private:
 	void InitializeBiomData();
-	void GenerateWithPerlinNoise(float** Map, float** HeatMap);
+	void GenerateWithPerlinNoise(float** Map, float** HeatMap,float** MoistureMap);
 	void GenerateWithDiamondSquare(float** Map);
 	float Clamp(float x, float left, float right);
-	uint8 GetBiom(float Noise);
-	void InvertMap(float** MapForInvert, float** HeatMap);
+	uint8 GetBiom(float Heat,float Moisture);
+	void InvertMap(float** MapForInvert, float** HeatMap,float** MoistureMap);
 
 	FGenerationParameters GenerationParameters;
 	BezierComputations* BezierComputationsInstance;

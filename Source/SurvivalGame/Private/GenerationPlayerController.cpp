@@ -314,7 +314,7 @@ void AGenerationPlayerController::GenerateMaps()
 
 void AGenerationPlayerController::GenerateHeightMap()
 {
-	GeneratorInstance->GenerateHeightMap(HeightMap,HeatMap);
+	GeneratorInstance->GenerateHeightMap(HeightMap,HeatMap,MoistureMap);
 }
 
 void AGenerationPlayerController::GenerateHeatMap()
