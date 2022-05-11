@@ -46,16 +46,16 @@ void Generator::GenerateHeightMap(float** Map, float** HeatMap)
 	case PERLIN_NOISE:
 		{
 			GenerateWithPerlinNoise(Map, HeatMap);
-		}
+		}break;
 	case DIAMOND_SQUARE:
 		{
 			GenerateWithDiamondSquare(Map);
-		}
+		}break;
 	default: ;
 	}
 }
 
-void Generator::GenerateTemperatureMap(float** Map)
+void Generator::GenerateBiomMaps(float** TemperatureMap,float** MoistureMap)
 {
 	USimplexNoiseBPLibrary::setNoiseSeed(21);
 	for (int i = LeftBorder; i <= RightBorder; i++)
@@ -68,13 +68,10 @@ void Generator::GenerateTemperatureMap(float** Map)
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
 
-			Map[XIndex][YIndex] = HeatNoise;
+			TemperatureMap[XIndex][YIndex] = HeatNoise;
 		}
 }
 
-void Generator::GenerateMoistureMap(float** Map)
-{
-}
 
 void Generator::GenerateSeaMap(float** Map)
 {
@@ -88,6 +85,21 @@ void Generator::InitializeBiomData()
 	{
 		FBiomData Data = *DataTableBiome->FindRow<FBiomData>(Name, EmptyString);
 		BiomDataSet.Add(Data.Type, Data);
+	}
+}
+void Generator::GenerateWithDiamondSquare(float** Map)
+{
+	DiamondSquareInstance->GenerateMap(Map);
+	if (GenerationParameters.IsApplyGausianFilter)
+	{
+		float** TempMap = new float*[MapSize];
+		for (int i = 0; i < MapSize; i++)
+		{
+			TempMap[i]=new float[MapSize];
+			for (int j = 0; j < MapSize; j++)
+				TempMap[i][j] = Map[i][j];
+		}
+		GausianFilterInstance->SmoothMap(TempMap, Map);
 	}
 }
 

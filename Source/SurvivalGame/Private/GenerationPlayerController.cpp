@@ -319,7 +319,7 @@ void AGenerationPlayerController::GenerateHeightMap()
 
 void AGenerationPlayerController::GenerateHeatMap()
 {
-	GeneratorInstance->GenerateTemperatureMap(HeatMap);
+	GeneratorInstance->GenerateBiomMaps(HeatMap,MoistureMap);
 }
 
 

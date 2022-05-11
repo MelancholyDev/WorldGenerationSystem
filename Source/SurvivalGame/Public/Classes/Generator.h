@@ -10,8 +10,7 @@ class Generator
 public:
 	Generator(FGenerationParameters Parameters, UDataTable* Table);
 	void GenerateHeightMap(float** Map, float** HeatMap);
-	void GenerateTemperatureMap(float** Map);
-	void GenerateMoistureMap(float** Map);
+	void GenerateBiomMaps(float** TemperatureMap,float** MoistureMap);
 	void GenerateSeaMap(float** Map);
 private:
 	void InitializeBiomData();
@@ -38,19 +37,3 @@ private:
 	int RightBorder;
 	int MapSize;
 };
-
-inline void Generator::GenerateWithDiamondSquare(float** Map)
-{
-	DiamondSquareInstance->GenerateMap(Map);
-	if (GenerationParameters.IsApplyGausianFilter)
-	{
-		float** TempMap = new float*[MapSize];
-		for (int i = 0; i < MapSize; i++)
-		{
-			TempMap[i]=new float[MapSize];
-			for (int j = 0; j < MapSize; j++)
-				TempMap[i][j] = Map[i][j];
-		}
-		GausianFilterInstance->SmoothMap(TempMap, Map);
-	}
-}
