@@ -301,6 +301,7 @@ void AGenerationPlayerController::GenerateMaps()
 	HeatMap = new float*[MapSize];
 	WaterMap = new float*[MapSize];
 	MoistureMap = new float*[MapSize];
+	UndergroundMap = new float**[MapSize];
 
 	for (int i =0; i < MapSize; i++)
 	{
@@ -308,6 +309,7 @@ void AGenerationPlayerController::GenerateMaps()
 		HeightMap[i] = new float[MapSize];
 		WaterMap[i] = new float[MapSize];
 		MoistureMap[i] = new float[MapSize];
+		UndergroundMap[i] = new float*[MapSize];
 	}
 	GenerateHeatMap();
 	GenerateHeightMap();

@@ -25,6 +25,7 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	float** HeatMap;
 	float** MoistureMap;
 	float** WaterMap;
+	float*** UndergroundMap;
 	
 	UPROPERTY(EditAnywhere)
 	FGenerationParameters GenerationParameters;
