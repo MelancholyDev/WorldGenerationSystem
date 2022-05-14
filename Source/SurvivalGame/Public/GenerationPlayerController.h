@@ -1,16 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enums/EBiomType.h"
 #include "VoxelChank.h"
 #include "Classes/Generator.h"
 #include "GameFramework/PlayerController.h"
-#include "Structures/FPerlinNoiseParameters.h"
-#include "Structures/FTemperatureAndMoistureParameters.h"
 #include "Factories/CompositeDataTableFactory.h"
 #include "Structures/FBiomData.h"
 #include "Structures/FVoxelLine.h"
-#include "Structures/FGausianParameters.h"
 #include "Structures/FVoxelGeneraionData.h"
 #include "Structures/FGenerationParameters.h"
 #include "GenerationPlayerController.generated.h"
@@ -24,7 +20,6 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
-	
 	Generator* GeneratorInstance;
 	float** HeightMap;
 	float** HeatMap;
@@ -39,6 +34,11 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UDataTable* BiomDataSet;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;
+	
+	UPROPERTY(EditAnywhere)
+	float WaterLevel;
+	UPROPERTY(EditAnywhere)
+	bool UpdateMap;
 	
 public:
 	virtual void BeginPlay() override;

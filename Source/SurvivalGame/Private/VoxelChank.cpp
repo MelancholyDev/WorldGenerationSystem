@@ -49,7 +49,15 @@ AVoxelChank::AVoxelChank()
 	InstanceStone->SetRelativeLocation(FVector(0, 0, 0));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Stone(
 		TEXT("StaticMesh'/Game/SurvivalGeneration/Models/Meshes/Stone.Stone'"));
-	InstanceStone->SetStaticMesh(Stone.Object);
+	
+	InstanceWater = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstanceWater"));
+	InstanceWater->SetMobility(EComponentMobility::Static);
+	InstanceWater->SetupAttachment(Root);
+	InstanceWater->SetRelativeLocation(FVector(0, 0, 0));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Water(
+		TEXT("StaticMesh'/Game/SurvivalGeneration/Models/Meshes/Water.Water'"));
+	InstanceWater->SetStaticMesh(Water.Object);
+	InstanceWater->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AVoxelChank::OnConstruction(const FTransform& Transform)
@@ -86,17 +94,23 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int ShiftClamped = FloorNoise * Data.VoxelSize;
 			FVector position(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
 			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-			if (HeatNoise < 0.33)
+			if(HeightNoise>WaterLevel)
 			{
-				InstanceSnow->AddInstance(transform);
-			}
-			else if ((HeatNoise >= 0.33) & (HeatNoise < 0.66))
+				if (HeatNoise < 0.33)
+				{
+					InstanceSnow->AddInstance(transform);
+				}
+				else if ((HeatNoise >= 0.33) & (HeatNoise < 0.66))
+				{
+					InstanceTopGrass->AddInstance(transform);
+				}
+				else
+				{
+					InstanceSand->AddInstance(transform);
+				}
+			}else
 			{
-				InstanceTopGrass->AddInstance(transform);
-			}
-			else
-			{
-				InstanceSand->AddInstance(transform);
+				InstanceWater->AddInstance(transform);
 			}
 			if (Data.IsAddDepth)
 			{
@@ -119,9 +133,10 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AVoxelChank::InitializeParameters(FVoxelGenerationData DataParam)
+void AVoxelChank::InitializeParameters(FVoxelGenerationData DataParam,float WaterLevelParam)
 {
 	Data = DataParam;
+	WaterLevel=WaterLevelParam;
 }
 
 void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const

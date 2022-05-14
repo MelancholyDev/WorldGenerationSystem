@@ -21,7 +21,7 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	Data.Initialize(VoxelGenerationData.IsAddDepth, GenerationParameters.VoxelSize, GenerationParameters.PerlinNoiseParameters.NoiseScale,
 	                GenerationParameters.ChunkSize, VoxelGenerationData.Depth, VoxelGenerationData.NoiseDensity3D,
 	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap);
-	Chunk->InitializeParameters(Data);
+	Chunk->InitializeParameters(Data,WaterLevel);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -260,24 +260,25 @@ void AGenerationPlayerController::BeginPlay()
 
 void AGenerationPlayerController::Tick(float DeltaSeconds)
 {
-	std::string s = std::to_string(GenerationParameters.RenderRange);
-	FString str = s.c_str();
-	auto CurrentCoordinates = GetPlayerChunkCoordinates();
-	int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
-	int Y_Shift = CurrentCoordinates.Y - OldCoordinates.Y;
-	if ((X_Shift != 0) & (Y_Shift != 0))
+	if(UpdateMap)
 	{
-		Diagonal(X_Shift, Y_Shift);
+		auto CurrentCoordinates = GetPlayerChunkCoordinates();
+		int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
+		int Y_Shift = CurrentCoordinates.Y - OldCoordinates.Y;
+		if ((X_Shift != 0) & (Y_Shift != 0))
+		{
+			Diagonal(X_Shift, Y_Shift);
+		}
+		else if (X_Shift != 0)
+		{
+			XShift(X_Shift);
+		}
+		else if (Y_Shift != 0)
+		{
+			YShift(Y_Shift);
+		}
+		OldCoordinates = CurrentCoordinates;
 	}
-	else if (X_Shift != 0)
-	{
-		XShift(X_Shift);
-	}
-	else if (Y_Shift != 0)
-	{
-		YShift(Y_Shift);
-	}
-	OldCoordinates = CurrentCoordinates;
 }
 
 void AGenerationPlayerController::PrintFullMap()
