@@ -149,7 +149,7 @@ void AGenerationPlayerController::InitializeParameters()
 	{
 		Map->Add(FVoxelLine());
 	}
-	GeneratorInstance=new Generator(GenerationParameters,VoxelGenerationData,WormSettings,BiomDataSet);
+	GeneratorInstance=new Generator(GenerationParameters,VoxelGenerationData,BiomDataSet);
 }
 
 

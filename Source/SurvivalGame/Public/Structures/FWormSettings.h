@@ -6,14 +6,8 @@ struct FWormSettings
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
-	float Persistance;
+	int WormLength;
 	UPROPERTY(EditAnywhere)
-	float Octaves;
-	UPROPERTY(EditAnywhere)
-	float NoiseDensity;
-	UPROPERTY(EditAnywhere)
-	float Lacunarity;
-	UPROPERTY(EditAnywhere)
-	float StartFrequency;
+	int WormWidth;
 
 };

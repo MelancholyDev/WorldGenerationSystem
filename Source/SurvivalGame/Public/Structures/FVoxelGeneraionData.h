@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FWormSettings.h"
 #include "FVoxelGeneraionData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -12,9 +13,19 @@ struct FVoxelGenerationData
 	UPROPERTY(EditAnywhere)
 	float NoiseDensity3D=0;
 	UPROPERTY(EditAnywhere)
+	float Lacunarity=0;
+	UPROPERTY(EditAnywhere)
+	float Persistance;
+	UPROPERTY(EditAnywhere)
+	int Octaves;
+	UPROPERTY(EditAnywhere)
+	bool ZeroToOne;
+	UPROPERTY(EditAnywhere)
 	int Depth=0;
 	UPROPERTY(EditAnywhere)
 	int CaveStart;
+	UPROPERTY(EditAnywhere)
+	FWormSettings WormSettings;
 	float VoxelSize=0;
 	int NoiseScale=0;
 	int ChunkSize=0;

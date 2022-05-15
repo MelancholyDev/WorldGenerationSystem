@@ -12,7 +12,7 @@ class Generator
 {
 public:
 	Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam,
-	          FWormSettings WormSettingsParam, UDataTable* Table);
+	          UDataTable* Table);
 	void GenerateHeightMap(float** Map, float** HeatMap, float** MoistureMap);
 	void GenerateBiomMaps(float** TemperatureMap, float** MoistureMap);
 	void GenerateSeaMap(float** Map);

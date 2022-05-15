@@ -34,8 +34,6 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	UPROPERTY(EditAnywhere)
 	FVoxelGenerationData VoxelGenerationData;
 	UPROPERTY(EditAnywhere)
-	FWormSettings WormSettings;
-	UPROPERTY(EditAnywhere)
 	UDataTable* BiomDataSet;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AVoxelChank> ToSpawn;

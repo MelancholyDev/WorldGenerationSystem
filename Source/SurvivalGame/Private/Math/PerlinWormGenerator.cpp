@@ -101,8 +101,8 @@ bool PerlinWormGenerator::FailCondition(float FirstNoise, float NeighbourNoise, 
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim,Size,Depth,3);
-	Worm->MoveLength(11);
+	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim,Size,Depth,WormSettings.WormWidth);
+	Worm->MoveLength(WormSettings.WormLength);
 }
 
 void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
@@ -125,7 +125,6 @@ void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
 	for (int i = 0; i < Maximas->Num(); i++)
 	{
 		FIntVector Maxim = (*Maximas)[i];
-		//FIntVector Maxim = FIntVector(Size/2,Size/2,Depth/2);
 		CreateWorm(Maxim);
 	}
 	 for (int i = 0; i < Size; i++)

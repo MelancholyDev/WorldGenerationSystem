@@ -3,10 +3,10 @@
 #include "SimplexNoiseBPLibrary.h"
 #include "Structures/FWormSettings.h"
 
-Generator::Generator(FGenerationParameters Parameters,FVoxelGenerationData CaveParametersParam,FWormSettings WormSettingsParam,UDataTable* Table)
+Generator::Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam, UDataTable* Table)
 {
-	WormSettings=WormSettingsParam;
-	CaveParameters=CaveParametersParam;
+	WormSettings = CaveParametersParam.WormSettings;
+	CaveParameters = CaveParametersParam;
 	GausianParameters = Parameters.GausianParameters;
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
 	TemperatureParameters = Parameters.TemperatureAndMoistureParameters.TemperatureParameters;
@@ -29,7 +29,7 @@ Generator::Generator(FGenerationParameters Parameters,FVoxelGenerationData CaveP
 	BezierComputationsInstance = new BezierComputations(BiomDataSet);
 	DiamondSquareInstance = new DiamondSquare(DiamondSquareParameters, MapSize);
 	GausianFilterInstance = new GausianFilter(GausianParameters, MapSize);
-	WormGenerator = new PerlinWormGenerator(MapSize,CaveParameters.CaveStart-CaveParameters.Depth+1,WormSettings);
+	WormGenerator = new PerlinWormGenerator(MapSize, CaveParameters.CaveStart - CaveParameters.Depth + 1, WormSettings);
 }
 
 float Generator::Clamp(float x, float left, float right)
@@ -105,17 +105,19 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = CaveParameters.CaveStart; k >=CaveParameters.Depth; k--)
+			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
 			{
-				float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(i, -j, k, CaveParameters.NoiseDensity3D);
+				//float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(i, -j, k, CaveParameters.NoiseDensity3D);
+				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+					i, -j, k, CaveParameters.Lacunarity, CaveParameters.Persistance, CaveParameters.Octaves,
+					CaveParameters.NoiseDensity3D, CaveParameters.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
-				UndergroundMap[XIndex][YIndex][DepthIndex]=Clamp(Noise3D,0,1);
+				UndergroundMap[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
 	WormGenerator->GenerateCaves(UndergroundMap);
-	
 }
 
 void Generator::InitializeBiomData()
