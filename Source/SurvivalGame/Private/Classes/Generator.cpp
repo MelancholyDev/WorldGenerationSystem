@@ -1,9 +1,11 @@
 #include "Classes/Generator.h"
 
 #include "SimplexNoiseBPLibrary.h"
+#include "Structures/FWormSettings.h"
 
-Generator::Generator(FGenerationParameters Parameters,FVoxelGenerationData CaveParametersParam, UDataTable* Table)
+Generator::Generator(FGenerationParameters Parameters,FVoxelGenerationData CaveParametersParam,FWormSettings WormSettingsParam,UDataTable* Table)
 {
+	WormSettings=WormSettingsParam;
 	CaveParameters=CaveParametersParam;
 	GausianParameters = Parameters.GausianParameters;
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
@@ -27,6 +29,7 @@ Generator::Generator(FGenerationParameters Parameters,FVoxelGenerationData CaveP
 	BezierComputationsInstance = new BezierComputations(BiomDataSet);
 	DiamondSquareInstance = new DiamondSquare(DiamondSquareParameters, MapSize);
 	GausianFilterInstance = new GausianFilter(GausianParameters, MapSize);
+	WormGenerator = new PerlinWormGenerator(MapSize,CaveParameters.CaveStart-CaveParameters.Depth+1,WormSettings);
 }
 
 float Generator::Clamp(float x, float left, float right)
@@ -107,10 +110,12 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 				float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(i, -j, k, CaveParameters.NoiseDensity3D);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
-				UndergroundMap[XIndex][YIndex][DepthIndex]=Noise3D;
+				UndergroundMap[XIndex][YIndex][DepthIndex]=Clamp(Noise3D,0,1);
 				DepthIndex++;
 			}
 		}
+	//WormGenerator->GenerateCaves(UndergroundMap);
+	
 }
 
 void Generator::InitializeBiomData()

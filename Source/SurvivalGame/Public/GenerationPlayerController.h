@@ -9,6 +9,8 @@
 #include "Structures/FVoxelLine.h"
 #include "Structures/FVoxelGeneraionData.h"
 #include "Structures/FGenerationParameters.h"
+#include "Structures/FWormSettings.h"
+
 #include "GenerationPlayerController.generated.h"
 
 UCLASS()
@@ -31,6 +33,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FGenerationParameters GenerationParameters;
 	UPROPERTY(EditAnywhere)
 	FVoxelGenerationData VoxelGenerationData;
+	UPROPERTY(EditAnywhere)
+	FWormSettings WormSettings;
 	UPROPERTY(EditAnywhere)
 	UDataTable* BiomDataSet;
 	UPROPERTY(EditAnywhere)

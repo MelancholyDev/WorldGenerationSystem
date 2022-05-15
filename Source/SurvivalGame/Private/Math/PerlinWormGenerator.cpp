@@ -2,10 +2,10 @@
 
 #include "Math/PerlinWorm.h"
 
-PerlinWormGenerator::PerlinWormGenerator(float*** UndergroundMapParam, int SizeParam, int DepthParam)
+PerlinWormGenerator::PerlinWormGenerator(int SizeParam, int DepthParam, FWormSettings WormSettingsParam)
 {
 	InitializeDirectionList();
-	UndergroundMap = UndergroundMapParam;
+	WormSettings = WormSettingsParam;
 	Depth = DepthParam;
 	Size = SizeParam;
 }
@@ -15,18 +15,18 @@ void PerlinWormGenerator::InitializeDirectionList()
 	Directions = new TArray<FIntVector>();
 	for (int i = -1; i <= 1; i++)
 		for (int j = -1; j <= 1; j++)
-			for (int k = -1; j <= k; i++)
+			for (int k = -1; k <= 1; k++)
 			{
 				if ((i != 0) | (j != 0) | (k != 0))
 				{
-					Directions->Add(FIntVector(i,j,k));
+					Directions->Add(FIntVector(i, j, k));
 				}
 			}
 }
 
 bool PerlinWormGenerator::CheckNeighbours(int X, int Y, int Z, bool IsMaxima)
 {
-	for(int i=0;i<Directions->Num();i++)
+	for (int i = 0; i < Directions->Num(); i++)
 	{
 		FIntVector Direction = (*Directions)[i];
 		int X_Check = X + Direction.X;
@@ -100,14 +100,27 @@ bool PerlinWormGenerator::FailCondition(float FirstNoise, float NeighbourNoise, 
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	PerlinWorm* Worm = new PerlinWorm();
+	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim);
 }
 
-void PerlinWormGenerator::GenerateCaves()
+void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
 {
+	UndergroundMap = UndergroundMapParam;
+	TempMap = new float**[Size];
+	for (int i = 0; i < Size; i++)
+	{
+		TempMap[i] = new float*[Size];
+		for (int j = 0; j < Size; j++)
+			TempMap[i][j] = new float[Depth];
+	}
+	for (int i = 0; i < Size; i++)
+		for (int j = 0; j < Size; j++)
+			for (int k = 0; k < Size; k++)
+			TempMap[i][j][k] = 1;
+	
 	FindLocalMaximas();
 	FindLocalMinimas();
-	for(int i=0;i<Maximas->Num();i++)
+	for (int i = 0; i < Maximas->Num(); i++)
 	{
 		FIntVector Maxim = (*Maximas)[i];
 		CreateWorm(Maxim);

@@ -2,14 +2,17 @@
 #include "Math/BezierComputations.h"
 #include "Math/DiamondSquare.h"
 #include "Math/GausianFilter.h"
+#include "Math/PerlinWormGenerator.h"
 #include "Structures/FPerlinNoiseParameters.h"
 #include "Structures/FTemperatureAndMoistureParameters.h"
 #include "Structures/FVoxelGeneraionData.h"
+#include "Structures/FWormSettings.h"
 
 class Generator
 {
 public:
-	Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam, UDataTable* Table);
+	Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam,
+	          FWormSettings WormSettingsParam, UDataTable* Table);
 	void GenerateHeightMap(float** Map, float** HeatMap, float** MoistureMap);
 	void GenerateBiomMaps(float** TemperatureMap, float** MoistureMap);
 	void GenerateSeaMap(float** Map);
@@ -24,9 +27,11 @@ private:
 
 	FVoxelGenerationData CaveParameters;
 	FGenerationParameters GenerationParameters;
+	FWormSettings WormSettings;
 	BezierComputations* BezierComputationsInstance;
 	DiamondSquare* DiamondSquareInstance;
 	GausianFilter* GausianFilterInstance;
+	PerlinWormGenerator* WormGenerator;
 
 	FGausianParameters GausianParameters;
 	FPerlinNoiseParameters PerlinNoiseParameters;

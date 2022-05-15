@@ -1,11 +1,13 @@
 #pragma once
 #include <list>
 
+#include "Structures/FWormSettings.h"
+
 class PerlinWormGenerator
 {
 public:
-	PerlinWormGenerator(float*** UndergroundMapParam, int SizeParam, int DepthParam);
-	void GenerateCaves();
+	PerlinWormGenerator(int SizeParam, int DepthParam,FWormSettings WormSettingsParam);
+	void GenerateCaves(float*** UndergroundMapParam);
 private:
 	void InitializeDirectionList();
 	bool CheckNeighbours(int X, int Y, int Z, bool IsMaxima);
@@ -17,9 +19,11 @@ private:
 
 
 	float*** UndergroundMap;
+	float*** TempMap;
 	TArray<FIntVector>* Directions;
 	TArray<FIntVector>* Maximas;
 	TArray<FIntVector>* Minimas;
 	int Size;
 	int Depth;
+	FWormSettings WormSettings;
 };
