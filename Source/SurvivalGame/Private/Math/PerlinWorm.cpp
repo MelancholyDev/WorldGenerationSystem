@@ -1,5 +1,9 @@
 #include "Math/PerlinWorm.h"
 
+PerlinWorm::PerlinWorm()
+{
+}
+
 PerlinWorm::PerlinWorm(FWormSettings WormSettingsParam, FIntVector StartPositionParam, FIntVector ConvergancePointParam)
 {
 	WormSetings=WormSettingsParam;

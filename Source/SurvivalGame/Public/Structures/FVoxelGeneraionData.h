@@ -13,14 +13,17 @@ struct FVoxelGenerationData
 	float NoiseDensity3D=0;
 	UPROPERTY(EditAnywhere)
 	int Depth=0;
+	UPROPERTY(EditAnywhere)
+	int CaveStart;
 	float VoxelSize=0;
 	int NoiseScale=0;
 	int ChunkSize=0;
 	int MapSize=0;
 	float **Map=0;
 	float **Heat=0;
-	void Initialize(bool IsAddDepthParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,float NoiseDensity3DParam,
-		float Threshold3DParam,int MapSizeParam,float **MapParam,float **HeatParam)
+	float ***UndergroundMap;
+	void Initialize(bool IsAddDepthParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,int CaveStartParam,float NoiseDensity3DParam,
+		float Threshold3DParam,int MapSizeParam,float **MapParam,float **HeatParam,float*** UndergroundMapParam)
 	{
 		IsAddDepth=IsAddDepthParam;
 		VoxelSize=VoxelSizeParam;
@@ -32,5 +35,7 @@ struct FVoxelGenerationData
 		MapSize = MapSizeParam;
 		Map=MapParam;
 		Heat=HeatParam;
+		UndergroundMap = UndergroundMapParam;
+		CaveStart=CaveStartParam;
 	}
 };

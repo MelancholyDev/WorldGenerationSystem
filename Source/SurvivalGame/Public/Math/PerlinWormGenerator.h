@@ -5,6 +5,7 @@ class PerlinWormGenerator
 {
 public:
 	PerlinWormGenerator(float*** UndergroundMapParam, int SizeParam, int DepthParam);
+	void GenerateCaves();
 private:
 	void InitializeDirectionList();
 	bool CheckNeighbours(int X, int Y, int Z, bool IsMaxima);
@@ -13,7 +14,6 @@ private:
 	void FindLocalMinimas();
 	bool FailCondition(float FirstNoise, float NeighbourNoise, bool IsMaxima);
 	void CreateWorm(FIntVector Maxim);
-	void GenerateRivers();
 
 
 	float*** UndergroundMap;

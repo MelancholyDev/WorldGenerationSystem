@@ -61,6 +61,7 @@ private:
 	void GenerateMaps();
 	void GenerateHeightMap();
 	void GenerateHeatMap();
+	void GenerateCaveMap();
 	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();

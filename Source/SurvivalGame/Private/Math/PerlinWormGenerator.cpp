@@ -1,5 +1,7 @@
 #include "Math/PerlinWormGenerator.h"
 
+#include "Math/PerlinWorm.h"
+
 PerlinWormGenerator::PerlinWormGenerator(float*** UndergroundMapParam, int SizeParam, int DepthParam)
 {
 	InitializeDirectionList();
@@ -98,10 +100,10 @@ bool PerlinWormGenerator::FailCondition(float FirstNoise, float NeighbourNoise, 
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	
+	PerlinWorm* Worm = new PerlinWorm();
 }
 
-void PerlinWormGenerator::GenerateRivers()
+void PerlinWormGenerator::GenerateCaves()
 {
 	FindLocalMaximas();
 	FindLocalMinimas();

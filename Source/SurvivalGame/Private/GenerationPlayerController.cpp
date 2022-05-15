@@ -19,8 +19,8 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	FVoxelGenerationData Data;
 	Data.Initialize(VoxelGenerationData.IsAddDepth, GenerationParameters.VoxelSize, GenerationParameters.PerlinNoiseParameters.NoiseScale,
-	                GenerationParameters.ChunkSize, VoxelGenerationData.Depth, VoxelGenerationData.NoiseDensity3D,
-	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap);
+	                GenerationParameters.ChunkSize, VoxelGenerationData.Depth,VoxelGenerationData.CaveStart, VoxelGenerationData.NoiseDensity3D,
+	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap,UndergroundMap);
 	Chunk->InitializeParameters(Data,WaterLevel);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
@@ -149,7 +149,7 @@ void AGenerationPlayerController::InitializeParameters()
 	{
 		Map->Add(FVoxelLine());
 	}
-	GeneratorInstance=new Generator(GenerationParameters,BiomDataSet);
+	GeneratorInstance=new Generator(GenerationParameters,VoxelGenerationData,BiomDataSet);
 }
 
 
@@ -311,8 +311,16 @@ void AGenerationPlayerController::GenerateMaps()
 		MoistureMap[i] = new float[MapSize];
 		UndergroundMap[i] = new float*[MapSize];
 	}
+	for (int i =0; i < MapSize; i++)
+	{
+		for (int j =0; j < MapSize; j++)
+		{
+			UndergroundMap[i][j] = new float[VoxelGenerationData.CaveStart - VoxelGenerationData.Depth+1];
+		}
+	}
 	GenerateHeatMap();
 	GenerateHeightMap();
+	GenerateCaveMap();
 }
 
 void AGenerationPlayerController::GenerateHeightMap()
@@ -323,6 +331,11 @@ void AGenerationPlayerController::GenerateHeightMap()
 void AGenerationPlayerController::GenerateHeatMap()
 {
 	GeneratorInstance->GenerateBiomMaps(HeatMap,MoistureMap);
+}
+
+void AGenerationPlayerController::GenerateCaveMap()
+{
+	GeneratorInstance->GenerateCaveMap(UndergroundMap);
 }
 
 
