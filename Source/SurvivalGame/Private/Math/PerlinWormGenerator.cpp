@@ -66,6 +66,7 @@ void PerlinWormGenerator::FindLocalMaximas()
 			}
 		}
 	}
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Maximas->Num()));
 }
 
 void PerlinWormGenerator::FindLocalMinimas()
@@ -100,7 +101,8 @@ bool PerlinWormGenerator::FailCondition(float FirstNoise, float NeighbourNoise, 
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim);
+	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim,Size,Depth,3);
+	Worm->MoveLength(11);
 }
 
 void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
@@ -115,7 +117,7 @@ void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
 	}
 	for (int i = 0; i < Size; i++)
 		for (int j = 0; j < Size; j++)
-			for (int k = 0; k < Size; k++)
+			for (int k = 0; k < Depth; k++)
 			TempMap[i][j][k] = 1;
 	
 	FindLocalMaximas();
@@ -123,6 +125,11 @@ void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
 	for (int i = 0; i < Maximas->Num(); i++)
 	{
 		FIntVector Maxim = (*Maximas)[i];
+		//FIntVector Maxim = FIntVector(Size/2,Size/2,Depth/2);
 		CreateWorm(Maxim);
 	}
+	 for (int i = 0; i < Size; i++)
+	 	for (int j = 0; j < Size; j++)
+	 		for (int k = 0; k < Depth; k++)
+	 			UndergroundMap[i][j][k] = TempMap[i][j][k];
 }

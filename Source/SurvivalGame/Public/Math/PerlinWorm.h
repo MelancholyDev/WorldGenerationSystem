@@ -4,7 +4,9 @@
 class PerlinWorm
 {
 public:
-	PerlinWorm(float*** UndergroundMapParam,float*** TempMapParam,FWormSettings WormSettingsParam, FIntVector StartPositionPram);
+	PerlinWorm(float*** UndergroundMapParam, float*** TempMapParam, FWormSettings WormSettingsParam,
+	           FIntVector StartPositionPram, int SizeParam, int DepthParam, int WidthParam);
+	void MoveLength(int Length);
 private:
 	FIntVector CurrentDirection;
 	FIntVector CurrentPosition;
@@ -12,8 +14,12 @@ private:
 	bool MoveToConvergancePoint;
 	float*** UndergroundMap;
 	float*** TempMap;
-	void MoveLength(int Length);
-	void Move();
-	FIntVector GetDirection();
+	int Size;
+	int Depth;
+	int Width;
 	FWormSettings WormSetings;
+
+	void Move();
+	void MarkEmpty(int X,int Y,int Z);
+	FIntVector GetDirection();
 };

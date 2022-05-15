@@ -140,7 +140,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 					{
 						float Noise3D = Data.UndergroundMap[XIndex][YIndex][DepthIterator];
 						DepthIterator++;
-						if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
+						if (Noise3D ==0)
 						{
 							transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
 							InstanceStone->AddInstance(transform);

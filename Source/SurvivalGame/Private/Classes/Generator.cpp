@@ -114,7 +114,7 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 				DepthIndex++;
 			}
 		}
-	//WormGenerator->GenerateCaves(UndergroundMap);
+	WormGenerator->GenerateCaves(UndergroundMap);
 	
 }
 
