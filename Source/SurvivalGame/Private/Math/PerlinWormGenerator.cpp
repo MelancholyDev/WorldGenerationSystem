@@ -1,5 +1,5 @@
 #include "Math/PerlinWormGenerator.h"
-
+#include <limits>
 #include "Math/PerlinWorm.h"
 
 PerlinWormGenerator::PerlinWormGenerator(int SizeParam, int DepthParam, FWormSettings WormSettingsParam)
@@ -66,9 +66,9 @@ void PerlinWormGenerator::FindLocalMaximas()
 			}
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Maximas->Num()));
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Size*Size*Depth));
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Directions->Num()));
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Maximas->Num()));
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Size*Size*Depth));
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Directions->Num()));
 }
 
 void PerlinWormGenerator::FindLocalMinimas()
@@ -103,8 +103,34 @@ bool PerlinWormGenerator::FailCondition(float Noise, float NeighbourNoise, bool 
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,FirstNoise,SecondNoise,WormSettings, Maxim,Size,Depth);
+	PerlinWorm* Worm;
+	if(WormSettings.IsConvergance)
+	{
+		Worm = new PerlinWorm(UndergroundMap,FirstNoise,SecondNoise,WormSettings, Maxim,FindNearestMinimum(Maxim),Size,Depth);
+	}else
+	{
+		Worm = new PerlinWorm(UndergroundMap,FirstNoise,SecondNoise,WormSettings, Maxim,Size,Depth);
+	}
 	Worm->MoveLength(WormSettings.WormLength);
+}
+
+FIntVector PerlinWormGenerator::FindNearestMinimum(FIntVector CheckPoint)
+{
+	float Distance=std::numeric_limits<float>::max();
+	FVector CheckPointFloat=FVector(CheckPoint);
+	FIntVector TargetVector = FIntVector(0,0,0);
+	for (int i = 0; i < Minimas->Num(); i++)
+	{
+		FIntVector Minim = (*Minimas)[i];
+		FVector MinimFloat=FVector(Minim);
+		float DistanceCheck=FVector::Distance(CheckPointFloat,MinimFloat);
+		if(DistanceCheck<Distance)
+		{
+			Distance=DistanceCheck;
+			TargetVector=Minim;
+		}
+	}
+	return TargetVector;
 }
 
 void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** FirstNoiseParam, float*** SecondNoiseParam,float*** CavePositionsParam)
@@ -120,6 +146,7 @@ void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** Fi
 	
 	FindLocalMaximas();
 	FindLocalMinimas();
+	FMath::SRandInit(355);
 	 for (int i = 0; i < Maximas->Num(); i++)
 	 {
 	 	FIntVector Maxim = (*Maximas)[i];

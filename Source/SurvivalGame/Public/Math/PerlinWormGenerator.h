@@ -15,6 +15,7 @@ private:
 	void FindLocalMinimas();
 	bool FailCondition(float FirstNoise, float NeighbourNoise, bool IsMaxima);
 	void CreateWorm(FIntVector Maxim);
+	FIntVector FindNearestMinimum(FIntVector CheckPoint);
 
 	float*** UndergroundMap;
 	float*** FirstNoise;

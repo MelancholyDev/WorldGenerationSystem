@@ -9,5 +9,8 @@ struct FWormSettings
 	int WormLength;
 	UPROPERTY(EditAnywhere)
 	int WormWidth;
-
+	UPROPERTY(EditAnywhere)
+	float Weight;
+	UPROPERTY(EditAnywhere)
+	bool IsConvergance;
 };

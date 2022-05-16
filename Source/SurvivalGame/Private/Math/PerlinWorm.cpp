@@ -12,23 +12,60 @@ PerlinWorm::PerlinWorm(float*** UndergroundMapParam, float*** FirstNoiseParam, f
 	SecondNoise = SecondNoiseParam;
 	WormSetings = WormSettingsParam;
 	CurrentPosition = StartPositionParam;
-	MoveToConvergancePoint = false;
+	IsMoveToConvergancePoint = false;
+}
+
+PerlinWorm::PerlinWorm(float*** UndergroundMapParam, float*** FirstNoiseParam, float*** SecondNoiseParam,
+                       FWormSettings WormSettingsParam, FIntVector StartPositionParam, FIntVector ConvergancePointParam,
+                       int SizeParam,
+                       int DepthParam)
+{
+	Width = WormSettingsParam.WormWidth - 1;
+	Size = SizeParam;
+	Depth = DepthParam;
+	UndergroundMap = UndergroundMapParam;
+	FirstNoise = FirstNoiseParam;
+	SecondNoise = SecondNoiseParam;
+	WormSetings = WormSettingsParam;
+	CurrentPosition = StartPositionParam;
+	ConvergancePoint = ConvergancePointParam;
+	IsMoveToConvergancePoint = true;
+	Weight = WormSettingsParam.Weight;
 }
 
 void PerlinWorm::MoveLength(int Length)
 {
-	FMath::SRandInit(CurrentPosition.X + CurrentPosition.Y + CurrentPosition.Z);
-	//int CurrentDirectionX = FMath::RandRange(-1, 1);
 	const int CurrentDirectionX = 1;
-	//int CurrentDirectionY = FMath::RandRange(-1, 1);
 	const int CurrentDirectionY = 0;
-	//int CurrentDirectionZ = FMath::RandRange(-1,1);
 	const int CurrentDirectionZ = 0;
 	CurrentDirection = FIntVector(CurrentDirectionX, CurrentDirectionY, CurrentDirectionZ);
-	UniqueBlocks=0;
+	FVector ConvergancePointFloat = FVector(ConvergancePoint);
 	for (int i = 0; i < Length; i++)
 	{
-		Move();
+		if (IsMoveToConvergancePoint)
+		{
+			MoveToConvergancePoint();
+			FVector CurrentPositionFloat = FVector(CurrentPosition);
+			if (FVector::Distance(ConvergancePointFloat, CurrentPositionFloat) < 1)
+				break;
+		}
+		else
+		{
+			Move();
+		}
+	}
+	if (IsMoveToConvergancePoint)
+	{
+		int Iterator = 0;
+		Weight = 0.9f;
+		FVector CurrentPositionFloat = FVector(CurrentPosition);
+		while (FVector::Distance(CurrentPositionFloat, ConvergancePointFloat) > 1)
+		{
+			MoveToConvergancePoint();
+			Iterator++;
+			if (Iterator > 50)
+				break;
+		}
 	}
 }
 
@@ -40,8 +77,34 @@ void PerlinWorm::Move()
 	if ((NextPosition.X >= 0) & (NextPosition.Y >= 0) & (NextPosition.Z >= 0) & (NextPosition.X < Size) & (NextPosition.
 		Y < Size) & (NextPosition.Z < Depth))
 	{
-		if(UndergroundMap[NextPosition.X][NextPosition.Y][NextPosition.Z]!=0)
-			UniqueBlocks++;
+		MarkEmpty(NextPosition.X, NextPosition.Y, NextPosition.Z);
+	}
+	CurrentPosition = NextPosition;
+	CurrentDirection = Direction;
+}
+
+void PerlinWorm::MoveToConvergancePoint()
+{
+	float Random = FMath::SRand();
+	FIntVector Direction;
+	if (Random < Weight)
+	{
+		Direction = GetDirection();
+	}
+	else
+	{
+		FIntVector Shift = FIntVector(ConvergancePoint.X - CurrentPosition.X, ConvergancePoint.Y - CurrentPosition.Y,
+		                              ConvergancePoint.Z - CurrentPosition.Z);
+		Direction = FIntVector(Shift.X / (Shift.X == 0 ? 1 : FMath::Abs(Shift.X)),
+		                       Shift.Y / (Shift.Y == 0 ? 1 : FMath::Abs(Shift.Y)),
+		                       Shift.Z / (Shift.Z == 0 ? 1 : FMath::Abs(Shift.Z)));
+	}
+	const FIntVector NextPosition = FIntVector(CurrentPosition.X + Direction.X, CurrentPosition.Y + Direction.Y,
+	                                           CurrentPosition.Z + Direction.Z);
+	if ((NextPosition.X >= 0) & (NextPosition.Y >= 0) & (NextPosition.Z >= 0) & (NextPosition.X < Size) & (
+		NextPosition.
+		Y < Size) & (NextPosition.Z < Depth))
+	{
 		MarkEmpty(NextPosition.X, NextPosition.Y, NextPosition.Z);
 	}
 	CurrentPosition = NextPosition;
@@ -98,8 +161,10 @@ FIntVector PerlinWorm::GetDirection()
 
 	const float AngleInRadians = Angle * PI / 180;
 
-	const float ComputedX = FMath::Cos(AngleInRadians) * CurrentDirection.X - FMath::Sin(AngleInRadians) * CurrentDirection.Y;
-	const float ComputedY = FMath::Sin(AngleInRadians) * CurrentDirection.X + FMath::Cos(AngleInRadians) * CurrentDirection.Y;
+	const float ComputedX = FMath::Cos(AngleInRadians) * CurrentDirection.X - FMath::Sin(AngleInRadians) *
+		CurrentDirection.Y;
+	const float ComputedY = FMath::Sin(AngleInRadians) * CurrentDirection.X + FMath::Cos(AngleInRadians) *
+		CurrentDirection.Y;
 
 	FVector NextDirection = FVector(ComputedX, ComputedY, 0);
 	if ((Angle == -45) | (Angle == 45))
@@ -114,18 +179,21 @@ FIntVector PerlinWorm::GetDirection()
 			NextDirection.Y = NextDirection.Y / FMath::Sqrt(2) * 2;
 		}
 	}
-	FIntVector NextDirectionInt=FIntVector(FMath::Floor(NextDirection.X+0.1),FMath::Floor(NextDirection.Y+0.1),0);
+	FIntVector NextDirectionInt = FIntVector(FMath::Floor(NextDirection.X + 0.1), FMath::Floor(NextDirection.Y + 0.1),
+	                                         0);
 	int Z;
-	if((SecondNoiseCurrent>=0) & (SecondNoiseCurrent<0.33))
+	if ((SecondNoiseCurrent >= 0) & (SecondNoiseCurrent < 0.33))
 	{
-		Z=-1;
-	}else if((SecondNoiseCurrent>=0.33) & (SecondNoiseCurrent<0.66))
-	{
-		Z=0;
-	}else
-	{
-		Z=1;
+		Z = -1;
 	}
-	NextDirectionInt.Z=Z;
+	else if ((SecondNoiseCurrent >= 0.33) & (SecondNoiseCurrent < 0.66))
+	{
+		Z = 0;
+	}
+	else
+	{
+		Z = 1;
+	}
+	NextDirectionInt.Z = Z;
 	return NextDirectionInt;
 }
