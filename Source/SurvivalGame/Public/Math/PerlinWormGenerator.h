@@ -1,14 +1,12 @@
 #pragma once
-#include <list>
 
-#include "Structures/FVoxelGeneraionData.h"
 #include "Structures/FWormSettings.h"
 
 class PerlinWormGenerator
 {
 public:
 	PerlinWormGenerator(int SizeParam, int DepthParam, FWormSettings WormSettingsParam);
-	void GenerateCaves(float*** UndergroundMapParam, float*** FirstNoiseParam, float*** SecondNoiseParam);
+	void GenerateCaves(float*** UndergroundMapParam, float*** FirstNoiseParam, float*** SecondNoiseParam,float*** CavePositions);
 private:
 	void InitializeDirectionList();
 	bool CheckNeighbours(int X, int Y, int Z, bool IsMaxima);
@@ -21,6 +19,8 @@ private:
 	float*** UndergroundMap;
 	float*** FirstNoise;
 	float*** SecondNoise;
+	float*** CavePositions;
+	
 	TArray<FIntVector>* Directions;
 	TArray<FIntVector>* Maximas;
 	TArray<FIntVector>* Minimas;

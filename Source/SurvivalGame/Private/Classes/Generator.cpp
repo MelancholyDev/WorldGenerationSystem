@@ -8,6 +8,7 @@ Generator::Generator(FGenerationParameters Parameters, FVoxelGenerationData Cave
 	WormSettings = CaveParametersParam.WormSettings;
 	CaveParameters = CaveParametersParam;
 	GausianParameters = Parameters.GausianParameters;
+	CaveDistibution = CaveParametersParam.CaveDistibution;
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
 	TemperatureParameters = Parameters.TemperatureAndMoistureParameters.TemperatureParameters;
 	MoistureParameters = Parameters.TemperatureAndMoistureParameters.MoistureParameters;
@@ -104,13 +105,16 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 	int Depth = CaveParameters.CaveStart-CaveParameters.Depth+1;
 	float*** FirstNoise = new float**[MapSize];
 	float*** SecondNoise = new float**[MapSize];
+	float*** CavePositions = new float**[MapSize];
 	for (int i = 0; i < MapSize; i++)
 	{
 		FirstNoise[i] = new float*[MapSize];
+		CavePositions[i] = new float*[MapSize];
 		SecondNoise[i] = new float*[MapSize];
 		for (int j = 0; j < MapSize; j++)
 		{
 			FirstNoise[i][j] = new float[Depth];
+			CavePositions[i][j] = new float[Depth];
 			SecondNoise[i][j] = new float[Depth];
 		}
 	}
@@ -151,8 +155,26 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 				DepthIndex++;
 			}
 		}
+	USimplexNoiseBPLibrary::createSeed(111);
+	USimplexNoiseBPLibrary::setNoiseSeed(111);
 	
-	WormGenerator->GenerateCaves(UndergroundMap,FirstNoise,SecondNoise);
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
+		{
+			int DepthIndex = 0;
+			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
+			{
+				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+					i, -j, k, CaveDistibution.Lacunarity, CaveDistibution.Persistance, CaveDistibution.Octaves,
+					CaveDistibution.NoiseDensity3D, CaveDistibution.ZeroToOne);
+				const int XIndex = i + RightBorder;
+				const int YIndex = j + RightBorder;
+				CavePositions[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
+				DepthIndex++;
+			}
+		}
+	
+	WormGenerator->GenerateCaves(UndergroundMap,FirstNoise,SecondNoise,CavePositions);
 }
 
 void Generator::InitializeBiomData()

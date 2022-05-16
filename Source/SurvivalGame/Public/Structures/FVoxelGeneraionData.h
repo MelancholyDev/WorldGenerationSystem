@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FCaveDistibution.h"
 #include "FWormSettings.h"
 #include "FVoxelGeneraionData.generated.h"
 
@@ -26,6 +27,8 @@ struct FVoxelGenerationData
 	int CaveStart;
 	UPROPERTY(EditAnywhere)
 	FWormSettings WormSettings;
+	UPROPERTY(EditAnywhere)
+	FCaveDistibution CaveDistibution;
 	float VoxelSize=0;
 	int NoiseScale=0;
 	int ChunkSize=0;

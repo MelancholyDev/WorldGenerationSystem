@@ -22,6 +22,6 @@ private:
 	FWormSettings WormSetings;
 
 	void Move();
-	void MarkEmpty(int X,int Y,int Z);
+	void MarkEmpty(int X,int Y,int Z) const;
 	FIntVector GetDirection();
 };

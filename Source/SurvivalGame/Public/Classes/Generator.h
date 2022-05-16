@@ -28,6 +28,7 @@ private:
 	FVoxelGenerationData CaveParameters;
 	FGenerationParameters GenerationParameters;
 	FWormSettings WormSettings;
+	FCaveDistibution CaveDistibution;
 	BezierComputations* BezierComputationsInstance;
 	DiamondSquare* DiamondSquareInstance;
 	GausianFilter* GausianFilterInstance;

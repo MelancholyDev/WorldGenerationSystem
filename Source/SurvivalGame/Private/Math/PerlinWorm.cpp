@@ -19,26 +19,24 @@ void PerlinWorm::MoveLength(int Length)
 {
 	FMath::SRandInit(CurrentPosition.X + CurrentPosition.Y + CurrentPosition.Z);
 	//int CurrentDirectionX = FMath::RandRange(-1, 1);
-	int CurrentDirectionX = 1;
+	const int CurrentDirectionX = 1;
 	//int CurrentDirectionY = FMath::RandRange(-1, 1);
-	int CurrentDirectionY = 0;
+	const int CurrentDirectionY = 0;
 	//int CurrentDirectionZ = FMath::RandRange(-1,1);
-	int CurrentDirectionZ = 0;
+	const int CurrentDirectionZ = 0;
 	CurrentDirection = FIntVector(CurrentDirectionX, CurrentDirectionY, CurrentDirectionZ);
 	UniqueBlocks=0;
 	for (int i = 0; i < Length; i++)
 	{
 		Move();
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-					               FString::Printf(TEXT(" %d  UNIQUE BLOCKS!"),UniqueBlocks));
 }
 
 void PerlinWorm::Move()
 {
-	FIntVector Direction = GetDirection();
-	FIntVector NextPosition = FIntVector(CurrentPosition.X + Direction.X, CurrentPosition.Y + Direction.Y,
-	                                     CurrentPosition.Z + Direction.Z);
+	const FIntVector Direction = GetDirection();
+	const FIntVector NextPosition = FIntVector(CurrentPosition.X + Direction.X, CurrentPosition.Y + Direction.Y,
+	                                           CurrentPosition.Z + Direction.Z);
 	if ((NextPosition.X >= 0) & (NextPosition.Y >= 0) & (NextPosition.Z >= 0) & (NextPosition.X < Size) & (NextPosition.
 		Y < Size) & (NextPosition.Z < Depth))
 	{
@@ -50,7 +48,7 @@ void PerlinWorm::Move()
 	CurrentDirection = Direction;
 }
 
-void PerlinWorm::MarkEmpty(int X, int Y, int Z)
+void PerlinWorm::MarkEmpty(int X, int Y, int Z) const
 {
 	for (int i = X - Width; i <= X + Width; i++)
 		for (int j = Y - Width; j <= Y + Width; j++)
@@ -98,10 +96,10 @@ FIntVector PerlinWorm::GetDirection()
 		Angle = 90;
 	}
 
-	float AngleInRadians = Angle * PI / 180;
+	const float AngleInRadians = Angle * PI / 180;
 
-	float ComputedX = FMath::Cos(AngleInRadians) * CurrentDirection.X - FMath::Sin(AngleInRadians) * CurrentDirection.Y;
-	float ComputedY = FMath::Sin(AngleInRadians) * CurrentDirection.X + FMath::Cos(AngleInRadians) * CurrentDirection.Y;
+	const float ComputedX = FMath::Cos(AngleInRadians) * CurrentDirection.X - FMath::Sin(AngleInRadians) * CurrentDirection.Y;
+	const float ComputedY = FMath::Sin(AngleInRadians) * CurrentDirection.X + FMath::Cos(AngleInRadians) * CurrentDirection.Y;
 
 	FVector NextDirection = FVector(ComputedX, ComputedY, 0);
 	if ((Angle == -45) | (Angle == 45))
@@ -130,94 +128,4 @@ FIntVector PerlinWorm::GetDirection()
 	}
 	NextDirectionInt.Z=Z;
 	return NextDirectionInt;
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-	                  //               FString::Printf(TEXT(" %d %d"),NextDirectionInt.X, NextDirectionInt.Y));
-	// if (((ComputedX != -1) & (ComputedX != 0) & (ComputedX != 1)) | ((ComputedY != -1) & (ComputedY != 0) & (ComputedY != 1)))
-	// 		if((NextDirection.X==0) | (NextDirection.Y==0))
-	// 		{
-	// 			NextDirection.Normalize();
-	// 		}else
-	// 		{
-	// 			int A;
-	// 			int B;
-	// 			//if((ComputedX != -1) & (ComputedX != 0) & (ComputedX != 1))
-	// 			if(NextDirection.X > 1.0)
-	// 				A=0;
-	// 			else
-	// 				A=1;
-	//
-	// 			if(((ComputedY != -1) & (ComputedY != 0) & (ComputedY != 1)))
-	// 				B=0;
-	// 			else
-	// 				B=1;
-	// 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-	// 										FString::Printf(TEXT("%f %f %d %d"), NextDirection.X, NextDirection.Y,A,B));
-	// 			 NextDirection.X=NextDirection.X*FMath::Sqrt(2)/2;
-	// 		   	 NextDirection.Y=NextDirection.Y*FMath::Sqrt(2)/2;
-	// 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-	// 										FString::Printf(TEXT("%f %f"), NextDirection.X, NextDirection.Y));
-	// 		}
-	// if (NextDirection.Size() > 1)
-	// {
-	// 	NextDirection.Normalize();
-	// }else
-	// {
-	// 	NextDirection.X=NextDirection.X*2/FMath::Square(2);
-	// 	NextDirection.Y=NextDirection.Y*2/FMath::Square(2);
-	// }
-	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-	//                                  FString::Printf(TEXT("%f %f %d %d"), NextDirection.X, NextDirection.Y,
-	//                                                  CurrentVectorX, CurrentVectorY));
-	return FIntVector(0, 0, 0);
-	// float Segments = 26;
-	// float Step = 1 / Segments;
-	// float Sum = 0;
-	// float NoiseSum = 0;
-	// while (Sum < FirstNoiseCurrent)
-	// {
-	// 	Sum += Step;
-	// 	NoiseSum++;
-	// }
-	//
-	// int NoiseSumClamped = (int)NoiseSum;
-	// Z = NoiseSumClamped % 3;
-	// int Current = NoiseSumClamped / 3;
-	// if (Current == 0)
-	// {
-	// 	Y = 0;
-	// 	X = 0;
-	// }
-	// else
-	// {
-	// 	Y = Current % 3;
-	// 	Current = Current / 3;
-	// 	if (Current == 0)
-	// 	{
-	// 		X = 0;
-	// 	}
-	// 	else
-	// 	{
-	// 		X = Current % 3;
-	// 	}
-	// }
-	// X = X - 1;
-	// Y = Y - 1;
-	// Z = Z - 1;
-	// Z += 1;
-	// if (Z == 2)
-	// {
-	// 	Z = 1;
-	// 	Y += 1;
-	// 	if (Y == 2)
-	// 	{
-	// 		Y = 1;
-	// 		X += 1;
-	// 		if (X == 2)
-	// 		{
-	// 			X = 1;
-	// 		}
-	// 	}
-	// }
-	// FIntVector Result(X, Y, Z);
-	// return Result;
 }

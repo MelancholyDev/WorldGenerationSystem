@@ -26,16 +26,16 @@ void PerlinWormGenerator::InitializeDirectionList()
 
 bool PerlinWormGenerator::CheckNeighbours(int X, int Y, int Z, bool IsMaxima)
 {
+	float Noise = CavePositions[X][Y][Z];
 	for (int i = 0; i < Directions->Num(); i++)
 	{
 		FIntVector Direction = (*Directions)[i];
 		int X_Check = X + Direction.X;
 		int Y_Check = Y + Direction.Y;
 		int Z_Check = Z + Direction.Z;
-		float Noise = FirstNoise[X][Y][Z];
-		if (!((X_Check > 0 || Y_Check > 0 || Z_Check > 0) || (X_Check < Size || Y_Check < Size || Z_Check < Depth)))
+		if ((X_Check > 0) & (Y_Check > 0) & (Z_Check > 0) & (X_Check < Size) & (Y_Check < Size) & (Z_Check < Depth))
 		{
-			float NeigbourNoise = FirstNoise[X_Check][Y_Check][Z_Check];
+			float NeigbourNoise = CavePositions[X_Check][Y_Check][Z_Check];
 			if (FailCondition(Noise, NeigbourNoise, IsMaxima))
 			{
 				return false;
@@ -59,18 +59,16 @@ void PerlinWormGenerator::FindLocalMaximas()
 		{
 			for (int Z = 0; Z < Depth; Z++)
 			{
-				// if (CheckNeighbours(X, Y, Z, true))
-				// {
-				// 	Maximas->Add(FIntVector(X, Y, Z));
-				// }
-				if (FirstNoise[X][Y][Z]>0.9)
-				{
-					Maximas->Add(FIntVector(X, Y, Z));
-				}
+				 if (CheckNeighbours(X, Y, Z, true))
+				 {
+				 	Maximas->Add(FIntVector(X, Y, Z));
+				 }
 			}
 		}
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Maximas->Num()));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Size*Size*Depth));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%d"),Directions->Num()));
 }
 
 void PerlinWormGenerator::FindLocalMinimas()
@@ -109,12 +107,12 @@ void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 	Worm->MoveLength(WormSettings.WormLength);
 }
 
-void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** FirstNoiseParam, float*** SecondNoiseParam)
+void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** FirstNoiseParam, float*** SecondNoiseParam,float*** CavePositionsParam)
 {
 	UndergroundMap = UndergroundMapParam;
 	FirstNoise=FirstNoiseParam;
 	SecondNoise=SecondNoiseParam;
-	
+	CavePositions =CavePositionsParam;
 	for (int i = 0; i < Size; i++)
 		for (int j = 0; j < Size; j++)
 			for (int k = 0; k < Depth; k++)
@@ -127,5 +125,4 @@ void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** Fi
 	 	FIntVector Maxim = (*Maximas)[i];
 	 	CreateWorm(Maxim);
 	 }
-	//CreateWorm(FIntVector(Size/2,Size/2,Depth/2));
 }
