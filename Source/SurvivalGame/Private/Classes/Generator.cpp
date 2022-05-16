@@ -101,23 +101,58 @@ void Generator::GenerateSeaMap(float** Map)
 
 void Generator::GenerateCaveMap(float*** UndergroundMap)
 {
+	int Depth = CaveParameters.CaveStart-CaveParameters.Depth+1;
+	float*** FirstNoise = new float**[MapSize];
+	float*** SecondNoise = new float**[MapSize];
+	for (int i = 0; i < MapSize; i++)
+	{
+		FirstNoise[i] = new float*[MapSize];
+		SecondNoise[i] = new float*[MapSize];
+		for (int j = 0; j < MapSize; j++)
+		{
+			FirstNoise[i][j] = new float[Depth];
+			SecondNoise[i][j] = new float[Depth];
+		}
+	}
+	USimplexNoiseBPLibrary::createSeed(322);
+	USimplexNoiseBPLibrary::setNoiseSeed(322);
+	
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
 			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
 			{
-				//float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(i, -j, k, CaveParameters.NoiseDensity3D);
 				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
 					i, -j, k, CaveParameters.Lacunarity, CaveParameters.Persistance, CaveParameters.Octaves,
 					CaveParameters.NoiseDensity3D, CaveParameters.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
-				UndergroundMap[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
+				FirstNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
-	WormGenerator->GenerateCaves(UndergroundMap);
+	
+	USimplexNoiseBPLibrary::createSeed(228);
+	USimplexNoiseBPLibrary::setNoiseSeed(228);
+	
+	for (int i = LeftBorder; i <= RightBorder; i++)
+		for (int j = RightBorder; j >= LeftBorder; j--)
+		{
+			int DepthIndex = 0;
+			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
+			{
+				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+					i, -j, k, CaveParameters.Lacunarity, CaveParameters.Persistance, CaveParameters.Octaves,
+					CaveParameters.NoiseDensity3D, CaveParameters.ZeroToOne);
+				const int XIndex = i + RightBorder;
+				const int YIndex = j + RightBorder;
+				SecondNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
+				DepthIndex++;
+			}
+		}
+	
+	WormGenerator->GenerateCaves(UndergroundMap,FirstNoise,SecondNoise);
 }
 
 void Generator::InitializeBiomData()

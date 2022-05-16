@@ -32,11 +32,11 @@ bool PerlinWormGenerator::CheckNeighbours(int X, int Y, int Z, bool IsMaxima)
 		int X_Check = X + Direction.X;
 		int Y_Check = Y + Direction.Y;
 		int Z_Check = Z + Direction.Z;
-		float FirstNoise = UndergroundMap[X][Y][Z];
-		if (!((X_Check < 0 || Y_Check < 0 || Z_Check < 0) || (X_Check >= Size || Y_Check >= Size || Z_Check >= Depth)))
+		float Noise = FirstNoise[X][Y][Z];
+		if (!((X_Check > 0 || Y_Check > 0 || Z_Check > 0) || (X_Check < Size || Y_Check < Size || Z_Check < Depth)))
 		{
-			float NeigbourNoise = UndergroundMap[X_Check][Y_Check][Z_Check];
-			if (FailCondition(FirstNoise, NeigbourNoise, IsMaxima))
+			float NeigbourNoise = FirstNoise[X_Check][Y_Check][Z_Check];
+			if (FailCondition(Noise, NeigbourNoise, IsMaxima))
 			{
 				return false;
 			}
@@ -59,7 +59,11 @@ void PerlinWormGenerator::FindLocalMaximas()
 		{
 			for (int Z = 0; Z < Depth; Z++)
 			{
-				if (CheckNeighbours(X, Y, Z, true))
+				// if (CheckNeighbours(X, Y, Z, true))
+				// {
+				// 	Maximas->Add(FIntVector(X, Y, Z));
+				// }
+				if (FirstNoise[X][Y][Z]>0.9)
 				{
 					Maximas->Add(FIntVector(X, Y, Z));
 				}
@@ -87,48 +91,41 @@ void PerlinWormGenerator::FindLocalMinimas()
 	}
 }
 
-bool PerlinWormGenerator::FailCondition(float FirstNoise, float NeighbourNoise, bool IsMaxima)
+bool PerlinWormGenerator::FailCondition(float Noise, float NeighbourNoise, bool IsMaxima)
 {
 	if (IsMaxima)
 	{
-		return NeighbourNoise > FirstNoise;
+		return NeighbourNoise > Noise;
 	}
 	else
 	{
-		return NeighbourNoise < FirstNoise;
+		return NeighbourNoise < Noise;
 	}
 }
 
 void PerlinWormGenerator::CreateWorm(FIntVector Maxim)
 {
-	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,TempMap,WormSettings, Maxim,Size,Depth,WormSettings.WormWidth);
+	PerlinWorm* Worm = new PerlinWorm(UndergroundMap,FirstNoise,SecondNoise,WormSettings, Maxim,Size,Depth);
 	Worm->MoveLength(WormSettings.WormLength);
 }
 
-void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam)
+void PerlinWormGenerator::GenerateCaves(float*** UndergroundMapParam,float*** FirstNoiseParam, float*** SecondNoiseParam)
 {
 	UndergroundMap = UndergroundMapParam;
-	TempMap = new float**[Size];
-	for (int i = 0; i < Size; i++)
-	{
-		TempMap[i] = new float*[Size];
-		for (int j = 0; j < Size; j++)
-			TempMap[i][j] = new float[Depth];
-	}
+	FirstNoise=FirstNoiseParam;
+	SecondNoise=SecondNoiseParam;
+	
 	for (int i = 0; i < Size; i++)
 		for (int j = 0; j < Size; j++)
 			for (int k = 0; k < Depth; k++)
-			TempMap[i][j][k] = 1;
+			UndergroundMap[i][j][k] = 1;
 	
 	FindLocalMaximas();
 	FindLocalMinimas();
-	for (int i = 0; i < Maximas->Num(); i++)
-	{
-		FIntVector Maxim = (*Maximas)[i];
-		CreateWorm(Maxim);
-	}
-	 for (int i = 0; i < Size; i++)
-	 	for (int j = 0; j < Size; j++)
-	 		for (int k = 0; k < Depth; k++)
-	 			UndergroundMap[i][j][k] = TempMap[i][j][k];
+	 for (int i = 0; i < Maximas->Num(); i++)
+	 {
+	 	FIntVector Maxim = (*Maximas)[i];
+	 	CreateWorm(Maxim);
+	 }
+	//CreateWorm(FIntVector(Size/2,Size/2,Depth/2));
 }
