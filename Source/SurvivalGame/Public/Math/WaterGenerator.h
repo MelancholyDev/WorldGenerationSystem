@@ -1,10 +1,10 @@
 #pragma once
-#include "Structures/FWaterParams.h"
+#include "Structures/FWaterParameters.h"
 
 class WaterGenerator
 {
 public:
-	WaterGenerator(FWaterParams WaterParams);
+	WaterGenerator(FWaterParameters WaterParams);
 private:
-	FWaterParams Water;
+	FWaterParameters Water;
 };

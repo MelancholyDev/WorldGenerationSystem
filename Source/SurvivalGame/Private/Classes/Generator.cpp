@@ -3,12 +3,11 @@
 #include "SimplexNoiseBPLibrary.h"
 #include "Structures/FWormSettings.h"
 
-Generator::Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam, UDataTable* Table)
+Generator::Generator(FGenerationParameters Parameters, UDataTable* Table)
 {
-	WormSettings = CaveParametersParam.WormSettings;
-	CaveParameters = CaveParametersParam;
+	WormSettings = Parameters.UndergroundParameters.WormSettings;
+	UndergroundParameters = Parameters.UndergroundParameters;
 	GausianParameters = Parameters.GausianParameters;
-	CaveDistibution = CaveParametersParam.CaveDistibution;
 	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
 	TemperatureParameters = Parameters.TemperatureAndMoistureParameters.TemperatureParameters;
 	MoistureParameters = Parameters.TemperatureAndMoistureParameters.MoistureParameters;
@@ -18,7 +17,7 @@ Generator::Generator(FGenerationParameters Parameters, FVoxelGenerationData Cave
 	InitializeBiomData();
 	if (GenerationParameters.GenerationType == PERLIN_NOISE)
 	{
-		MapSize = (GenerationParameters.ChunkSize * 2 + 1) * PerlinNoiseParameters.Multiplier;
+		MapSize = (GenerationParameters.ChunkSize * 2 + 1) * PerlinNoiseParameters.MapSizeMultiplier;
 	}
 	else
 	{
@@ -30,7 +29,7 @@ Generator::Generator(FGenerationParameters Parameters, FVoxelGenerationData Cave
 	BezierComputationsInstance = new BezierComputations(BiomDataSet);
 	DiamondSquareInstance = new DiamondSquare(DiamondSquareParameters, MapSize);
 	GausianFilterInstance = new GausianFilter(GausianParameters, MapSize);
-	WormGenerator = new PerlinWormGenerator(MapSize, CaveParameters.CaveStart - CaveParameters.Depth + 1, WormSettings);
+	WormGenerator = new PerlinWormGenerator(MapSize, UndergroundParameters.CaveStart - UndergroundParameters.Depth + 1, WormSettings);
 }
 
 float Generator::Clamp(float x, float left, float right)
@@ -67,15 +66,15 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 	float** TemperatureMap = new float*[MapSize];
 	float** MoistureMap = new float*[MapSize];
 
-	for (int i =0; i < MapSize; i++)
+	for (int i = 0; i < MapSize; i++)
 	{
 		MoistureMap[i] = new float[MapSize];
 		TemperatureMap[i] = new float[MapSize];
 	}
-	
+
 	USimplexNoiseBPLibrary::createSeed(TemperatureParameters.Seed);
 	USimplexNoiseBPLibrary::setNoiseSeed(TemperatureParameters.Seed);
-	
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -88,10 +87,10 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 
 			TemperatureMap[XIndex][YIndex] = HeatNoise;
 		}
-	
+
 	USimplexNoiseBPLibrary::createSeed(MoistureParameters.Seed);
 	USimplexNoiseBPLibrary::setNoiseSeed(MoistureParameters.Seed);
-	
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -106,15 +105,14 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 			MoistureMap[XIndex][YIndex] = MoistureNoise;
 		}
 
-	for (int i = 0; i <MapSize; i++)
+	for (int i = 0; i < MapSize; i++)
 		for (int j = 0; j < MapSize; j++)
 		{
 			float MoistureNoise = MoistureMap[i][j];
 			float TemperatureNoise = TemperatureMap[i][j];
 
-			BiomMap[i][j] = (EBiomType)GetBiom(TemperatureNoise,MoistureNoise);
+			BiomMap[i][j] = (EBiomType)GetBiom(TemperatureNoise, MoistureNoise);
 		}
-	
 }
 
 
@@ -124,10 +122,11 @@ void Generator::GenerateSeaMap(float** Map)
 
 void Generator::GenerateCaveMap(float*** UndergroundMap)
 {
-	int Depth = CaveParameters.CaveStart-CaveParameters.Depth+1;
+	int Depth = UndergroundParameters.CaveStart - UndergroundParameters.Depth + 1;
 	float*** FirstNoise = new float**[MapSize];
 	float*** SecondNoise = new float**[MapSize];
 	float*** CavePositions = new float**[MapSize];
+
 	for (int i = 0; i < MapSize; i++)
 	{
 		FirstNoise[i] = new float*[MapSize];
@@ -140,63 +139,66 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			SecondNoise[i][j] = new float[Depth];
 		}
 	}
-	USimplexNoiseBPLibrary::createSeed(322);
-	USimplexNoiseBPLibrary::setNoiseSeed(322);
-	
+	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.FirstNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.FirstNoise.Seed);
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
+			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
-					i, -j, k, CaveParameters.Lacunarity, CaveParameters.Persistance, CaveParameters.Octaves,
-					CaveParameters.NoiseDensity3D, CaveParameters.ZeroToOne);
+					i, -j, k, UndergroundParameters.FirstNoise.Lacunarity, UndergroundParameters.FirstNoise.Persistence,
+					UndergroundParameters.FirstNoise.Octaves,
+					UndergroundParameters.FirstNoise.NoiseDensity, UndergroundParameters.FirstNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				FirstNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
-	
-	USimplexNoiseBPLibrary::createSeed(228);
-	USimplexNoiseBPLibrary::setNoiseSeed(228);
-	
+
+	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.SecondNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.SecondNoise.Seed);
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
+			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
-					i, -j, k, CaveParameters.Lacunarity, CaveParameters.Persistance, CaveParameters.Octaves,
-					CaveParameters.NoiseDensity3D, CaveParameters.ZeroToOne);
+					i, -j, k, UndergroundParameters.SecondNoise.Lacunarity, UndergroundParameters.SecondNoise.Persistence,
+					UndergroundParameters.SecondNoise.Octaves,
+					UndergroundParameters.SecondNoise.NoiseDensity, UndergroundParameters.SecondNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				SecondNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
-	USimplexNoiseBPLibrary::createSeed(111);
-	USimplexNoiseBPLibrary::setNoiseSeed(111);
-	
+	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.WormPlaceNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.WormPlaceNoise.Seed);
+
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = CaveParameters.CaveStart; k >= CaveParameters.Depth; k--)
+			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
-					i, -j, k, CaveDistibution.Lacunarity, CaveDistibution.Persistance, CaveDistibution.Octaves,
-					CaveDistibution.NoiseDensity3D, CaveDistibution.ZeroToOne);
+					i, -j, k, UndergroundParameters.WormPlaceNoise.Lacunarity, UndergroundParameters.WormPlaceNoise.Persistence,
+					UndergroundParameters.WormPlaceNoise.Octaves,
+					UndergroundParameters.WormPlaceNoise.NoiseDensity, UndergroundParameters.WormPlaceNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				CavePositions[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
-	
-	WormGenerator->GenerateCaves(UndergroundMap,FirstNoise,SecondNoise,CavePositions);
+
+	WormGenerator->GenerateCaves(UndergroundMap, FirstNoise, SecondNoise, CavePositions);
 }
 
 void Generator::InitializeBiomData()
@@ -252,8 +254,7 @@ uint8 Generator::GetBiom(float Heat, float Moisture)
 		}
 		else if ((Moisture >= 0.33) & (Moisture < 0.66))
 		{
-			bytes = (uint8)TROPICAL_WOODLAND
-;
+			bytes = (uint8)TROPICAL_WOODLAND;
 		}
 		else
 		{
@@ -285,8 +286,8 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
-	USimplexNoiseBPLibrary::createSeed(PerlinNoiseParameters.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(PerlinNoiseParameters.Seed);
+	USimplexNoiseBPLibrary::createSeed(PerlinNoiseParameters.Sharp.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(PerlinNoiseParameters.Sharp.Seed);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -296,15 +297,15 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			float SmoothNoise;
 
 			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, PerlinNoiseParameters.Lacunarity, PerlinNoiseParameters.Persistance,
-				PerlinNoiseParameters.OctaveSharp,
-				PerlinNoiseParameters.NoiseDensity, PerlinNoiseParameters.ZeroToOne);
+				i, -j, PerlinNoiseParameters.Sharp.Lacunarity, PerlinNoiseParameters.Sharp.Persistence,
+				PerlinNoiseParameters.Sharp.Octaves,
+				PerlinNoiseParameters.Sharp.NoiseDensity, PerlinNoiseParameters.Sharp.ZeroToOne);
 
 
 			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
-				i, -j, PerlinNoiseParameters.Lacunarity, PerlinNoiseParameters.Persistance,
-				PerlinNoiseParameters.OctaveSmooth,
-				PerlinNoiseParameters.NoiseDensity, PerlinNoiseParameters.ZeroToOne);
+				i, -j, PerlinNoiseParameters.Smooth.Lacunarity, PerlinNoiseParameters.Smooth.Persistence,
+				PerlinNoiseParameters.Smooth.Octaves,
+				PerlinNoiseParameters.Smooth.NoiseDensity, PerlinNoiseParameters.Smooth.ZeroToOne);
 
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
@@ -316,7 +317,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			}
 			else
 			{
-				CurrentBiom = PerlinNoiseParameters.Biom;
+				CurrentBiom = PerlinNoiseParameters.DefaultBiom;
 			}
 			float FinalNoise = BezierComputationsInstance->FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
 			float Clamped = Clamp(FinalNoise, 0, 1);
@@ -355,7 +356,7 @@ void Generator::InvertMap(float** MapForInvert, EBiomType** BiomMap)
 			}
 			else
 			{
-				CurrentBiom = PerlinNoiseParameters.Biom;
+				CurrentBiom = PerlinNoiseParameters.DefaultBiom;
 			}
 			FBiomData* CurrentBiomData = BezierComputationsInstance->DataSet.Find(CurrentBiom);
 			float Noise = MapForInvert[XIndex][YIndex];

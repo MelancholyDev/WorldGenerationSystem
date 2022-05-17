@@ -1,6 +1,6 @@
 #include "Math/WaterGenerator.h"
 
-WaterGenerator::WaterGenerator(FWaterParams WaterParams)
+WaterGenerator::WaterGenerator(FWaterParameters WaterParams)
 {
 	Water = WaterParams;
 }

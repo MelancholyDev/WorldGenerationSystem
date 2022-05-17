@@ -96,7 +96,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int ShiftClamped = CurrentMapCoordinate * Data.VoxelSize;
 			FVector SpawnPosition(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
 			FTransform SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
-			if (HeightNoise > WaterLevel)
+			if (HeightNoise > Data.WaterLevel)
 			{
 				AddSolidBlock(SpawnTransform,SpawnBiom);
 			}
@@ -141,10 +141,9 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AVoxelChank::InitializeParameters(FVoxelGenerationData DataParam, float WaterLevelParam)
+void AVoxelChank::InitializeParameters(FVoxelGenerationData DataParam)
 {
 	Data = DataParam;
-	WaterLevel = WaterLevelParam;
 }
 
 void AVoxelChank::ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const

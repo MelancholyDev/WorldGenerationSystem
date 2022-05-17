@@ -9,7 +9,6 @@
 #include "Structures/FVoxelLine.h"
 #include "Structures/FVoxelGeneraionData.h"
 #include "Structures/FGenerationParameters.h"
-#include "Structures/FWormSettings.h"
 
 #include "GenerationPlayerController.generated.h"
 
@@ -17,32 +16,56 @@ UCLASS()
 class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+public:
+	//SerializedParameters
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EGenerationType> GenerationType;
+	UPROPERTY(EditAnywhere)
+	bool IsApplyGausianFilter;
+	UPROPERTY(EditAnywhere)
+	bool IsAddBezierFunction;
+	UPROPERTY(EditAnywhere)
+	int RenderRange;
+	UPROPERTY(EditAnywhere)
+	int ChunkSize;
+	UPROPERTY(EditAnywhere)
+	int VoxelSize;
+	UPROPERTY(EditAnywhere)
+	float NoiseScale;
+	UPROPERTY(EditAnywhere)
+	FDiamondSquareParameters DiamondSquareParameters;
+	UPROPERTY(EditAnywhere)
+	FPerlinNoiseParameters PerlinNoiseParameters;
+	UPROPERTY(EditAnywhere)
+	FGausianParameters GausianParameters;
+	UPROPERTY(EditAnywhere)
+	FTemperatureAndMoistureParameters TemperatureAndMoistureParameters;
+	UPROPERTY(EditAnywhere)
+	FUndergroundParameters UndergroundParameters;
+	UPROPERTY(EditAnywhere)
+	FWaterParameters WaterParameters;
+	UPROPERTY(EditAnywhere)
+	bool UpdateMap;
+	UPROPERTY(EditAnywhere)
+	UDataTable* BiomDataSet;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AVoxelChank> ToSpawn;
+	//End Serializedparameters
+private:
+	FGenerationParameters GenerationParameters;
 	int MapSize;
 	int ChunkLength;
 	FIntVector OldCoordinates;
 	TArray<FVoxelLine>* Map;
 	FActorSpawnParameters* ChunkRenderLines;
 	Generator* GeneratorInstance;
+	FVoxelGenerationData VoxelGenerationData;
+
 	float** HeightMap;
-	
 	EBiomType** BiomMap;
 	float** WaterMap;
 	float*** UndergroundMap;
-	
-	UPROPERTY(EditAnywhere)
-	FGenerationParameters GenerationParameters;
-	UPROPERTY(EditAnywhere)
-	FVoxelGenerationData VoxelGenerationData;
-	UPROPERTY(EditAnywhere)
-	UDataTable* BiomDataSet;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AVoxelChank> ToSpawn;
-	
-	UPROPERTY(EditAnywhere)
-	float WaterLevel;
-	UPROPERTY(EditAnywhere)
-	bool UpdateMap;
-	
+
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -64,7 +87,7 @@ private:
 	void GenerateHeightMap() const;
 	void GenerateBiomMap() const;
 	void GenerateCaveMap() const;
-	
+
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
 };

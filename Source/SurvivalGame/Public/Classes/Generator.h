@@ -5,30 +5,29 @@
 #include "Math/PerlinWormGenerator.h"
 #include "Structures/FPerlinNoiseParameters.h"
 #include "Structures/FTemperatureAndMoistureParameters.h"
+#include "Structures/FUndergroundParameters.h"
 #include "Structures/FVoxelGeneraionData.h"
 #include "Structures/FWormSettings.h"
 
 class Generator
 {
 public:
-	Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam,
-	          UDataTable* Table);
+	Generator(FGenerationParameters Parameters, UDataTable* Table);
 	void GenerateHeightMap(float** Map, EBiomType** BiomMap);
 	void GenerateBiomMaps(EBiomType** BiomMap);
 	void GenerateSeaMap(float** Map);
 	void GenerateCaveMap(float*** UndergroundMap);
 private:
 	void InitializeBiomData();
-	void GenerateWithPerlinNoise(float** Map,  EBiomType** BiomMap);
+	void GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap);
 	void GenerateWithDiamondSquare(float** Map);
 	float Clamp(float x, float left, float right);
 	uint8 GetBiom(float Heat, float Moisture);
-	void InvertMap(float** MapForInvert,EBiomType** BiomMap);
+	void InvertMap(float** MapForInvert, EBiomType** BiomMap);
 
-	FVoxelGenerationData CaveParameters;
+	FUndergroundParameters UndergroundParameters;
 	FGenerationParameters GenerationParameters;
 	FWormSettings WormSettings;
-	FCaveDistibution CaveDistibution;
 	BezierComputations* BezierComputationsInstance;
 	DiamondSquare* DiamondSquareInstance;
 	GausianFilter* GausianFilterInstance;

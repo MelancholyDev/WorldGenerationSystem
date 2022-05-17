@@ -11,7 +11,6 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 {
 	GENERATED_BODY()
 	FVoxelGenerationData Data;
-	float WaterLevel;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
 	UPROPERTY(VisibleAnywhere)
@@ -35,5 +34,5 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 public:
 	AVoxelChank();
 	virtual void OnConstruction(const FTransform& Transform) override;
-	void InitializeParameters(FVoxelGenerationData DataParam,float WaterLevelParam);
+	void InitializeParameters(FVoxelGenerationData DataParam);
 };

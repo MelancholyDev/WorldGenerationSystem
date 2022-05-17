@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FPerlinParameters.h"
 #include "Enums/EBiomType.h"
 #include "FPerlinNoiseParameters.generated.h"
 
@@ -7,25 +8,13 @@ struct FPerlinNoiseParameters
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
-	int Seed;
+	FPerlinParameters Smooth;
 	UPROPERTY(EditAnywhere)
-	int OctaveSharp;
+	FPerlinParameters Sharp;
 	UPROPERTY(EditAnywhere)
-	int OctaveSmooth;
+	int MapSizeMultiplier;
 	UPROPERTY(EditAnywhere)
-	bool ZeroToOne;
-	UPROPERTY(EditAnywhere)
-	float Lacunarity;
-	UPROPERTY(EditAnywhere)
-	float Persistance;
-	UPROPERTY(EditAnywhere)
-	int Multiplier;
-	UPROPERTY(EditAnywhere)
-	float NoiseDensity;
-	UPROPERTY(EditAnywhere)
-	int NoiseScale;
-	UPROPERTY(EditAnywhere)
-	TEnumAsByte<EBiomType> Biom;
+	TEnumAsByte<EBiomType> DefaultBiom;
 	UPROPERTY(EditAnywhere)
 	bool IsTest;
 	UPROPERTY(EditAnywhere)
