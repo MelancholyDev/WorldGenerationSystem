@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "FCaveDistibution.h"
 #include "FWormSettings.h"
+#include "Enums/EBiomType.h"
+
 #include "FVoxelGeneraionData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -33,11 +35,11 @@ struct FVoxelGenerationData
 	int NoiseScale=0;
 	int ChunkSize=0;
 	int MapSize=0;
-	float **Map=0;
-	float **Heat=0;
+	float **Map=nullptr;
+	EBiomType** BiomMap;
 	float ***UndergroundMap;
 	void Initialize(bool IsAddDepthParam,float VoxelSizeParam,int NoiseScaleParam,int ChunkSizeParam,int DepthParam,int CaveStartParam,float NoiseDensity3DParam,
-		float Threshold3DParam,int MapSizeParam,float **MapParam,float **HeatParam,float*** UndergroundMapParam)
+		float Threshold3DParam,int MapSizeParam,float **MapParam,EBiomType **BiomMapParam,float*** UndergroundMapParam)
 	{
 		IsAddDepth=IsAddDepthParam;
 		VoxelSize=VoxelSizeParam;
@@ -48,7 +50,7 @@ struct FVoxelGenerationData
 		NoiseDensity3D=NoiseDensity3DParam;
 		MapSize = MapSizeParam;
 		Map=MapParam;
-		Heat=HeatParam;
+		BiomMap=BiomMapParam;
 		UndergroundMap = UndergroundMapParam;
 		CaveStart=CaveStartParam;
 	}

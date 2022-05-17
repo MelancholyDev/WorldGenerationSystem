@@ -24,8 +24,8 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	FActorSpawnParameters* ChunkRenderLines;
 	Generator* GeneratorInstance;
 	float** HeightMap;
-	float** HeatMap;
-	float** MoistureMap;
+	
+	EBiomType** BiomMap;
 	float** WaterMap;
 	float*** UndergroundMap;
 	
@@ -61,9 +61,9 @@ private:
 
 	void InitializeParameters();
 	void GenerateMaps();
-	void GenerateHeightMap();
-	void GenerateHeatMap();
-	void GenerateCaveMap();
+	void GenerateHeightMap() const;
+	void GenerateBiomMap() const;
+	void GenerateCaveMap() const;
 	
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();

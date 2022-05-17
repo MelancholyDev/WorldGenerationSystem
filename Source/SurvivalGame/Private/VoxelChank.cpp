@@ -79,41 +79,30 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int XIndex = A / Data.VoxelSize + IndexShift;
 			int YIndex = B / Data.VoxelSize + IndexShift;
 			float HeightNoise;
-			float HeatNoise;
+			EBiomType SpawnBiom;
 			if (CheckInBound(XIndex, Data.MapSize) & CheckInBound(YIndex, Data.MapSize))
 			{
 				HeightNoise = Data.Map[XIndex][YIndex];
-				HeatNoise = Data.Heat[XIndex][YIndex];
+				SpawnBiom = Data.BiomMap[XIndex][YIndex];
 			}
 			else
 			{
 				HeightNoise = 1;
-				HeatNoise = 1;
+				SpawnBiom = TUNDRA;
 			}
 
 			HeightNoise = HeightNoise * Data.NoiseScale;
 			int CurrentMapCoordinate = floor(HeightNoise);
 			int ShiftClamped = CurrentMapCoordinate * Data.VoxelSize;
-			FVector position(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
-			FTransform transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
+			FVector SpawnPosition(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
+			FTransform SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
 			if (HeightNoise > WaterLevel)
 			{
-				if (HeatNoise < 0.33)
-				{
-					InstanceSnow->AddInstance(transform);
-				}
-				else if ((HeatNoise >= 0.33) & (HeatNoise < 0.66))
-				{
-					InstanceTopGrass->AddInstance(transform);
-				}
-				else
-				{
-					InstanceSand->AddInstance(transform);
-				}
+				AddSolidBlock(SpawnTransform,SpawnBiom);
 			}
 			else
 			{
-				InstanceWater->AddInstance(transform);
+				InstanceWater->AddInstance(SpawnTransform);
 			}
 			if (Data.IsAddDepth)
 			{
@@ -122,7 +111,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 				for (int i = -1; i >= DepthCount; i--)
 				{
 					int DepthCoordinate = CurrentMapCoordinate + i;
-					position.Z = ShiftClamped + i * Data.VoxelSize;
+					SpawnPosition.Z = ShiftClamped + i * Data.VoxelSize;
 					int A1, B1, C1;
 					ActorLocationVoxelWorldXY(LoopX, LoopY, A1, B1);
 					ActorLocationVoxelWorldZ(i, C1);
@@ -132,8 +121,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 							XIndex, YIndex, DepthCoordinate, Data.NoiseDensity3D);
 						if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
 						{
-							transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-							InstanceDirt->AddInstance(transform);
+							SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
+							InstanceDirt->AddInstance(SpawnTransform);
 						}
 					}
 					else
@@ -142,8 +131,8 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 						DepthIterator++;
 						if (Noise3D ==0)
 						{
-							transform = FTransform(FRotator(0, 0, 0), position, FVector(0.5, 0.5, 0.5));
-							InstanceStone->AddInstance(transform);
+							SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
+							InstanceStone->AddInstance(SpawnTransform);
 						}
 					}
 				}
@@ -176,4 +165,20 @@ bool AVoxelChank::CheckInBound(int Index, int Size)
 	if ((Index < Size) & (Index >= 0))
 		return true;
 	return false;
+}
+
+void AVoxelChank::AddSolidBlock(FTransform SpawnTransform, EBiomType Biom)
+{
+	if ((Biom == TUNDRA) | (Biom==BOREAL) | (Biom==SEASONAL_FOREST))
+	{
+		InstanceSnow->AddInstance(SpawnTransform);
+	}
+	else if ((Biom == TROPICAL_WOODLAND) | (Biom == TEMPERATE_FOREST) | (Biom == TEMPERATE_RAINFOREST))
+	{
+		InstanceTopGrass->AddInstance(SpawnTransform);
+	}
+	else
+	{
+		InstanceSand->AddInstance(SpawnTransform);
+	}
 }

@@ -579,9 +579,6 @@ float USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(float x, float y, float lacun
 	return ZeroToOne ? sum * 0.5f + 0.5f : sum;
 }
 
-
-
-
 // Get 3D Simplex Noise ( with lacunarity, persistance, octaves )
 float USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(float x, float y, float z, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
 {

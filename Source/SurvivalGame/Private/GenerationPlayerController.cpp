@@ -18,10 +18,12 @@ AVoxelChank* AGenerationPlayerController::SpawnChunk(float X, float Y, float Z)
 	AActor* NewActor = GetWorld()->SpawnActorDeferred<AVoxelChank>(AVoxelChank::StaticClass(), Transform);
 	AVoxelChank* Chunk = Cast<AVoxelChank>(NewActor);
 	FVoxelGenerationData Data;
-	Data.Initialize(VoxelGenerationData.IsAddDepth, GenerationParameters.VoxelSize, GenerationParameters.PerlinNoiseParameters.NoiseScale,
-	                GenerationParameters.ChunkSize, VoxelGenerationData.Depth,VoxelGenerationData.CaveStart, VoxelGenerationData.NoiseDensity3D,
-	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, HeatMap,UndergroundMap);
-	Chunk->InitializeParameters(Data,WaterLevel);
+	Data.Initialize(VoxelGenerationData.IsAddDepth, GenerationParameters.VoxelSize,
+	                GenerationParameters.PerlinNoiseParameters.NoiseScale,
+	                GenerationParameters.ChunkSize, VoxelGenerationData.Depth, VoxelGenerationData.CaveStart,
+	                VoxelGenerationData.NoiseDensity3D,
+	                VoxelGenerationData.Threshold3D, MapSize, HeightMap, BiomMap, UndergroundMap);
+	Chunk->InitializeParameters(Data, WaterLevel);
 	UGameplayStatics::FinishSpawningActor(NewActor, Transform);
 	return Chunk;
 }
@@ -68,8 +70,9 @@ void AGenerationPlayerController::AddColumn(bool isLeft)
 	int Shift = isLeft ? -GenerationParameters.RenderRange : GenerationParameters.RenderRange;
 	for (int i = 0; i <= GenerationParameters.RenderRange * 2; i++)
 	{
-		AVoxelChank* CreatedChunk = SpawnChunk((CurrentCoordinates.X + i - GenerationParameters.RenderRange) * ChunkLength,
-		                                       (CurrentCoordinates.Y + Shift) * ChunkLength, 0);
+		AVoxelChank* CreatedChunk = SpawnChunk(
+			(CurrentCoordinates.X + i - GenerationParameters.RenderRange) * ChunkLength,
+			(CurrentCoordinates.Y + Shift) * ChunkLength, 0);
 		FVoxelLine* Line = &(*Map)[i];
 		if (isLeft)
 		{
@@ -149,7 +152,7 @@ void AGenerationPlayerController::InitializeParameters()
 	{
 		Map->Add(FVoxelLine());
 	}
-	GeneratorInstance=new Generator(GenerationParameters,VoxelGenerationData,BiomDataSet);
+	GeneratorInstance = new Generator(GenerationParameters, VoxelGenerationData, BiomDataSet);
 }
 
 
@@ -242,7 +245,7 @@ void AGenerationPlayerController::BeginPlay()
 {
 	InitializeParameters();
 	GenerateMaps();
-	
+
 	ChunkLength = GenerationParameters.ChunkSize * GenerationParameters.VoxelSize * 2 + GenerationParameters.VoxelSize;
 	OldCoordinates = GetPlayerChunkCoordinates();
 	for (int i = GenerationParameters.RenderRange * -1; i <= GenerationParameters.RenderRange; i++)
@@ -260,7 +263,7 @@ void AGenerationPlayerController::BeginPlay()
 
 void AGenerationPlayerController::Tick(float DeltaSeconds)
 {
-	if(UpdateMap)
+	if (UpdateMap)
 	{
 		auto CurrentCoordinates = GetPlayerChunkCoordinates();
 		int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
@@ -283,12 +286,12 @@ void AGenerationPlayerController::Tick(float DeltaSeconds)
 
 void AGenerationPlayerController::PrintFullMap()
 {
-	for(int i=0;i<MapSize;i++)
+	for (int i = 0; i < MapSize; i++)
 	{
-		FString str="";
-		for(int j=0;j<MapSize;j++)
+		FString str = "";
+		for (int j = 0; j < MapSize; j++)
 		{
-			str+=FString::Printf(TEXT("%f"),HeightMap[i][j])+" ";
+			str += FString::Printf(TEXT("%f"), HeightMap[i][j]) + " ";
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, str);
 	}
@@ -298,44 +301,40 @@ void AGenerationPlayerController::PrintFullMap()
 void AGenerationPlayerController::GenerateMaps()
 {
 	HeightMap = new float*[MapSize];
-	HeatMap = new float*[MapSize];
 	WaterMap = new float*[MapSize];
-	MoistureMap = new float*[MapSize];
 	UndergroundMap = new float**[MapSize];
+	BiomMap = new EBiomType*[MapSize];
 
-	for (int i =0; i < MapSize; i++)
+	for (int i = 0; i < MapSize; i++)
 	{
-		HeatMap[i] = new float[MapSize];
 		HeightMap[i] = new float[MapSize];
 		WaterMap[i] = new float[MapSize];
-		MoistureMap[i] = new float[MapSize];
 		UndergroundMap[i] = new float*[MapSize];
+		BiomMap[i] = new EBiomType[MapSize];
 	}
-	for (int i =0; i < MapSize; i++)
+	for (int i = 0; i < MapSize; i++)
 	{
-		for (int j =0; j < MapSize; j++)
+		for (int j = 0; j < MapSize; j++)
 		{
-			UndergroundMap[i][j] = new float[VoxelGenerationData.CaveStart - VoxelGenerationData.Depth+1];
+			UndergroundMap[i][j] = new float[VoxelGenerationData.CaveStart - VoxelGenerationData.Depth + 1];
 		}
 	}
-	GenerateHeatMap();
+	GenerateBiomMap();
 	GenerateHeightMap();
 	GenerateCaveMap();
 }
 
-void AGenerationPlayerController::GenerateHeightMap()
+void AGenerationPlayerController::GenerateHeightMap() const
 {
-	GeneratorInstance->GenerateHeightMap(HeightMap,HeatMap,MoistureMap);
+	GeneratorInstance->GenerateHeightMap(HeightMap, BiomMap);
 }
 
-void AGenerationPlayerController::GenerateHeatMap()
+void AGenerationPlayerController::GenerateBiomMap() const
 {
-	GeneratorInstance->GenerateBiomMaps(HeatMap,MoistureMap);
+	GeneratorInstance->GenerateBiomMaps(BiomMap);
 }
 
-void AGenerationPlayerController::GenerateCaveMap()
+void AGenerationPlayerController::GenerateCaveMap() const
 {
 	GeneratorInstance->GenerateCaveMap(UndergroundMap);
 }
-
-

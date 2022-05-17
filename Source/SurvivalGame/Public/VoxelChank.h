@@ -30,6 +30,7 @@ class SURVIVALGAME_API AVoxelChank : public AActor
 	void ActorLocationVoxelWorldXY(const int XIndex, const int YIndex, int& X, int& Y) const;
 	void ActorLocationVoxelWorldZ(const int ZIndex, int& Z) const;
 	bool CheckInBound(int Index,int Size);
+	void AddSolidBlock(FTransform Position,EBiomType Biom);
 
 public:
 	AVoxelChank();

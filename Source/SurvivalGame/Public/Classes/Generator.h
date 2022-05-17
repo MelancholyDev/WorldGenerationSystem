@@ -13,17 +13,17 @@ class Generator
 public:
 	Generator(FGenerationParameters Parameters, FVoxelGenerationData CaveParametersParam,
 	          UDataTable* Table);
-	void GenerateHeightMap(float** Map, float** HeatMap, float** MoistureMap);
-	void GenerateBiomMaps(float** TemperatureMap, float** MoistureMap);
+	void GenerateHeightMap(float** Map, EBiomType** BiomMap);
+	void GenerateBiomMaps(EBiomType** BiomMap);
 	void GenerateSeaMap(float** Map);
 	void GenerateCaveMap(float*** UndergroundMap);
 private:
 	void InitializeBiomData();
-	void GenerateWithPerlinNoise(float** Map, float** HeatMap, float** MoistureMap);
+	void GenerateWithPerlinNoise(float** Map,  EBiomType** BiomMap);
 	void GenerateWithDiamondSquare(float** Map);
 	float Clamp(float x, float left, float right);
 	uint8 GetBiom(float Heat, float Moisture);
-	void InvertMap(float** MapForInvert, float** HeatMap, float** MoistureMap);
+	void InvertMap(float** MapForInvert,EBiomType** BiomMap);
 
 	FVoxelGenerationData CaveParameters;
 	FGenerationParameters GenerationParameters;
