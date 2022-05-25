@@ -1,6 +1,6 @@
 #include "VoxelChank.h"
 #include "Math/BezierComputations.h"
-#include "SimplexNoiseBPLibrary.h"
+#include "PerlinNoiseBPLibrary.h"
 #include "Chaos/KinematicTargets.h"
 
 //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%f"),Shift));
@@ -117,7 +117,7 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 					ActorLocationVoxelWorldZ(i, C1);
 					if (DepthCoordinate > Data.CaveStart)
 					{
-						float Noise3D = USimplexNoiseBPLibrary::SimplexNoise3D(
+						float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D(
 							XIndex, YIndex, DepthCoordinate, Data.NoiseDensity3D);
 						if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
 						{

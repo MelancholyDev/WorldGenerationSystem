@@ -3,7 +3,7 @@
  -----
  DevDad - Afan Olovcic @ art-and-code.com - 08/12/2015
 */
-#include "SimplexNoisePrivatePCH.h"
+#include "PerlinNoisePrivatePCH.h"
 
 //DEFINE_LOG_CATEGORY(Victory)
 

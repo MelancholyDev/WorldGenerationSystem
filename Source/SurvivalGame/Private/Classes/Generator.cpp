@@ -1,6 +1,6 @@
 #include "Classes/Generator.h"
 
-#include "SimplexNoiseBPLibrary.h"
+#include "PerlinNoiseBPLibrary.h"
 #include "Structures/FWormSettings.h"
 
 Generator::Generator(FGenerationParameters Parameters, UDataTable* Table)
@@ -78,7 +78,7 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			float HeatNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			float HeatNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
 				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
 				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
 			HeatNoise = Clamp(HeatNoise, 0, 1);
@@ -94,7 +94,7 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
-			float MoistureNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			float MoistureNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
 				i, -j, MoistureParameters.Lacunarity, MoistureParameters.Persistence,
 				MoistureParameters.Octaves, MoistureParameters.NoiseDensity, MoistureParameters.ZeroToOne);
 			MoistureNoise = Clamp(MoistureNoise, 0, 1);
@@ -148,7 +148,7 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			int DepthIndex = 0;
 			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
-				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
 					i, -j, k, UndergroundParameters.FirstNoise.Lacunarity, UndergroundParameters.FirstNoise.Persistence,
 					UndergroundParameters.FirstNoise.Octaves,
 					UndergroundParameters.FirstNoise.NoiseDensity, UndergroundParameters.FirstNoise.ZeroToOne);
@@ -168,7 +168,7 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			int DepthIndex = 0;
 			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
-				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
 					i, -j, k, UndergroundParameters.SecondNoise.Lacunarity, UndergroundParameters.SecondNoise.Persistence,
 					UndergroundParameters.SecondNoise.Octaves,
 					UndergroundParameters.SecondNoise.NoiseDensity, UndergroundParameters.SecondNoise.ZeroToOne);
@@ -187,7 +187,7 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			int DepthIndex = 0;
 			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
 			{
-				float Noise3D = USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(
+				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
 					i, -j, k, UndergroundParameters.WormPlaceNoise.Lacunarity, UndergroundParameters.WormPlaceNoise.Persistence,
 					UndergroundParameters.WormPlaceNoise.Octaves,
 					UndergroundParameters.WormPlaceNoise.NoiseDensity, UndergroundParameters.WormPlaceNoise.ZeroToOne);
@@ -296,13 +296,13 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			float SharpNoise;
 			float SmoothNoise;
 
-			SharpNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			SharpNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
 				i, -j, PerlinNoiseParameters.Sharp.Lacunarity, PerlinNoiseParameters.Sharp.Persistence,
 				PerlinNoiseParameters.Sharp.Octaves,
 				PerlinNoiseParameters.Sharp.NoiseDensity, PerlinNoiseParameters.Sharp.ZeroToOne);
 
 
-			SmoothNoise = USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(
+			SmoothNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
 				i, -j, PerlinNoiseParameters.Smooth.Lacunarity, PerlinNoiseParameters.Smooth.Persistence,
 				PerlinNoiseParameters.Smooth.Octaves,
 				PerlinNoiseParameters.Smooth.NoiseDensity, PerlinNoiseParameters.Smooth.ZeroToOne);

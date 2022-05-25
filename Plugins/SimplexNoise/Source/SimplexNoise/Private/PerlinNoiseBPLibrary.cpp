@@ -20,8 +20,8 @@ I only request that you mention me in the credits for your game in the way that 
 */
 
 
-#include "SimplexNoiseBPLibrary.h"
-#include "SimplexNoisePrivatePCH.h"
+#include "PerlinNoiseBPLibrary.h"
+#include "PerlinNoisePrivatePCH.h"
 
 // USimplexNoiseBPLibrary
 #define FASTFLOOR(x) ( ((x)>0) ? ((int)x) : (((int)x)-1) )
@@ -451,7 +451,7 @@ int USimplexNoiseBPLibrary::_polygonise(FCell cell, float isolevel, FTriangle* t
 
 // 1D Simplex Noise
 
-float USimplexNoiseBPLibrary::SimplexNoise1D(float x, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoise1D(float x, float inFactor)
 {
 	return (float)_simplexNoise1D(x * inFactor);
 }
@@ -460,7 +460,7 @@ float USimplexNoiseBPLibrary::SimplexNoise1D(float x, float inFactor)
 
 // 2D Simplex Noise
 
-float USimplexNoiseBPLibrary::SimplexNoise2D(float x, float y, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoise2D(float x, float y, float inFactor)
 {
 	return (float)_simplexNoise2D(x * inFactor, y * inFactor);
 }
@@ -469,7 +469,7 @@ float USimplexNoiseBPLibrary::SimplexNoise2D(float x, float y, float inFactor)
 
 
 // 3D Simplex Noise
-float USimplexNoiseBPLibrary::SimplexNoise3D(float x, float y, float z, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoise3D(float x, float y, float z, float inFactor)
 {
 	return (float)_simplexNoise3D(x * inFactor, y * inFactor, z* inFactor);
 }
@@ -478,32 +478,32 @@ float USimplexNoiseBPLibrary::SimplexNoise3D(float x, float y, float z, float in
 
 
 // 4D Simplex Noise
-float USimplexNoiseBPLibrary::SimplexNoise4D(float x, float y, float z, float w, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoise4D(float x, float y, float z, float w, float inFactor)
 {
 	return (float)_simplexNoise4D(x * inFactor, y * inFactor, z * inFactor, w * inFactor);
 }
 
 // Scaled by float value
 
-float USimplexNoiseBPLibrary::SimplexNoiseScaled1D(float x, float scaleOut, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseScaled1D(float x, float scaleOut, float inFactor)
 {
 	return _simplexNoise1D(x * inFactor) * scaleOut;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseScaled2D(float x, float y, float scaleOut, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseScaled2D(float x, float y, float scaleOut, float inFactor)
 {
 	return _simplexNoise2D(x * inFactor, y * inFactor) * scaleOut;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseScaled3D(float x, float y, float z, float scaleOut, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseScaled3D(float x, float y, float z, float scaleOut, float inFactor)
 {
 	return _simplexNoise3D((x * inFactor), (y * inFactor), (z * inFactor)) * scaleOut;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseScaled4D(float x, float y, float z, float w, float scaleOut, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseScaled4D(float x, float y, float z, float w, float scaleOut, float inFactor)
 {
 	return _simplexNoise4D(x * inFactor, y * inFactor, z * inFactor, w * inFactor) * scaleOut;
 };
@@ -512,39 +512,39 @@ float USimplexNoiseBPLibrary::SimplexNoiseScaled4D(float x, float y, float z, fl
 // Return Value is scaled by difference between rangeMin & rangeMax value
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseInRange1D(float x, float rangeMin, float rangeMax, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseInRange1D(float x, float rangeMin, float rangeMax, float inFactor)
 {
 	if (rangeMax < rangeMin)rangeMax = rangeMin + 1.0f; // prevent negative numbers in that case we will return value between 0 - 1
-	float nval = (SimplexNoise1D(x, inFactor) + 1) * 0.5f;
+	float nval = (PerlinNoise1D(x, inFactor) + 1) * 0.5f;
 	return nval * (rangeMax - rangeMin) + rangeMin;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseInRange2D(float x, float y, float rangeMin, float rangeMax, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseInRange2D(float x, float y, float rangeMin, float rangeMax, float inFactor)
 {
 	if (rangeMax < rangeMin)rangeMax = rangeMin + 1.0f; // prevent negative numbers in that case we will return value between 0 - 1
-	float nval = (SimplexNoise2D(x, y, inFactor) + 1) * 0.5f;
+	float nval = (PerlinNoise2D(x, y, inFactor) + 1) * 0.5f;
 	return nval * (rangeMax - rangeMin) + rangeMin;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseInRange3D(float x, float y, float z, float rangeMin, float rangeMax, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseInRange3D(float x, float y, float z, float rangeMin, float rangeMax, float inFactor)
 {
 	if (rangeMax < rangeMin)rangeMax = rangeMin + 1.0f; // prevent negative numbers in that case we will return value between 0 - 1
-	float nval = (SimplexNoise3D(x, y, z, inFactor) + 1) * 0.5f;
+	float nval = (PerlinNoise3D(x, y, z, inFactor) + 1) * 0.5f;
  	return nval * (rangeMax - rangeMin) + rangeMin;
 }
 
 
-float USimplexNoiseBPLibrary::SimplexNoiseInRange4D(float x, float y, float z, float w, float rangeMin, float rangeMax, float inFactor)
+float USimplexNoiseBPLibrary::PerlinNoiseInRange4D(float x, float y, float z, float w, float rangeMin, float rangeMax, float inFactor)
 {
 	if (rangeMax < rangeMin)rangeMax = rangeMin + 1.0f; // prevent negative numbers in that case we will return value between 0 - 1
-	float nval = (SimplexNoise4D(x, y, z, w, inFactor) + 1) * 0.5f;
+	float nval = (PerlinNoise4D(x, y, z, w, inFactor) + 1) * 0.5f;
 	return nval * (rangeMax - rangeMin) + rangeMin;
 }
 
 // Get 1D Simplex Noise ( with lacunarity, persistance, octaves )
-float USimplexNoiseBPLibrary::GetSimplexNoise1D_EX(float x, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
+float USimplexNoiseBPLibrary::PerlinNoise1D_EX(float x, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
 {
 	int i;
 	float frequency = 1.0f;
@@ -564,7 +564,7 @@ float USimplexNoiseBPLibrary::GetSimplexNoise1D_EX(float x, float lacunarity, fl
 
 // Get 2D Simplex Noise ( with lacunarity, persistance, octaves )
 
-float USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(float x, float y, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne )
+float USimplexNoiseBPLibrary::PerlinNoise2D_EX(float x, float y, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne )
 {
 	int i;
 	float frequency = 1.0f;
@@ -580,7 +580,7 @@ float USimplexNoiseBPLibrary::GetSimplexNoise2D_EX(float x, float y, float lacun
 }
 
 // Get 3D Simplex Noise ( with lacunarity, persistance, octaves )
-float USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(float x, float y, float z, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
+float USimplexNoiseBPLibrary::PerlinNoise3D_EX(float x, float y, float z, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
 {
 	int i;
 	float frequency = 1.0f;
@@ -600,7 +600,7 @@ float USimplexNoiseBPLibrary::GetSimplexNoise3D_EX(float x, float y, float z, fl
 
 
 // Get Get 4D Simplex Noise ( with lacunarity, persistance, octaves )
-float USimplexNoiseBPLibrary::GetSimplexNoise4D_EX(float x, float y, float z, float w, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
+float USimplexNoiseBPLibrary::PerlinNoise4D_EX(float x, float y, float z, float w, float lacunarity, float persistance, int octaves, float inFactor, bool ZeroToOne)
 {
 	int i;
 	float frequency = 1.0f;

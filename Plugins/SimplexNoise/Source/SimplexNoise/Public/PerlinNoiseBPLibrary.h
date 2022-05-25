@@ -24,7 +24,7 @@ I only request that you mention me in the credits for your game in the way that 
 #include <map>
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "SimplexNoiseBPLibrary.generated.h"
+#include "PerlinNoiseBPLibrary.generated.h"
 
 	USTRUCT()
 	struct FPoint {
@@ -77,22 +77,22 @@ public:
 	static void createSeed(const int32& newSeed);
 	static void setNoiseSeed(const int32& newSeed);
 	static void setNoiseFromStream(FRandomStream& RandStream);
-	static float SimplexNoise1D(float x, float inFactor = 1.f);
-	static float SimplexNoise2D(float x, float y, float inFactor = 1.f);
-	static float SimplexNoise3D(float x, float y, float z, float inFactor = 1.f);
-	static float SimplexNoise4D(float x, float y, float z, float w, float inFactor = 1.f);
-	static float SimplexNoiseScaled1D(float x , float scaleOut = 1.f, float inFactor = 1.f);
-	static float SimplexNoiseScaled2D(float x, float y, float scaleOut = 1.f, float inFactor = 1.f);
-	static float SimplexNoiseScaled3D(float x, float y, float z, float scaleOut = 1.f, float inFactor = 1.f);
-	static float SimplexNoiseScaled4D(float x, float y, float z, float w, float scaleOut = 1.f, float inFactor = 1.f);
-	static float SimplexNoiseInRange1D(float x, float rangeMin, float rangeMax, float inFactor = 1.f);
-	static float SimplexNoiseInRange2D(float x, float y, float rangeMin, float rangeMax, float inFactor = 1.f);
-	static float SimplexNoiseInRange3D(float x, float y, float z, float rangeMin, float rangeMax, float inFactor = 1.f);
-	static float SimplexNoiseInRange4D(float x, float y, float z, float w, float rangeMin, float rangeMax, float inFactor = 1.f);
-	static float GetSimplexNoise1D_EX(float x, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
-	static float GetSimplexNoise2D_EX(float x, float y, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
-	static float GetSimplexNoise3D_EX(float x, float y, float z, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
-	static float GetSimplexNoise4D_EX(float x, float y, float z, float w, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
+	static float PerlinNoise1D(float x, float inFactor = 1.f);
+	static float PerlinNoise2D(float x, float y, float inFactor = 1.f);
+	static float PerlinNoise3D(float x, float y, float z, float inFactor = 1.f);
+	static float PerlinNoise4D(float x, float y, float z, float w, float inFactor = 1.f);
+	static float PerlinNoiseScaled1D(float x , float scaleOut = 1.f, float inFactor = 1.f);
+	static float PerlinNoiseScaled2D(float x, float y, float scaleOut = 1.f, float inFactor = 1.f);
+	static float PerlinNoiseScaled3D(float x, float y, float z, float scaleOut = 1.f, float inFactor = 1.f);
+	static float PerlinNoiseScaled4D(float x, float y, float z, float w, float scaleOut = 1.f, float inFactor = 1.f);
+	static float PerlinNoiseInRange1D(float x, float rangeMin, float rangeMax, float inFactor = 1.f);
+	static float PerlinNoiseInRange2D(float x, float y, float rangeMin, float rangeMax, float inFactor = 1.f);
+	static float PerlinNoiseInRange3D(float x, float y, float z, float rangeMin, float rangeMax, float inFactor = 1.f);
+	static float PerlinNoiseInRange4D(float x, float y, float z, float w, float rangeMin, float rangeMax, float inFactor = 1.f);
+	static float PerlinNoise1D_EX(float x, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
+	static float PerlinNoise2D_EX(float x, float y, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
+	static float PerlinNoise3D_EX(float x, float y, float z, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
+	static float PerlinNoise4D_EX(float x, float y, float z, float w, float lacunarity = 2.3f, float persistance = 0.6f, int octaves = 4, float inFactor = 1.0f, bool ZeroToOne = false);
 
 };
 

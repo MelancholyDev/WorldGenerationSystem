@@ -5,13 +5,13 @@
 ===========================================================================*/
 
 #include "UObject/GeneratedCppIncludes.h"
-#include "SimplexNoise/Public/SimplexNoiseBPLibrary.h"
+#include "SimplexNoise/Public/PerlinNoiseBPLibrary.h"
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4883)
 #endif
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
-void EmptyLinkFunctionForGeneratedCodeSimplexNoiseBPLibrary() {}
+void EmptyLinkFunctionForGeneratedCodePerlinNoiseBPLibrary() {}
 // Cross Module References
 	SIMPLEXNOISE_API UScriptStruct* Z_Construct_UScriptStruct_FCell();
 	UPackage* Z_Construct_UPackage__Script_SimplexNoise();
@@ -62,7 +62,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFCell
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FCell_Statics::Struct_MetaDataParams[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	void* Z_Construct_UScriptStruct_FCell_Statics::NewStructOps()
@@ -71,13 +71,13 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFCell
 	}
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FCell_Statics::NewProp_point_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FStructPropertyParams Z_Construct_UScriptStruct_FCell_Statics::NewProp_point = { "point", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, CPP_ARRAY_DIM(point, FCell), STRUCT_OFFSET(FCell, point), Z_Construct_UScriptStruct_FPoint, METADATA_PARAMS(Z_Construct_UScriptStruct_FCell_Statics::NewProp_point_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FCell_Statics::NewProp_point_MetaData)) };
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FCell_Statics::NewProp_val_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FFloatPropertyParams Z_Construct_UScriptStruct_FCell_Statics::NewProp_val = { "val", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, CPP_ARRAY_DIM(val, FCell), STRUCT_OFFSET(FCell, val), METADATA_PARAMS(Z_Construct_UScriptStruct_FCell_Statics::NewProp_val_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FCell_Statics::NewProp_val_MetaData)) };
@@ -113,7 +113,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFCell
 		}
 		return ReturnStruct;
 	}
-	uint32 Get_Z_Construct_UScriptStruct_FCell_Hash() { return 1897841681U; }
+	uint32 Get_Z_Construct_UScriptStruct_FCell_Hash() { return 3922049985U; }
 class UScriptStruct* FTriangle::StaticStruct()
 {
 	static class UScriptStruct* Singleton = NULL;
@@ -151,7 +151,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FTriangle_Statics::Struct_MetaDataParams[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	void* Z_Construct_UScriptStruct_FTriangle_Statics::NewStructOps()
@@ -160,7 +160,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle
 	}
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FTriangle_Statics::NewProp_point_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FStructPropertyParams Z_Construct_UScriptStruct_FTriangle_Statics::NewProp_point = { "point", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, CPP_ARRAY_DIM(point, FTriangle), STRUCT_OFFSET(FTriangle, point), Z_Construct_UScriptStruct_FPoint, METADATA_PARAMS(Z_Construct_UScriptStruct_FTriangle_Statics::NewProp_point_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FTriangle_Statics::NewProp_point_MetaData)) };
@@ -195,7 +195,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle
 		}
 		return ReturnStruct;
 	}
-	uint32 Get_Z_Construct_UScriptStruct_FTriangle_Hash() { return 1281451314U; }
+	uint32 Get_Z_Construct_UScriptStruct_FTriangle_Hash() { return 3569196351U; }
 class UScriptStruct* FPoint::StaticStruct()
 {
 	static class UScriptStruct* Singleton = NULL;
@@ -241,7 +241,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FPoint_Statics::Struct_MetaDataParams[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	void* Z_Construct_UScriptStruct_FPoint_Statics::NewStructOps()
@@ -250,19 +250,19 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 	}
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FPoint_Statics::NewProp_x_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FFloatPropertyParams Z_Construct_UScriptStruct_FPoint_Statics::NewProp_x = { "x", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FPoint, x), METADATA_PARAMS(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_x_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_x_MetaData)) };
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FPoint_Statics::NewProp_y_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FFloatPropertyParams Z_Construct_UScriptStruct_FPoint_Statics::NewProp_y = { "y", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FPoint, y), METADATA_PARAMS(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_y_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_y_MetaData)) };
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UScriptStruct_FPoint_Statics::NewProp_z_MetaData[] = {
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const UE4CodeGen_Private::FFloatPropertyParams Z_Construct_UScriptStruct_FPoint_Statics::NewProp_z = { "z", nullptr, (EPropertyFlags)0x0010000000000000, UE4CodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(FPoint, z), METADATA_PARAMS(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_z_MetaData, UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FPoint_Statics::NewProp_z_MetaData)) };
@@ -299,7 +299,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 		}
 		return ReturnStruct;
 	}
-	uint32 Get_Z_Construct_UScriptStruct_FPoint_Hash() { return 369178749U; }
+	uint32 Get_Z_Construct_UScriptStruct_FPoint_Hash() { return 1801779142U; }
 	void USimplexNoiseBPLibrary::StaticRegisterNativesUSimplexNoiseBPLibrary()
 	{
 	}
@@ -322,8 +322,8 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_USimplexNoiseBPLibrary_Statics::Class_MetaDataParams[] = {
-		{ "IncludePath", "SimplexNoiseBPLibrary.h" },
-		{ "ModuleRelativePath", "Public/SimplexNoiseBPLibrary.h" },
+		{ "IncludePath", "PerlinNoiseBPLibrary.h" },
+		{ "ModuleRelativePath", "Public/PerlinNoiseBPLibrary.h" },
 	};
 #endif
 	const FCppClassTypeInfoStatic Z_Construct_UClass_USimplexNoiseBPLibrary_Statics::StaticCppClassTypeInfo = {
@@ -353,7 +353,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 		}
 		return OuterClass;
 	}
-	IMPLEMENT_CLASS(USimplexNoiseBPLibrary, 364677402);
+	IMPLEMENT_CLASS(USimplexNoiseBPLibrary, 869822407);
 	template<> SIMPLEXNOISE_API UClass* StaticClass<USimplexNoiseBPLibrary>()
 	{
 		return USimplexNoiseBPLibrary::StaticClass();
