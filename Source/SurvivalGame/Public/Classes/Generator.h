@@ -36,8 +36,8 @@ private:
 	FGausianParameters GausianParameters;
 	FPerlinNoiseParameters PerlinNoiseParameters;
 
-	FBiomMapGenerateParameters MoistureParameters;
-	FBiomMapGenerateParameters TemperatureParameters;
+	FPerlinParameters MoistureParameters;
+	FPerlinParameters TemperatureParameters;
 
 	FDiamondSquareParameters DiamondSquareParameters;
 

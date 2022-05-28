@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "FBiomMapGenerateParameters.h"
+#include "FPerlinParameters.h"
 #include "FTemperatureAndMoistureParameters.generated.h"
 
 USTRUCT()
@@ -7,7 +7,7 @@ struct FTemperatureAndMoistureParameters
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
-	FBiomMapGenerateParameters TemperatureParameters;
+	FPerlinParameters TemperatureParameters;
 	UPROPERTY(EditAnywhere)
-	FBiomMapGenerateParameters MoistureParameters;
+	FPerlinParameters MoistureParameters;
 };
