@@ -96,13 +96,19 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 			int ShiftClamped = CurrentMapCoordinate * Data.VoxelSize;
 			FVector SpawnPosition(LoopX * Data.VoxelSize, LoopY * Data.VoxelSize, ShiftClamped);
 			FTransform SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
-			if (HeightNoise > Data.WaterLevel)
+			if (CurrentMapCoordinate > Data.WaterLevel)
 			{
-				AddSolidBlock(SpawnTransform,SpawnBiom);
+				AddSolidBlock(SpawnTransform, SpawnBiom);
 			}
 			else
 			{
-				InstanceWater->AddInstance(SpawnTransform);
+				//InstanceWater->AddInstance(SpawnTransform);
+				for (int i = CurrentMapCoordinate; i <= Data.WaterLevel; i++)
+				{
+					FVector WaterPosition(SpawnPosition.X, SpawnPosition.Y, SpawnPosition.Z+(i-CurrentMapCoordinate)*Data.VoxelSize);
+					SpawnTransform = FTransform(FRotator(0, 0, 0), WaterPosition, FVector(0.5, 0.5, 0.5));
+					InstanceWater->AddInstance(SpawnTransform);
+				}
 			}
 			if (Data.IsAddDepth)
 			{
@@ -117,19 +123,26 @@ void AVoxelChank::OnConstruction(const FTransform& Transform)
 					ActorLocationVoxelWorldZ(i, C1);
 					if (DepthCoordinate > Data.CaveStart)
 					{
-						float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D(
-							XIndex, YIndex, DepthCoordinate, Data.NoiseDensity3D);
-						if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
+						SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
+						if (DepthCoordinate < 0)
 						{
-							SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
-							InstanceDirt->AddInstance(SpawnTransform);
+							float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D(
+								XIndex, YIndex, DepthCoordinate, Data.NoiseDensity3D);
+							if ((Noise3D > Data.Threshold3D) || (i > -3) || ((i - 1) == DepthCount))
+							{
+								InstanceDirt->AddInstance(SpawnTransform);
+							}
+						}
+						else
+						{
+							AddSolidBlock(SpawnTransform, SpawnBiom, true);
 						}
 					}
 					else
 					{
 						float Noise3D = Data.UndergroundMap[XIndex][YIndex][DepthIterator];
 						DepthIterator++;
-						if (Noise3D ==0)
+						if (Noise3D == 0)
 						{
 							SpawnTransform = FTransform(FRotator(0, 0, 0), SpawnPosition, FVector(0.5, 0.5, 0.5));
 							InstanceStone->AddInstance(SpawnTransform);
@@ -166,15 +179,22 @@ bool AVoxelChank::CheckInBound(int Index, int Size)
 	return false;
 }
 
-void AVoxelChank::AddSolidBlock(FTransform SpawnTransform, EBiomType Biom)
+void AVoxelChank::AddSolidBlock(FTransform SpawnTransform, EBiomType Biom, bool Underground)
 {
-	if ((Biom == TUNDRA) | (Biom==BOREAL) | (Biom==SEASONAL_FOREST))
+	if ((Biom == TUNDRA) | (Biom == BOREAL) | (Biom == SEASONAL_FOREST))
 	{
 		InstanceSnow->AddInstance(SpawnTransform);
 	}
 	else if ((Biom == TROPICAL_WOODLAND) | (Biom == TEMPERATE_FOREST) | (Biom == TEMPERATE_RAINFOREST))
 	{
-		InstanceTopGrass->AddInstance(SpawnTransform);
+		if (!Underground)
+		{
+			InstanceTopGrass->AddInstance(SpawnTransform);
+		}
+		else
+		{
+			InstanceDirt->AddInstance(SpawnTransform);
+		}
 	}
 	else
 	{

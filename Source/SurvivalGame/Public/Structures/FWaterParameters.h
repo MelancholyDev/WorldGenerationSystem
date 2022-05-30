@@ -8,8 +8,4 @@ struct FWaterParameters
 	
 	UPROPERTY(EditAnywhere)
 	float WaterLevel;
-	UPROPERTY(EditAnywhere)
-	bool IsAddRivers;
-	UPROPERTY(EditAnywhere)
-	int RiverWidth;
 };
