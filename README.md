@@ -9,6 +9,6 @@ The following algorithms were used within the framework of the project:
 4. Perlin Worms
 5. Bezier Curves
 
+**Press on image to see Demo!**
 
-#Press on image to see Demo!
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/vyDTDbUEysk/0.jpg)](https://www.youtube.com/watch?v=vyDTDbUEysk)
+[![Generation Demo](https://img.youtube.com/vi/vyDTDbUEysk/0.jpg)](https://www.youtube.com/watch?v=vyDTDbUEysk)
