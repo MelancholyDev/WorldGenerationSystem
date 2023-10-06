@@ -18,8 +18,6 @@ struct FGenerationParameters
 	UPROPERTY(EditAnywhere)
 	bool IsApplyGausianFilter;
 	UPROPERTY(EditAnywhere)
-	bool IsAddBezierFunction;
-	UPROPERTY(EditAnywhere)
 	int RenderRange;
 	UPROPERTY(EditAnywhere)
 	int ChunkSize;
@@ -40,7 +38,7 @@ struct FGenerationParameters
 	UPROPERTY(EditAnywhere)
 	FWaterParameters WaterParameters;
 
-	FGenerationParameters(): GenerationType(), IsApplyGausianFilter(false), IsAddBezierFunction(false), RenderRange(0),
+	FGenerationParameters(): GenerationType(), IsApplyGausianFilter(false), RenderRange(0),
 	                         ChunkSize(0),
 	                         VoxelSize(0), NoiseScale(0),
 	                         DiamondSquareParameters(),
@@ -53,7 +51,7 @@ struct FGenerationParameters
 	}
 
 	FGenerationParameters(const TEnumAsByte<EGenerationType>& GenerationType, bool bIsApplyGausianFilter,
-	                      bool IsAddBezierFunction, int RenderRange, int ChunkSize, int VoxelSize, float NoiseScale,
+	int RenderRange, int ChunkSize, int VoxelSize, float NoiseScale,
 	                      const FDiamondSquareParameters& DiamondSquareParameters,
 	                      const FPerlinNoiseParameters& PerlinNoiseParameters,
 	                      const FGausianParameters& GausianParameters,
@@ -61,7 +59,6 @@ struct FGenerationParameters
 	                      const FUndergroundParameters& UndergroundParameters, const FWaterParameters& WaterParameters)
 		: GenerationType(GenerationType),
 		  IsApplyGausianFilter(bIsApplyGausianFilter),
-		  IsAddBezierFunction(IsAddBezierFunction),
 		  RenderRange(RenderRange),
 		  ChunkSize(ChunkSize),
 		  VoxelSize(VoxelSize),

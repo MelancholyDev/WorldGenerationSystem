@@ -18,12 +18,11 @@ class SURVIVALGAME_API AGenerationPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	//SerializedParameters
+	
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EGenerationType> GenerationType;
 	UPROPERTY(EditAnywhere)
 	bool IsApplyGausianFilter;
-	UPROPERTY(EditAnywhere)
-	bool IsAddBezierFunction;
 	UPROPERTY(EditAnywhere)
 	int RenderRange;
 	UPROPERTY(EditAnywhere)
@@ -32,7 +31,7 @@ public:
 	int VoxelSize;
 	UPROPERTY(EditAnywhere)
 	float NoiseScale;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,meta=(EditCondition="IsHide",EditConditionHides))
 	FDiamondSquareParameters DiamondSquareParameters;
 	UPROPERTY(EditAnywhere)
 	FPerlinNoiseParameters PerlinNoiseParameters;
@@ -48,8 +47,7 @@ public:
 	bool UpdateMap;
 	UPROPERTY(EditAnywhere)
 	UDataTable* BiomDataSet;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AVoxelChank> ToSpawn;
+	
 	//End Serializedparameters
 private:
 	FGenerationParameters GenerationParameters;

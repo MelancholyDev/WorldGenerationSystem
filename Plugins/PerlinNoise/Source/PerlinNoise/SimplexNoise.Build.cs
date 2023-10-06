@@ -12,9 +12,9 @@ public class SimplexNoise : ModuleRules
 	{
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         //Private Paths
-        PrivateIncludePaths.AddRange(new string[] { 
-			"SimplexNoise/Private"
-		});
+  //       PrivateIncludePaths.AddRange(new string[] { 
+		// 	"SimplexNoise/Private"
+		// });
 		
         PublicDependencyModuleNames.AddRange(
 			new string[] { 

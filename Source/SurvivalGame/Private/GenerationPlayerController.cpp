@@ -131,7 +131,7 @@ void AGenerationPlayerController::DeleteColumn(int Index)
 
 void AGenerationPlayerController::InitializeParameters()
 {
-	GenerationParameters = FGenerationParameters(GenerationType, IsApplyGausianFilter, IsAddBezierFunction, RenderRange,
+	GenerationParameters = FGenerationParameters(GenerationType, IsApplyGausianFilter, RenderRange,
 	                                             ChunkSize, VoxelSize, NoiseScale, DiamondSquareParameters,
 	                                             PerlinNoiseParameters, GausianParameters,
 	                                             TemperatureAndMoistureParameters, UndergroundParameters,
