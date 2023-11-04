@@ -1,6 +1,6 @@
 #pragma once
 #include "Enums/EDisplacementType.h"
-#include "Structures/FGenerationParameters.h"
+#include "Structures/FDiamondSquareParameters.h"
 
 class DiamondSquare
 {

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "FGenerationParameters.h"
+#include "Data/WorldGenerationSettings.h"
 #include "Enums/EBiomType.h"
 
 #include "FVoxelGeneraionData.generated.h"
@@ -32,20 +32,20 @@ struct FVoxelGenerationData
 	{
 		
 	}
-	FVoxelGenerationData(FGenerationParameters GenerationParameters,int MapSizeParam,float **MapParam,EBiomType **BiomMapParam,float*** UndergroundMapParam)
+	FVoxelGenerationData(UWorldGenerationSettings* GenerationParameters,int MapSizeParam,float **MapParam,EBiomType **BiomMapParam,float*** UndergroundMapParam)
 	{
-		IsAddDepth = GenerationParameters.UndergroundParameters.IsAddDepth;
-		Threshold3D = GenerationParameters.UndergroundParameters.Threshold3D;
-		Depth = GenerationParameters.UndergroundParameters.Depth;
-		CaveStart = GenerationParameters.UndergroundParameters.CaveStart;
-		VoxelSize = GenerationParameters.VoxelSize;
-		NoiseScale = GenerationParameters.NoiseScale;
-		ChunkSize=GenerationParameters.ChunkSize;
+		IsAddDepth = GenerationParameters->UndergroundParameters.IsAddDepth;
+		Threshold3D = GenerationParameters->UndergroundParameters.Threshold3D;
+		Depth = GenerationParameters->UndergroundParameters.Depth;
+		CaveStart = GenerationParameters->UndergroundParameters.CaveStart;
+		VoxelSize = GenerationParameters->VoxelSize;
+		NoiseScale = GenerationParameters->NoiseScale;
+		ChunkSize=GenerationParameters->ChunkSize;
 		MapSize=MapSizeParam;
 		Map=MapParam;
 		BiomMap=BiomMapParam;
 		UndergroundMap=UndergroundMapParam;
-		WaterLevel = GenerationParameters.WaterParameters.WaterLevel;
-		NoiseDensity3D = GenerationParameters.UndergroundParameters.NoiseDenisty3D;
+		WaterLevel = GenerationParameters->WaterParameters.WaterLevel;
+		NoiseDensity3D = GenerationParameters->UndergroundParameters.NoiseDenisty3D;
 	}
 };

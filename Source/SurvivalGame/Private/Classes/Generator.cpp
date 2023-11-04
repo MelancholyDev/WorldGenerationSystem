@@ -3,33 +3,33 @@
 #include "PerlinNoiseBPLibrary.h"
 #include "Structures/FWormSettings.h"
 
-Generator::Generator(FGenerationParameters Parameters, UDataTable* Table)
+Generator::Generator(UWorldGenerationSettings* GenerationSettings)
 {
-	WormSettings = Parameters.UndergroundParameters.WormSettings;
-	UndergroundParameters = Parameters.UndergroundParameters;
-	GausianParameters = Parameters.GausianParameters;
-	PerlinNoiseParameters = Parameters.PerlinNoiseParameters;
-	TemperatureParameters = Parameters.TemperatureAndMoistureParameters.TemperatureParameters;
-	MoistureParameters = Parameters.TemperatureAndMoistureParameters.MoistureParameters;
-	DiamondSquareParameters = Parameters.DiamondSquareParameters;
-	GenerationParameters = Parameters;
-	DataTableBiome = Table;
+	SetGenerationSettings(GenerationSettings);
+	CreateInstances();
+}
+
+Generator::Generator()
+{
+	CreateInstances();
+}
+
+void Generator::SetGenerationSettings(UWorldGenerationSettings* GenerationSettings)
+{
+	WorldGenerationSettings = GenerationSettings;
 	InitializeBiomData();
-	if (GenerationParameters.GenerationType == PERLIN_NOISE)
+
+	if (WorldGenerationSettings->GenerationType == PERLIN_NOISE)
 	{
-		MapSize = (GenerationParameters.ChunkSize * 2 + 1) * PerlinNoiseParameters.MapSizeMultiplier;
+		MapSize = (WorldGenerationSettings->ChunkSize * 2 + 1) * WorldGenerationSettings->PerlinNoiseParameters.
+			MapSizeMultiplier;
 	}
 	else
 	{
-		MapSize = FMath::Pow(2, GenerationParameters.DiamondSquareParameters.MapMultiplier) + 1;
+		MapSize = FMath::Pow(2, WorldGenerationSettings->DiamondSquareParameters.MapMultiplier) + 1;
 	}
 	LeftBorder = -(MapSize - 1) / 2;
 	RightBorder = -LeftBorder;
-
-	BezierComputationsInstance = new BezierComputations(BiomDataSet);
-	DiamondSquareInstance = new DiamondSquare(DiamondSquareParameters, MapSize);
-	GausianFilterInstance = new GausianFilter(GausianParameters, MapSize);
-	WormGenerator = new PerlinWormGenerator(MapSize, UndergroundParameters.CaveStart - UndergroundParameters.Depth + 1, WormSettings);
 }
 
 float Generator::Clamp(float x, float left, float right)
@@ -43,9 +43,21 @@ float Generator::Clamp(float x, float left, float right)
 	return x;
 }
 
+
+void Generator::CreateInstances()
+{
+	BezierComputationsInstance = new BezierComputations(BiomDataSet);
+	DiamondSquareInstance = new DiamondSquare(WorldGenerationSettings->DiamondSquareParameters, MapSize);
+	GausianFilterInstance = new GausianFilter(WorldGenerationSettings->GausianParameters, MapSize);
+	WormGenerator = new PerlinWormGenerator(
+		MapSize,
+		WorldGenerationSettings->UndergroundParameters.CaveStart - WorldGenerationSettings->UndergroundParameters.Depth
+		+ 1, WorldGenerationSettings->UndergroundParameters.WormSettings);
+}
+
 void Generator::GenerateHeightMap(float** Map, EBiomType** BiomMap)
 {
-	switch (GenerationParameters.GenerationType)
+	switch (WorldGenerationSettings->GenerationType)
 	{
 	case PERLIN_NOISE:
 		{
@@ -72,15 +84,18 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 		TemperatureMap[i] = new float[MapSize];
 	}
 
-	USimplexNoiseBPLibrary::createSeed(TemperatureParameters.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(TemperatureParameters.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->TemperatureParameters.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->TemperatureParameters.Seed);
 
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			float HeatNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
-				i, -j, TemperatureParameters.Lacunarity, TemperatureParameters.Persistence,
-				TemperatureParameters.Octaves, TemperatureParameters.NoiseDensity, TemperatureParameters.ZeroToOne);
+				i, -j, WorldGenerationSettings->TemperatureParameters.Lacunarity,
+				WorldGenerationSettings->TemperatureParameters.Persistence,
+				WorldGenerationSettings->TemperatureParameters.Octaves,
+				WorldGenerationSettings->TemperatureParameters.NoiseDensity,
+				WorldGenerationSettings->TemperatureParameters.ZeroToOne);
 			HeatNoise = Clamp(HeatNoise, 0, 1);
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
@@ -88,15 +103,18 @@ void Generator::GenerateBiomMaps(EBiomType** BiomMap)
 			TemperatureMap[XIndex][YIndex] = HeatNoise;
 		}
 
-	USimplexNoiseBPLibrary::createSeed(MoistureParameters.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(MoistureParameters.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->MoistureParameters.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->MoistureParameters.Seed);
 
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			float MoistureNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
-				i, -j, MoistureParameters.Lacunarity, MoistureParameters.Persistence,
-				MoistureParameters.Octaves, MoistureParameters.NoiseDensity, MoistureParameters.ZeroToOne);
+				i, -j, WorldGenerationSettings->MoistureParameters.Lacunarity,
+				WorldGenerationSettings->MoistureParameters.Persistence,
+				WorldGenerationSettings->MoistureParameters.Octaves,
+				WorldGenerationSettings->MoistureParameters.NoiseDensity,
+				WorldGenerationSettings->MoistureParameters.ZeroToOne);
 			MoistureNoise = Clamp(MoistureNoise, 0, 1);
 
 			const int XIndex = i + RightBorder;
@@ -122,7 +140,8 @@ void Generator::GenerateSeaMap(float** Map)
 
 void Generator::GenerateCaveMap(float*** UndergroundMap)
 {
-	int Depth = UndergroundParameters.CaveStart - UndergroundParameters.Depth + 1;
+	int Depth = WorldGenerationSettings->UndergroundParameters.CaveStart - WorldGenerationSettings->
+	                                                                       UndergroundParameters.Depth + 1;
 	float*** FirstNoise = new float**[MapSize];
 	float*** SecondNoise = new float**[MapSize];
 	float*** CavePositions = new float**[MapSize];
@@ -139,19 +158,22 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			SecondNoise[i][j] = new float[Depth];
 		}
 	}
-	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.FirstNoise.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.FirstNoise.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->UndergroundParameters.FirstNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->UndergroundParameters.FirstNoise.Seed);
 
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
+			for (int k = WorldGenerationSettings->UndergroundParameters.CaveStart; k >= WorldGenerationSettings->
+			     UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
-					i, -j, k, UndergroundParameters.FirstNoise.Lacunarity, UndergroundParameters.FirstNoise.Persistence,
-					UndergroundParameters.FirstNoise.Octaves,
-					UndergroundParameters.FirstNoise.NoiseDensity, UndergroundParameters.FirstNoise.ZeroToOne);
+					i, -j, k, WorldGenerationSettings->UndergroundParameters.FirstNoise.Lacunarity,
+					WorldGenerationSettings->UndergroundParameters.FirstNoise.Persistence,
+					WorldGenerationSettings->UndergroundParameters.FirstNoise.Octaves,
+					WorldGenerationSettings->UndergroundParameters.FirstNoise.NoiseDensity,
+					WorldGenerationSettings->UndergroundParameters.FirstNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				FirstNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
@@ -159,38 +181,44 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 			}
 		}
 
-	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.SecondNoise.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.SecondNoise.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->UndergroundParameters.SecondNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->UndergroundParameters.SecondNoise.Seed);
 
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
+			for (int k = WorldGenerationSettings->UndergroundParameters.CaveStart; k >= WorldGenerationSettings->
+			     UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
-					i, -j, k, UndergroundParameters.SecondNoise.Lacunarity, UndergroundParameters.SecondNoise.Persistence,
-					UndergroundParameters.SecondNoise.Octaves,
-					UndergroundParameters.SecondNoise.NoiseDensity, UndergroundParameters.SecondNoise.ZeroToOne);
+					i, -j, k, WorldGenerationSettings->UndergroundParameters.SecondNoise.Lacunarity,
+					WorldGenerationSettings->UndergroundParameters.SecondNoise.Persistence,
+					WorldGenerationSettings->UndergroundParameters.SecondNoise.Octaves,
+					WorldGenerationSettings->UndergroundParameters.SecondNoise.NoiseDensity,
+					WorldGenerationSettings->UndergroundParameters.SecondNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				SecondNoise[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
 				DepthIndex++;
 			}
 		}
-	USimplexNoiseBPLibrary::createSeed(UndergroundParameters.WormPlaceNoise.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(UndergroundParameters.WormPlaceNoise.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.Seed);
 
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
 			int DepthIndex = 0;
-			for (int k = UndergroundParameters.CaveStart; k >= UndergroundParameters.Depth; k--)
+			for (int k = WorldGenerationSettings->UndergroundParameters.CaveStart; k >= WorldGenerationSettings->
+			     UndergroundParameters.Depth; k--)
 			{
 				float Noise3D = USimplexNoiseBPLibrary::PerlinNoise3D_EX(
-					i, -j, k, UndergroundParameters.WormPlaceNoise.Lacunarity, UndergroundParameters.WormPlaceNoise.Persistence,
-					UndergroundParameters.WormPlaceNoise.Octaves,
-					UndergroundParameters.WormPlaceNoise.NoiseDensity, UndergroundParameters.WormPlaceNoise.ZeroToOne);
+					i, -j, k, WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.Lacunarity,
+					WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.Persistence,
+					WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.Octaves,
+					WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.NoiseDensity,
+					WorldGenerationSettings->UndergroundParameters.WormPlaceNoise.ZeroToOne);
 				const int XIndex = i + RightBorder;
 				const int YIndex = j + RightBorder;
 				CavePositions[XIndex][YIndex][DepthIndex] = Clamp(Noise3D, 0, 1);
@@ -203,11 +231,11 @@ void Generator::GenerateCaveMap(float*** UndergroundMap)
 
 void Generator::InitializeBiomData()
 {
-	TArray<FName> RowNames = DataTableBiome->GetRowNames();
+	TArray<FName> RowNames = WorldGenerationSettings->BiomDataSet->GetRowNames();
 	FString EmptyString;
 	for (auto& Name : RowNames)
 	{
-		FBiomData Data = *DataTableBiome->FindRow<FBiomData>(Name, EmptyString);
+		FBiomData Data = *WorldGenerationSettings->BiomDataSet->FindRow<FBiomData>(Name, EmptyString);
 		BiomDataSet.Add(Data.Type, Data);
 	}
 }
@@ -215,7 +243,7 @@ void Generator::InitializeBiomData()
 void Generator::GenerateWithDiamondSquare(float** Map)
 {
 	DiamondSquareInstance->GenerateMap(Map);
-	if (GenerationParameters.IsApplyGausianFilter)
+	if (WorldGenerationSettings->IsApplyGausianFilter)
 	{
 		float** TempMap = new float*[MapSize];
 		for (int i = 0; i < MapSize; i++)
@@ -286,8 +314,8 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 	{
 		TempHeightMap[i] = new float[MapSize];
 	}
-	USimplexNoiseBPLibrary::createSeed(PerlinNoiseParameters.Sharp.Seed);
-	USimplexNoiseBPLibrary::setNoiseSeed(PerlinNoiseParameters.Sharp.Seed);
+	USimplexNoiseBPLibrary::createSeed(WorldGenerationSettings->PerlinNoiseParameters.Sharp.Seed);
+	USimplexNoiseBPLibrary::setNoiseSeed(WorldGenerationSettings->PerlinNoiseParameters.Sharp.Seed);
 	for (int i = LeftBorder; i <= RightBorder; i++)
 		for (int j = RightBorder; j >= LeftBorder; j--)
 		{
@@ -297,27 +325,31 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			float SmoothNoise;
 
 			SharpNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
-				i, -j, PerlinNoiseParameters.Sharp.Lacunarity, PerlinNoiseParameters.Sharp.Persistence,
-				PerlinNoiseParameters.Sharp.Octaves,
-				PerlinNoiseParameters.Sharp.NoiseDensity, PerlinNoiseParameters.Sharp.ZeroToOne);
+				i, -j, WorldGenerationSettings->PerlinNoiseParameters.Sharp.Lacunarity,
+				WorldGenerationSettings->PerlinNoiseParameters.Sharp.Persistence,
+				WorldGenerationSettings->PerlinNoiseParameters.Sharp.Octaves,
+				WorldGenerationSettings->PerlinNoiseParameters.Sharp.NoiseDensity,
+				WorldGenerationSettings->PerlinNoiseParameters.Sharp.ZeroToOne);
 
 
 			SmoothNoise = USimplexNoiseBPLibrary::PerlinNoise2D_EX(
-				i, -j, PerlinNoiseParameters.Smooth.Lacunarity, PerlinNoiseParameters.Smooth.Persistence,
-				PerlinNoiseParameters.Smooth.Octaves,
-				PerlinNoiseParameters.Smooth.NoiseDensity, PerlinNoiseParameters.Smooth.ZeroToOne);
+				i, -j, WorldGenerationSettings->PerlinNoiseParameters.Smooth.Lacunarity,
+				WorldGenerationSettings->PerlinNoiseParameters.Smooth.Persistence,
+				WorldGenerationSettings->PerlinNoiseParameters.Smooth.Octaves,
+				WorldGenerationSettings->PerlinNoiseParameters.Smooth.NoiseDensity,
+				WorldGenerationSettings->PerlinNoiseParameters.Smooth.ZeroToOne);
 
 			SmoothNoise = Clamp(SmoothNoise, 0, 1);
 			SharpNoise = Clamp(SharpNoise, 0, 1);
 
 			TEnumAsByte<EBiomType> CurrentBiom;
-			if (PerlinNoiseParameters.IsTest)
+			if (WorldGenerationSettings->PerlinNoiseParameters.IsTest)
 			{
 				CurrentBiom = BiomMap[XIndex][YIndex];
 			}
 			else
 			{
-				CurrentBiom = PerlinNoiseParameters.DefaultBiom;
+				CurrentBiom = WorldGenerationSettings->PerlinNoiseParameters.DefaultBiom;
 			}
 			float FinalNoise = BezierComputationsInstance->FilterMap(SharpNoise, SmoothNoise, CurrentBiom);
 			float Clamped = Clamp(FinalNoise, 0, 1);
@@ -325,7 +357,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			TempHeightMap[XIndex][YIndex] = Clamped;
 		}
 
-	if (PerlinNoiseParameters.IsInvert)
+	if (WorldGenerationSettings->PerlinNoiseParameters.IsInvert)
 	{
 		InvertMap(TempHeightMap, BiomMap);
 	}
@@ -336,7 +368,7 @@ void Generator::GenerateWithPerlinNoise(float** Map, EBiomType** BiomMap)
 			Map[i][j] = TempHeightMap[i][j];
 		}
 	}
-	if (GenerationParameters.IsApplyGausianFilter)
+	if (WorldGenerationSettings->IsApplyGausianFilter)
 	{
 		GausianFilterInstance->SmoothMap(TempHeightMap, Map);
 	}
@@ -350,13 +382,13 @@ void Generator::InvertMap(float** MapForInvert, EBiomType** BiomMap)
 			const int XIndex = i + RightBorder;
 			const int YIndex = j + RightBorder;
 			TEnumAsByte<EBiomType> CurrentBiom;
-			if (PerlinNoiseParameters.IsTest)
+			if (WorldGenerationSettings->PerlinNoiseParameters.IsTest)
 			{
 				CurrentBiom = BiomMap[XIndex][YIndex];
 			}
 			else
 			{
-				CurrentBiom = PerlinNoiseParameters.DefaultBiom;
+				CurrentBiom = WorldGenerationSettings->PerlinNoiseParameters.DefaultBiom;
 			}
 			FBiomData* CurrentBiomData = BezierComputationsInstance->DataSet.Find(CurrentBiom);
 			float Noise = MapForInvert[XIndex][YIndex];
