@@ -171,6 +171,19 @@ void UWorldGenerationSubsystem::GenerateWorld(UWorldGenerationSettings* WorldGen
 	}
 }
 
+void UWorldGenerationSubsystem::StartUpdateMap()
+{
+	GetWorld()->GetTimerManager().ClearTimer(UpdateMapTimer);
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this,"UpdateMap");
+	GetWorld()->GetTimerManager().SetTimer(UpdateMapTimer,TimerDelegate,0.1f,true);
+}
+
+void UWorldGenerationSubsystem::StopUpdateMap()
+{
+	GetWorld()->GetTimerManager().ClearTimer(UpdateMapTimer);
+}
+
 void UWorldGenerationSubsystem::GetFullSize()
 {
 	for (int i = 0; i <= GenerationSettings->RenderRange * 2; i++)
@@ -256,26 +269,26 @@ void UWorldGenerationSubsystem::Diagonal(int X, int Y)
 	}
 }
 
-//
-// void UWorldGenerationSubsystem::Tick(float DeltaSeconds)
-// {
-// 	auto CurrentCoordinates = GetPlayerChunkCoordinates();
-// 	int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
-// 	int Y_Shift = CurrentCoordinates.Y - OldCoordinates.Y;
-// 	if ((X_Shift != 0) & (Y_Shift != 0))
-// 	{
-// 		Diagonal(X_Shift, Y_Shift);
-// 	}
-// 	else if (X_Shift != 0)
-// 	{
-// 		XShift(X_Shift);
-// 	}
-// 	else if (Y_Shift != 0)
-// 	{
-// 		YShift(Y_Shift);
-// 	}
-// 	OldCoordinates = CurrentCoordinates;
-// }
+
+void UWorldGenerationSubsystem::UpdateMap()
+{
+	auto CurrentCoordinates = GetPlayerChunkCoordinates();
+	int X_Shift = CurrentCoordinates.X - OldCoordinates.X;
+	int Y_Shift = CurrentCoordinates.Y - OldCoordinates.Y;
+	if ((X_Shift != 0) & (Y_Shift != 0))
+	{
+		Diagonal(X_Shift, Y_Shift);
+	}
+	else if (X_Shift != 0)
+	{
+		XShift(X_Shift);
+	}
+	else if (Y_Shift != 0)
+	{
+		YShift(Y_Shift);
+	}
+	OldCoordinates = CurrentCoordinates;
+}
 
 
 void UWorldGenerationSubsystem::GenerateMaps()

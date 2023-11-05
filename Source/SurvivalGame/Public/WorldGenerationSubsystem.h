@@ -16,9 +16,12 @@ class SURVIVALGAME_API UWorldGenerationSubsystem : public UGameInstanceSubsystem
 public:
 	UFUNCTION(BlueprintCallable)
 	void GenerateWorld(UWorldGenerationSettings* WorldGenerationSystem);
-	
+	UFUNCTION(BlueprintCallable)
+	void StartUpdateMap();
+	UFUNCTION(BlueprintCallable)
+	void StopUpdateMap();
+
 private:
-	
 	void GetFullSize();
 	void XShift(int X);
 	void YShift(int Y);
@@ -33,6 +36,8 @@ private:
 	void GenerateHeightMap() const;
 	void GenerateBiomMap() const;
 	void GenerateCaveMap() const;
+	UFUNCTION()
+	void UpdateMap();
 
 	AVoxelChank* SpawnChunk(float X, float Y, float Z);
 	FIntVector GetPlayerChunkCoordinates();
@@ -46,10 +51,10 @@ private:
 	FActorSpawnParameters* ChunkRenderLines;
 	Generator* GeneratorInstance;
 	FVoxelGenerationData VoxelGenerationData;
+	FTimerHandle UpdateMapTimer;
 
 	float** HeightMap;
 	EBiomType** BiomMap;
 	float** WaterMap;
 	float*** UndergroundMap;
-	
 };
